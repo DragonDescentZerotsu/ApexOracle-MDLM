@@ -171,8 +171,7 @@ def _train(config, logger, tokenizer):
     config, tokenizer)
   _print_batch(train_ds, valid_ds, tokenizer)
 
-  model = diffusion.Diffusion(
-    config, tokenizer=valid_ds.tokenizer)
+  model = diffusion.Diffusion(config, tokenizer=valid_ds.tokenizer)
 
   trainer = hydra.utils.instantiate(
     config.trainer,
@@ -183,8 +182,7 @@ def _train(config, logger, tokenizer):
   trainer.fit(model, train_ds, valid_ds, ckpt_path=ckpt_path)
 
 
-@hydra.main(version_base=None, config_path='configs',
-            config_name='config')
+@hydra.main(version_base=None, config_path='configs',config_name='config')  # 当运行脚本时，Hydra 将自动加载该配置并调用 main 函数，传入 config
 def main(config):
   """Main entry point for training."""
   L.seed_everything(config.seed)

@@ -1,0 +1,56 @@
+# Checkpoints related folders
+/checkpoints
+/Checkpoints
+/Checkpoints_fangping
+**/*checkpoints*/
+
+# Molecules data folder
+molecule_data/
+
+# Common Python patterns
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+outputs/
+temp_data/
+wandb/
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Wheel files
+*.whl
+
+# Large model files
+*.safetensors

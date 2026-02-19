@@ -2,12 +2,12 @@ defaults:
   - _self_
   - /callbacks: [checkpoint_every_n_steps, checkpoint_monitor, learning_rate_monitor]
   - /data: openwebtext
-  - /model: small
+  - /model: small  # small / medium
   - /strategy: ddp
   - /noise: loglinear
   - /lr_scheduler: constant_warmup
 
-mode: train  # train / ppl_eval / sample_eval
+mode: sample_eval  # train / ppl_eval / sample_eval
 diffusion: absorbing_state
 backbone: dit  # dit / dimamba / ar
 parameterization: subs  # subs / d3pm / sedd
@@ -37,6 +37,7 @@ sampling:
   stride_length: 1
   num_strides: 1
 
+
 training:
   ema: 0.9999
   antithetic_sampling: True
@@ -45,7 +46,7 @@ training:
   change_of_variables: False
 
 eval:
-  checkpoint_path: ''  # Used to evaluate a checkpoint after training.
+  checkpoint_path: '/data2/tianang/projects/mdlm/Checkpoints_fangping/1-255000-fine-tune.ckpt'  # Used to evaluate a checkpoint after training.
   disable_ema: False
   compute_generative_perplexity: False
   perplexity_batch_size: 8

@@ -75,7 +75,8 @@ class Diffusion(L.LightningModule):
     self.config = config
 
     self.tokenizer = tokenizer
-    self.vocab_size = self.tokenizer.vocab_size
+    # TODO: 这里这个 tokenizer 有问题
+    self.vocab_size = 3160  # self.tokenizer.vocab_size
     self.sampler = self.config.sampling.predictor
     self.gen_ppl_eval_model_name_or_path = self.config.eval.\
       gen_ppl_eval_model_name_or_path
@@ -89,7 +90,7 @@ class Diffusion(L.LightningModule):
     else:
       self.mask_index = self.tokenizer.mask_token_id
     self.parameterization = self.config.parameterization
-    if self.config.backbone == 'dit':
+    if self.config.backbone == 'dit':  # config 中的内容
       self.backbone = models.dit.DIT(
         self.config, vocab_size=self.vocab_size)
     elif self.config.backbone == 'dimamba':
@@ -260,7 +261,7 @@ class Diffusion(L.LightningModule):
 
   def _subs_parameterization(self, logits, xt):
     # log prob at the mask index = - infinity
-    logits[:, :, self.mask_index] += self.neg_infinity
+    logits[:, :, self.mask_index] += self.neg_infinity  # size: [Batch_size, Length, Vocab_size]  把 vocab_size 中 mask 对应的变成 -∞
     
     # Normalize the logits such that x.exp() is
     # a probability distribution over vocab_size.
@@ -271,7 +272,7 @@ class Diffusion(L.LightningModule):
     # For the logits of the unmasked tokens, set all values
     # to -infinity except for the indices corresponding to
     # the unmasked tokens.
-    unmasked_indices = (xt != self.mask_index)
+    unmasked_indices = (xt != self.mask_index)  # xt: [batch_size, input_length]
     logits[unmasked_indices] = self.neg_infinity
     logits[unmasked_indices, xt[unmasked_indices]] = 0
     return logits
@@ -595,7 +596,7 @@ class Diffusion(L.LightningModule):
     if t.ndim > 1:
       t = t.squeeze(-1)
     assert t.ndim == 1
-    move_chance_t = t[:, None, None]
+    move_chance_t = t[:, None, None]  # a_t = 1 - t, a_s = 1 - s
     move_chance_s = (t - dt)[:, None, None]
     assert move_chance_t.ndim == 3, move_chance_t.shape
     if p_x0 is None:
@@ -603,7 +604,7 @@ class Diffusion(L.LightningModule):
     
     assert move_chance_t.ndim == p_x0.ndim
     q_xs = p_x0 * (move_chance_t - move_chance_s)
-    q_xs[:, :, self.mask_index] = move_chance_s[:, :, 0]
+    q_xs[:, :, self.mask_index] = move_chance_s[:, :, 0]  # (1 - a_s)m
     _x = _sample_categorical(q_xs)
     
     copy_flag = (x != self.mask_index).to(x.dtype)
@@ -663,24 +664,18 @@ class Diffusion(L.LightningModule):
     # Lightning auto-casting is not working in this method for some reason
     if num_steps is None:
       num_steps = self.config.sampling.steps
-    x = self._sample_prior(
-      batch_size_per_gpu,
-      self.config.model.length).to(self.device)
-    timesteps = torch.linspace(
-      1, eps, num_steps + 1, device=self.device)
+    x = self._sample_prior(batch_size_per_gpu, self.config.model.length).to(self.device)
+    timesteps = torch.linspace(1, eps, num_steps + 1, device=self.device)
     dt = (1 - eps) / num_steps
     p_x0_cache = None
 
     for i in range(num_steps):
-      t = timesteps[i] * torch.ones(
-        x.shape[0], 1, device=self.device)
+      t = timesteps[i] * torch.ones(x.shape[0], 1, device=self.device)
       if self.sampler == 'ddpm':
         x = self._ddpm_update(x, t, dt)
       elif self.sampler == 'ddpm_cache':
-        p_x0_cache, x_next = self._ddpm_caching_update(
-          x, t, dt, p_x0=p_x0_cache)
-        if (not torch.allclose(x_next, x)
-            or self.time_conditioning):
+        p_x0_cache, x_next = self._ddpm_caching_update(x, t, dt, p_x0=p_x0_cache)
+        if (not torch.allclose(x_next, x) or self.time_conditioning):
           # Disable caching
           p_x0_cache = None
         x = x_next
@@ -688,8 +683,7 @@ class Diffusion(L.LightningModule):
         x = self._analytic_update(x, t, dt)
 
     if self.config.sampling.noise_removal:
-      t = timesteps[-1] * torch.ones(x.shape[0], 1,
-                                     device=self.device)
+      t = timesteps[-1] * torch.ones(x.shape[0], 1, device=self.device)
       if self.sampler == 'analytic':
         x = self._denoiser_update(x, t)
       else:
@@ -799,7 +793,7 @@ class Diffusion(L.LightningModule):
 
   def _sample_t(self, n, device):
     _eps_t = torch.rand(n, device=device)
-    if self.antithetic_sampling:
+    if self.antithetic_sampling:  # True
       offset = torch.arange(n, device=device) / n
       _eps_t = (_eps_t / n + offset) % 1
     t = (1 - self.sampling_eps) * _eps_t + self.sampling_eps
@@ -845,25 +839,25 @@ class Diffusion(L.LightningModule):
                           index=x0[:, :, None]).squeeze(-1)
 
   def _forward_pass_diffusion(self, x0):
-    t = self._sample_t(x0.shape[0], x0.device)
+    t = self._sample_t(x0.shape[0], x0.device)  #  x0.shape[0] = Batch_size
     if self.T > 0:
       t = (t * self.T).to(torch.int)
       t = t / self.T
       # t \in {1/T, 2/T, ..., 1}
       t += (1 / self.T)
 
-    if self.change_of_variables:
+    if self.change_of_variables:  # False
       unet_conditioning = t[:, None]
       f_T = torch.log1p(- torch.exp(- self.noise.sigma_max))
       f_0 = torch.log1p(- torch.exp(- self.noise.sigma_min))
       move_chance = torch.exp(f_0 + t * (f_T - f_0))
       move_chance = move_chance[:, None]
-    else:
+    else:  # 从这里进
       sigma, dsigma = self.noise(t)
       unet_conditioning = sigma[:, None]
       move_chance = 1 - torch.exp(-sigma[:, None])
 
-    xt = self.q_xt(x0, move_chance)
+    xt = self.q_xt(x0, move_chance)  # [batch_size, input_length]
     model_output = self.forward(xt, unet_conditioning)
     utils.print_nans(model_output, 'model_output')
 
@@ -887,11 +881,9 @@ class Diffusion(L.LightningModule):
       index=x0[:, :, None]).squeeze(-1)
     
     if self.change_of_variables or self.importance_sampling:
-      return log_p_theta * torch.log1p(
-        - torch.exp(- self.noise.sigma_min))
+      return log_p_theta * torch.log1p(- torch.exp(- self.noise.sigma_min))
     
-    return - log_p_theta * (
-      dsigma / torch.expm1(sigma))[:, None]
+    return - log_p_theta * (dsigma / torch.expm1(sigma))[:, None]
 
   def _loss(self, x0, attention_mask):
     (input_tokens, output_tokens,
