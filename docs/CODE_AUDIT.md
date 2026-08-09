@@ -115,9 +115,13 @@ snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
 - 正式资产只读验证：1.5 GB DLM、376 MB v1 classifier、两个各 8.6 GB MIC checkpoints 均通过 CPU
   `mmap` schema 验证；canonical regression/genome/text/classifier heads 还以 `meta` module 对真实 state
   dict 完成 `strict=True` load；该过程没有复制大 tensor、分配 GPU 或改写文件；
+- 正式 head GPU parity：Generation 的复制实现与 canonical implementation 使用 noisy guidance 正式权重、
+  fixed seed、2-sample synthetic batch 和 bfloat16 autocast 时，genome attention、text attention 和
+  regression output 均 `torch.equal`，最大 absolute difference `0.0`，输出 shape `(2, 1)`，单卡峰值
+  allocated memory 约 7.13 GiB；未启动 sampler 或写产物；
 - caller 迁移：仅将 `judge_generated_mols_MIC.py::find_matching_generated_file` 从脆弱 `_` split 改为
   canonical parser，保持 legacy first-match/`None` contract；其他 scoring/model callers 未切换；
 - 验证：13 个新 focused tests passed；跨仓库 output writer、checkpoint loader、embedding config、Core
   dynamic import、MDLM consumer、RegressionHead AST 和 attention modules 共 7 项 source audit passed；
-- 未完成：DLM encoder/full runtime load、固定 batch GPU logit/MIC parity 和 Generation clean release；
-  不能将本批描述为端到端等价完成。
+- 未完成：DLM encoder/full Generation runtime、candidate scorer end-to-end parity 和 Generation clean
+  release；不能将本批描述为端到端等价完成。

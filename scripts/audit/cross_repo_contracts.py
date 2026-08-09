@@ -27,6 +27,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Mmap and validate the trusted formal local checkpoints in the manifest.",
     )
+    parser.add_argument(
+        "--check-gpu-head-parity",
+        action="store_true",
+        help="Compare Generation and canonical MIC heads with formal weights on one visible GPU.",
+    )
     return parser.parse_args()
 
 
@@ -139,6 +144,119 @@ def check_formal_assets(
     return results
 
 
+def check_gpu_head_parity(
+    manifest: dict[str, Any], roots: dict[str, Path]
+) -> dict[str, Any]:
+    import importlib.util
+
+    import torch
+
+    from apexoracle_mdlm.models import FirstTokenCrossAttention, RegressionHead
+
+    if not torch.cuda.is_available() or torch.cuda.device_count() != 1:
+        raise RuntimeError(
+            "Expose exactly one GPU with CUDA_VISIBLE_DEVICES for head parity."
+        )
+
+    source = roots["generation"] / "models" / "antibiotic_classifier.py"
+    spec = importlib.util.spec_from_file_location(
+        "generation_antibiotic_classifier", source
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Could not load Generation head module from {source}.")
+    legacy_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(legacy_module)
+
+    contracts = {item["id"]: item for item in manifest["artifact_contracts"]}
+    contract = contracts["generation_noisy_mic_guidance"]
+    checkpoint_path = roots[contract["owner"]] / contract["relative_path"]
+    checkpoint = torch.load(
+        checkpoint_path,
+        map_location="cpu",
+        weights_only=False,
+        mmap=True,
+    )
+
+    with torch.device("meta"):
+        legacy_genome = legacy_module.FirstTokenAttention_genome(768, 8192, 4, 0.1)
+        canonical_genome = FirstTokenCrossAttention(
+            768, 8192, 4, 0.1, return_attention=False, legacy_squeeze=True
+        )
+        legacy_text = legacy_module.FirstTokenAttention_genome(768, 4096, 4, 0.1)
+        canonical_text = FirstTokenCrossAttention(
+            768, 4096, 4, 0.1, return_attention=False, legacy_squeeze=True
+        )
+        legacy_regression = legacy_module.RegressionHead(12288, 3072, 128, 1, 0.2)
+        canonical_regression = RegressionHead(12288, 3072, 128, 1, 0.2)
+
+    model_states = (
+        (legacy_genome, checkpoint["co_cross_attn_genome"]),
+        (canonical_genome, checkpoint["co_cross_attn_genome"]),
+        (legacy_text, checkpoint["co_cross_attn_text"]),
+        (canonical_text, checkpoint["co_cross_attn_text"]),
+        (legacy_regression, checkpoint["re_head_state_dict"]),
+        (canonical_regression, checkpoint["re_head_state_dict"]),
+    )
+    for model, state_dict in model_states:
+        model.load_state_dict(state_dict, strict=True, assign=True)
+        model.to("cuda").eval()
+
+    torch.manual_seed(20260809)
+    torch.cuda.reset_peak_memory_stats()
+    molecule = torch.randn(2, 768, device="cuda") * 1e-3
+    genome = torch.randn(2, 2, 8192, device="cuda") * 1e-3
+    text = torch.randn(2, 3, 4096, device="cuda") * 1e-3
+    genome_mask = torch.tensor([[False, False], [False, True]], device="cuda")
+    text_mask = torch.tensor(
+        [[False, False, False], [False, False, True]], device="cuda"
+    )
+
+    with (
+        torch.inference_mode(),
+        torch.autocast(device_type="cuda", dtype=torch.bfloat16),
+    ):
+        legacy_genome_output = legacy_genome(molecule, genome, genome_mask)
+        canonical_genome_output = canonical_genome(molecule, genome, genome_mask)
+        legacy_text_output = legacy_text(molecule, text, text_mask)
+        canonical_text_output = canonical_text(molecule, text, text_mask)
+        legacy_fused = torch.cat(
+            (
+                legacy_genome_output.reshape(-1, 8192),
+                legacy_text_output.reshape(-1, 4096),
+            ),
+            dim=1,
+        )
+        canonical_fused = torch.cat(
+            (
+                canonical_genome_output.reshape(-1, 8192),
+                canonical_text_output.reshape(-1, 4096),
+            ),
+            dim=1,
+        )
+        legacy_prediction = legacy_regression(legacy_fused)
+        canonical_prediction = canonical_regression(canonical_fused)
+
+    equal = {
+        "genome": torch.equal(legacy_genome_output, canonical_genome_output),
+        "text": torch.equal(legacy_text_output, canonical_text_output),
+        "regression": torch.equal(legacy_prediction, canonical_prediction),
+    }
+    max_abs_diff = float((legacy_prediction - canonical_prediction).abs().max().float())
+    if not all(equal.values()):
+        raise RuntimeError(
+            f"Generation/canonical head parity failed: equal={equal}, "
+            f"max_abs_diff={max_abs_diff}."
+        )
+    return {
+        "id": "generation_formal_bfloat16_gpu_head_parity",
+        "status": "passed",
+        "torch_equal": equal,
+        "max_abs_diff": max_abs_diff,
+        "output_shape": list(canonical_prediction.shape),
+        "peak_memory_gib": torch.cuda.max_memory_allocated() / 1024**3,
+    }
+
+
 def main() -> None:
     args = parse_args()
     roots = {
@@ -184,6 +302,8 @@ def main() -> None:
 
     if args.check_assets:
         results.extend(check_formal_assets(manifest, roots))
+    if args.check_gpu_head_parity:
+        results.append(check_gpu_head_parity(manifest, roots))
 
     print(
         json.dumps(

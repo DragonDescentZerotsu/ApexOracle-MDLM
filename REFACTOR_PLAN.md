@@ -106,10 +106,13 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 - [x] 用 CPU `mmap` 对四个正式 generation/scoring checkpoint 验证顶层键、prefix、head keys/shapes；
 - [x] 用 `meta` modules 对两个正式 MIC checkpoints 的 regression/genome/text heads 和 v1 classifier
   head 执行真实 `strict=True` state-dict load，不复制大 tensor、不使用 GPU；
+- [x] 用正式 noisy guidance 权重、fixed seed、2-sample synthetic condition batch 和 bfloat16 autocast
+  比较 Generation legacy copy 与 canonical genome/text/regression heads；三段输出均 `torch.equal`，最大
+  absolute difference 为 `0.0`；
 - [x] 冻结 Generation output filename schema，并将 `judge_generated_mols_MIC.py` 的 split parser 切换为
   canonical parser，保持 first-match legacy contract；
-- [ ] 完成 DLM encoder/full runtime load 与固定 batch GPU prediction parity，并逐个切换 trainer/scoring
-  模型 caller；
+- [ ] 完成 DLM encoder/full Generation runtime 与 candidate scorer end-to-end parity，并逐个切换
+  trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。

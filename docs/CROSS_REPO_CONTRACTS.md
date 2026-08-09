@@ -61,7 +61,8 @@ breaking change 处理。
 当前禁止：
 
 - 移动或改名 `Checkpoints_fangping`、v1 classifier checkpoint、Core embedding 目录；
-- 在未做 GPU prediction parity 时让 Generation 直接改 import 新 head；
+- 虽然 formal head-level GPU parity 已通过，但在 DLM/full sampler parity 前让 Generation 直接改 import
+  新 package；
 - 将 noisy generation MIC checkpoint 与 clean candidate-scoring checkpoint 合并为一个 profile；
 - 把 Generation 的 dirty checkout 当作 MDLM 重构的一部分修改或提交。
 
@@ -98,6 +99,13 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
 验证 manifest SHA-256（完整 hash 应在发布资产审计中单独执行）。不要对不可信 pickle checkpoint 使用该
 选项。
 
-仍待完成：DLM encoder/full runtime load、固定 batch GPU logits/prediction parity、Generation clean branch/
-自有 remote、顶层 asset resolver 与 fresh-clone smoke。因此当前可以声明“source/schema contract 和
-canonical head strict load 已通过”，不能声明三仓库已完成端到端 release 验收。
+有一张空闲 GPU 时，可再追加 `--check-gpu-head-parity`（应先用 `CUDA_VISIBLE_DEVICES` 只暴露一张卡）。
+它加载正式 noisy MIC guidance 权重，以固定 seed、2-sample synthetic condition batch 和 generation
+实际使用的 bfloat16 autocast，对比 Generation legacy copy 与 canonical genome/text attention 和 regression
+output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
+
+当前 formal bfloat16 GPU head parity 已通过：genome/text attention 与 regression output 均
+`torch.equal`，最大差异 `0.0`。仍待完成 DLM encoder/full sampler、candidate scorer end-to-end parity、
+Generation clean branch/自有 remote、顶层 asset resolver 与 fresh-clone smoke。因此当前可以声明
+“source/schema contract、canonical head strict load 与 head-level GPU parity 已通过”，不能声明三仓库已
+完成端到端 release 验收。

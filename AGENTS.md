@@ -66,5 +66,7 @@
 - 跨仓库只读审计入口：`PYTHONPATH=src python scripts/audit/cross_repo_contracts.py
   --synergy-root <core> --generation-root <generation>`；主要参数为三个 repo roots 和可选 manifest，输出
   stdout JSON，不写文件；`--check-assets` 仅用于 trusted formal checkpoints，以 CPU `mmap` 追加 schema
-  和 strict-head load。契约与资产角色见 `docs/CROSS_REPO_CONTRACTS.md` 和
+  和 strict-head load；`--check-gpu-head-parity` 要求 `CUDA_VISIBLE_DEVICES` 只暴露一张空闲 GPU，使用
+  正式 noisy guidance 权重比较 Generation copy 与 canonical heads 的 fixed-seed bfloat16 outputs，不启动
+  sampler。契约与资产角色见 `docs/CROSS_REPO_CONTRACTS.md` 和
   `reproducibility/cross_repo_contracts.json`。
