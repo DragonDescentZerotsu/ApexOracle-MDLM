@@ -120,6 +120,8 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 `reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前七项
 source/AST 检查通过，但这不替代最终 GPU replay。
 
+Cross-repository contract 实现 commit：`4521c53`。
+
 ### M4：Legacy driver 收口
 
 状态：待执行。

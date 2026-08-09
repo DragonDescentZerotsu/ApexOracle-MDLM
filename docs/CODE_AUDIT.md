@@ -106,6 +106,7 @@ snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
 
 ### M3b cross-repo generation contracts（2026-08-09）
 
+- 实现 commit：`4521c53`；
 - canonical 新入口：`apexoracle_mdlm.checkpoints` 三个 generation schema validators、
   `apexoracle_mdlm.scoring` generated-file parser 和 `scripts/audit/cross_repo_contracts.py`；
 - 已验证事实：Generation 的 `RegressionHead` 与 MDLM pad/no-mask producer AST 完全一致；cross-attention
