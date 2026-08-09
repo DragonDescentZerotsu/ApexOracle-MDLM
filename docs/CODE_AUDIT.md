@@ -69,6 +69,7 @@ snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
 
 ### M1 checkpoint/embedding I/O（2026-08-09）
 
+- 实现 commit：`87fe50d`；
 - legacy 来源：28 个 `load_DIT` 中重复的 checkpoint prefix removal，以及 21 份
   `load_all_genome_embeddings`/`load_text_wo_genome_embeddings`；
 - canonical 新入口：`apexoracle_mdlm.checkpoints` 与 `apexoracle_mdlm.embeddings`；
@@ -83,6 +84,7 @@ snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
 
 ### M3a shared guidance heads（2026-08-09）
 
+- 实现 commit：`136905c`；
 - legacy 来源：22 份完全重复的 `RegressionHead` 与多套
   `FirstTokenAttention_genome`；characterization reference 为
   `guaidance_regressor_all_data.py`；

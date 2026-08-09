@@ -78,7 +78,7 @@ ApexOracle-MDLM/
 - [x] 用小 tensor fixtures 验证 key、dtype、shape、scale 和 state-dict 内容保持；
 - [x] 暂不切换 GPU legacy callers。
 
-验收：11 个 `unittest` 全部通过；真实文件名 parity 覆盖 567 genome、568 ATCC text 和 1,079
+实现 commit：`87fe50d`。验收：11 个 `unittest` 全部通过；真实文件名 parity 覆盖 567 genome、568 ATCC text 和 1,079
 text-only embeddings，新旧 key 映射均为 0 mismatch/0 duplicate。新 modules 可独立 import，不需要
 下载模型、数据或 checkpoint。
 
@@ -97,6 +97,8 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 ### M3：Guidance heads 与 candidate scoring
 
 状态：共享 heads 已迁移并通过 CPU parity；trainer/scoring caller 尚未切换。
+
+共享 heads 实现 commit：`136905c`。
 
 - [x] 统一 `RegressionHead`、genome/text cross-attention 的 parameter/state-dict schema；
 - [x] 明确 attention 的 tensor-only 与 `(tensor, weights)` 两个历史返回 contract，禁止静默合并；
