@@ -48,3 +48,7 @@
   `PYTHONPATH=src python -m unittest tests.test_embedding_io -v`。
 - 这些 M1 contracts 尚未切换任何 legacy GPU caller；当前只建立可测试 replacement。正式 DLM
   embedding、guidance 和 scoring 入口将在 M2/M3 登记。
+- `apexoracle_mdlm.models.RegressionHead` 与 `FirstTokenCrossAttention`：保持历史 parameter names 和
+  state-dict schema；后者用 `return_attention` 显式选择 tensor-only 或 `(tensor, weights)` contract，
+  并用 `legacy_squeeze` 冻结 batch-size-one 历史 shape。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_model_heads -v`。本批仍未切换 legacy callers。

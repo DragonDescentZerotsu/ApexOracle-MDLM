@@ -96,10 +96,11 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 
 ### M3：Guidance heads 与 candidate scoring
 
-状态：待执行。
+状态：共享 heads 已迁移并通过 CPU parity；trainer/scoring caller 尚未切换。
 
-- 统一 `RegressionHead`、genome/text cross-attention 和 checkpoint schema；
-- 明确 attention 的 tensor-only 与 `(tensor, weights)` 两个历史返回 contract，禁止静默合并；
+- [x] 统一 `RegressionHead`、genome/text cross-attention 的 parameter/state-dict schema；
+- [x] 明确 attention 的 tensor-only 与 `(tensor, weights)` 两个历史返回 contract，禁止静默合并；
+- [ ] 以正式 checkpoint 验证 shared heads 严格加载，并逐个切换 trainer/scoring caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。

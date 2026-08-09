@@ -80,3 +80,22 @@ snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
   algorithm 均为 0 mismatch，三个目录均为 0 normalized-key duplicate；
 - legacy callers：本批未切换、未删除；本地 tensors 只读，未移动或改写；
 - 恢复位置：`legacy-code-snapshot-2026-08-09`。
+
+### M3a shared guidance heads（2026-08-09）
+
+- legacy 来源：22 份完全重复的 `RegressionHead` 与多套
+  `FirstTokenAttention_genome`；characterization reference 为
+  `guaidance_regressor_all_data.py`；
+- canonical 新入口：`apexoracle_mdlm.models.RegressionHead` 与
+  `apexoracle_mdlm.models.FirstTokenCrossAttention`；
+- 保持项：所有 parameter names、state-dict keys、linear/GELU/dropout 顺序、Q/K/V projection、
+  mask bool conversion、residual/layer-norm 顺序和 average attention weights；
+- 显式差异：用 `return_attention` 表达两种历史返回 contract；`legacy_squeeze=True` 保持 batch=1
+  的历史降维，`False` 才选择稳定 batch dimension；非有限 attention 从 legacy `exit(0)` 改为明确
+  `FloatingPointError`，正常 finite-input 路径不变；
+- 验证：相同随机 state dict 和输入下，RegressionHead output、cross-attention output/weights 均与
+  legacy reference `torch.equal`；tensor-only/weight-return 两种 contract 同值；全套累计 15 tests passed；
+- 正式 checkpoint：单文件约 9.17 GB，本批未为追求 schema smoke 将其完整载入内存；strict
+  checkpoint load 与 prediction parity 保留为 M3 caller migration 验收，不宣称已经完成；
+- legacy callers：本批未切换、未删除；恢复位置仍为
+  `legacy-code-snapshot-2026-08-09`。
