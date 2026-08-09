@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apexoracle-mdlm"
+version = "0.1.0.dev0"
+description = "Downstream DLM embedding and guidance support for ApexOracle"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+dependencies = ["torch"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

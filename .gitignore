@@ -4,6 +4,10 @@
 /Checkpoints_fangping
 **/*checkpoints*/
 
+# Source package named ``checkpoints`` is code, not a weight directory.
+!src/apexoracle_mdlm/checkpoints/
+!src/apexoracle_mdlm/checkpoints/*.py
+
 # Molecules data folder
 molecule_data/
 

@@ -1,5 +1,16 @@
 # MDLM Project
 
+> **ApexOracle downstream MDLM 重构中。** 本 checkout 正在从历史 upstream-MDLM + ApexOracle
+> 单文件实验集合，整理为可作为 super-repo submodule 使用的 downstream MDLM 模块。重构前源码已由
+> annotated tag `legacy-code-snapshot-2026-08-09` 保护；当前不会删除数据、checkpoint 或尚未验证的
+> legacy source。
+
+- 重构阶段与验收：[`REFACTOR_PLAN.md`](REFACTOR_PLAN.md)
+- 代码功能与处置审计：[`docs/CODE_AUDIT.md`](docs/CODE_AUDIT.md)
+- Legacy 恢复方法：[`docs/LEGACY_SNAPSHOT.md`](docs/LEGACY_SNAPSHOT.md)
+
+在 canonical embedding/scoring CLI 完成前，下面的历史入口不能解释为最终 public quickstart。
+
 [中文版](README_zh.md)
 
 This repository contains tools for molecular generation and MIC (Minimum Inhibitory Concentration) prediction using MDLM (Masked Diffusion Language Model).
