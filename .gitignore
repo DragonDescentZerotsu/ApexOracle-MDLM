@@ -39,11 +39,20 @@ ENV/
 env/
 
 # IDE
+.codex
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# Local test and plotting caches
+.cache/
+.mplconfig/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # OS files
 .DS_Store

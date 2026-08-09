@@ -1,6 +1,7 @@
 from pathlib import Path
 import argparse
 import json
+import hashlib
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -15,7 +16,7 @@ from torch.nn.utils.rnn import pad_sequence
 from sklearn.cluster import AgglomerativeClustering
 from Bio import Phylo
 from triton.language import bfloat16
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import pearsonr, spearmanr, mannwhitneyu
 import json
 import itertools
 import logging
@@ -29,14 +30,28 @@ import noise_schedule
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator, FormatStrFormatter, FuncFormatter
+from matplotlib.patches import Patch, PathPatch
+from matplotlib.collections import PolyCollection
+import matplotlib.colors as mcolors
 import ast
 import seaborn as sns
-from matplotlib.colors import LinearSegmentedColormap
 from guaidance_regressor_all_data import FirstTokenAttention_genome, RegressionHead, load_all_genome_embeddings, load_text_wo_genome_embeddings
-from matplotlib.collections import PolyCollection
-import matplotlib.colors as mcolors  # 仅用于颜色处理
 
 current_directory = Path('/data2/tianang/projects/Synergy')
+CACHE_DIR = Path(__file__).resolve().parent / 'temp_data' / 'temp_precomputed_MIC_for_figs'
+
+GROUP_ORDER = ['Unconditional', 'Guided']
+GROUP_OFFSETS = [-0.15, 0.15]
+GROUP_STYLE = {
+    'Unconditional': {
+        'facecolor': "#000000",
+        'edgecolor': "#000000",
+    },
+    'Guided': {
+        'facecolor': "#F279AB",
+        'edgecolor': "#F279AB",
+    },
+}
 
 with initialize(config_path="configs"):
     config = compose(config_name="config")
@@ -204,7 +219,7 @@ class MIC_regressor(nn.Module):
 
         return reg_logits
 
-def get_mic(file_names, mic_regressor, tokenizer, strain, target_MIC, guidance_method, target_length):
+def find_matching_generated_file(file_names, strain, target_MIC, guidance_method, target_length):
     for file_name in file_names:
         file_strain = file_name.split('.txt')[0].split('_')[1]
         file_target_MIC = file_name.split('.txt')[0].split('_')[3]
@@ -214,10 +229,40 @@ def get_mic(file_names, mic_regressor, tokenizer, strain, target_MIC, guidance_m
         except:
             continue
         if strain == file_strain and file_target_MIC == target_MIC and file_guidance_method == guidance_method and file_target_length == target_length:
-            with open(generate_mol_save_dir/file_name, "r", encoding="utf-8") as f:
-                lines = f.readlines()  # 返回所有行的列表，每行末尾包含 '\n'
-            # 如果想去掉末尾的换行符：
-            SELFIES_strs = [line.rstrip("\n") for line in lines]
+            return file_name
+    return None
+
+
+def get_mic_cache_path(generate_mol_save_dir, strain, target_MIC, guidance_method, target_length, ckpt_path):
+    cache_key = (
+        f"{generate_mol_save_dir.resolve()}::"
+        f"{strain}::{target_MIC}::{guidance_method}::{target_length}::{Path(ckpt_path).resolve()}"
+    )
+    cache_hash = hashlib.md5(cache_key.encode("utf-8")).hexdigest()[:12]
+    cache_name = f"{strain}_MIC_{target_MIC}_length_{target_length}_{guidance_method}_{cache_hash}.pt"
+    return CACHE_DIR / cache_name
+
+
+def get_mic(generate_mol_save_dir, file_names, mic_regressor, tokenizer, strain, target_MIC, guidance_method, target_length, ckpt_path):
+    matched_file_name = find_matching_generated_file(file_names, strain, target_MIC, guidance_method, target_length)
+    if matched_file_name is None:
+        raise FileNotFoundError(
+            f"Could not find generated molecules for strain={strain}, target_MIC={target_MIC}, "
+            f"guidance_method={guidance_method}, target_length={target_length} in {generate_mol_save_dir}"
+        )
+
+    cache_path = get_mic_cache_path(generate_mol_save_dir, strain, target_MIC, guidance_method, target_length, ckpt_path)
+    if cache_path.exists():
+        cached_payload = torch.load(cache_path, map_location='cpu')
+        print(f'Loaded cached MICs from {cache_path}')
+        return cached_payload['mics'].to(torch.float32)
+
+    if mic_regressor is None or tokenizer is None:
+        raise RuntimeError(f'MIC cache miss for {strain} / {target_MIC} / {target_length}, but model is not initialized.')
+
+    with open(generate_mol_save_dir / matched_file_name, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    SELFIES_strs = [line.rstrip("\n") for line in lines]
 
     input_ids = tokenizer(
         [s.replace('][', '] [') for s in SELFIES_strs],
@@ -250,7 +295,135 @@ def get_mic(file_names, mic_regressor, tokenizer, strain, target_MIC, guidance_m
     else:
         mics = torch.from_numpy(np.array(mics))
 
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            'mics': mics.cpu().to(torch.float32),
+            'strain': strain,
+            'target_MIC': target_MIC,
+            'guidance_method': guidance_method,
+            'target_length': target_length,
+            'generate_mol_save_dir': str(generate_mol_save_dir),
+            'source_file': matched_file_name,
+            'ckpt_path': ckpt_path,
+        },
+        cache_path,
+    )
+    print(f'Saved MIC cache to {cache_path}')
+
     return mics
+
+
+def draw_significance(ax, x1, x2, y_top, left_drop, right_drop, text, text_y):
+    ax.plot(
+        [x1, x1, x2, x2],
+        [y_top - left_drop, y_top, y_top, y_top - right_drop],
+        color="#222222",
+        linewidth=1.3,
+        solid_capstyle="butt",
+        clip_on=False,
+        zorder=4,
+    )
+    ax.text(
+        (x1 + x2) / 2,
+        text_y,
+        text,
+        ha="center",
+        va="bottom",
+        fontsize=11,
+        fontweight="bold",
+        color="black",
+    )
+
+
+def format_p_value(p_value):
+    if p_value < 1e-4:
+        return "p < 1e-4"
+    return f"p = {p_value:.4f}"
+
+
+def add_p_value_annotation(ax, x1, x2, left_values, right_values):
+    p_value = mannwhitneyu(left_values, right_values, alternative="two-sided").pvalue
+
+    combined_values = np.concatenate((left_values, right_values))
+    y_min = float(np.min(combined_values))
+    y_max = float(np.max(combined_values))
+    y_span = max(y_max - y_min, 1.0)
+    y_top = y_max + 0.08 * y_span
+    drop = 0.04 * y_span
+    text_y = y_top + 0.015 * y_span
+
+    draw_significance(
+        ax,
+        x1,
+        x2,
+        y_top,
+        drop,
+        drop,
+        format_p_value(p_value),
+        text_y,
+    )
+
+    current_bottom, current_top = ax.get_ylim()
+    ax.set_ylim(current_bottom, max(current_top, text_y + 0.08 * y_span))
+
+
+def style_violin_body(body, label):
+    style = GROUP_STYLE[label]
+    body.set_facecolor(mcolors.to_rgba(style["facecolor"], alpha=0.55))
+    body.set_edgecolor('none')
+    body.set_linewidth(0.0)
+    body.set_antialiased(False)
+
+
+def add_violin_outline(ax, body, label):
+    outline = PathPatch(
+        body.get_paths()[0],
+        facecolor='none',
+        edgecolor=GROUP_STYLE[label]["edgecolor"],
+        linewidth=1.4,
+        joinstyle='round',
+        capstyle='round',
+        antialiased=True,
+        zorder=body.get_zorder() + 0.2,
+    )
+    ax.add_patch(outline)
+
+
+def violin_span_at_y(body, y_value):
+    path = body.get_paths()[0]
+    vertices = path.vertices
+    x_intersections = []
+
+    for (x1, y1), (x2, y2) in zip(vertices[:-1], vertices[1:]):
+        if y1 == y2:
+            if y_value == y1:
+                x_intersections.extend([x1, x2])
+            continue
+        if min(y1, y2) <= y_value <= max(y1, y2):
+            ratio = (y_value - y1) / (y2 - y1)
+            x_intersections.append(x1 + ratio * (x2 - x1))
+
+    if len(x_intersections) < 2:
+        center_x = np.mean(vertices[:, 0])
+        return center_x, center_x
+
+    return min(x_intersections), max(x_intersections)
+
+
+def add_distribution_summary(ax, body, values, label):
+    edgecolor = GROUP_STYLE[label]["edgecolor"]
+    median = np.percentile(values, 50)
+    median_x_min, median_x_max = violin_span_at_y(body, median)
+    ax.hlines(
+        median,
+        median_x_min,
+        median_x_max,
+        colors=edgecolor,
+        linestyles=(0, (1, 1)),
+        linewidth=1.2,
+        zorder=3,
+    )
 
 if __name__ == '__main__':
 
@@ -262,140 +435,175 @@ if __name__ == '__main__':
     # ckpt_path = '/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_regressor/guidance_best_R2_all_peptide_epoch_12.pth'
     # ckpt_path = '/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_regressor/noise_guidance_all_peptide_epoch_100_of_100.pth'
 
-    # 先读取 SELFIES 的文件
     guidance_method = 'noise'  # clean / noise
-    strain_show_names = [r'P. aeruginosa BAA-3170']
-    strains = ['BAA-3170']
-    length = '368'
     target_MICs = ['1', '1000']  # '1000' 表示 unconditional generation
-    generate_mol_save_dir = Path('/data2/tianang/projects/discrete-diffusion-guidance/outputs/generated_mol_SELFIES-new-test')
-    file_names = [file.name for file in generate_mol_save_dir.iterdir()]
+    strain_plot_configs = [
+        {
+            'strain': 'BAA-3170',
+            'label': r'$\it{E.\ coli}$ AR-0349',
+            'center': 0.0,
+            'length': '368',
+            'generate_mol_save_dir': Path('/data2/tianang/projects/discrete-diffusion-guidance/outputs/generated_mol_SELFIES-new-test'),
+        },
+        {
+            'strain': 'BAA-3197',
+            'label': r'$\it{P.\ aeruginosa}$ PA5257',
+            'center': 0.8,
+            'length': '232',
+            'generate_mol_save_dir': Path('/data2/tianang/projects/discrete-diffusion-guidance/outputs/generated_mol_SELFIES'),
+        },
+    ]
 
-    model_name = "ibm-research/materials.selfies-ted"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    target_label_map = {
+        '1': 'Guided',
+        '1000': 'Unconditional',
+    }
 
-    mic_regressor = MIC_regressor(config, ckpt_path, device)
-    mic_regressor.to(device)
-    mic_regressor.eval()
-
-    ax_labels = ['Guided', 'Unconditional']
-
-    colors = ["#F7CFE1", "#B49EDE"]  # , "#759ECD"]
-    custom_cmap = LinearSegmentedColormap.from_list("custom_gradient", colors, N=2)
-
-    fractions = np.linspace(0, 1, len(ax_labels))
-    palette = [custom_cmap(f) for f in fractions]
-
-    for strain, strain_show_name in zip(strains, strain_show_names):
-        mic_list = []
+    all_cache_ready = True
+    for strain_config in strain_plot_configs:
+        generate_mol_save_dir = strain_config['generate_mol_save_dir']
+        file_names = [file.name for file in generate_mol_save_dir.iterdir()]
         for target_MIC in target_MICs:
-            mic = get_mic(file_names, mic_regressor, tokenizer, strain, target_MIC, guidance_method, length)
+            cache_path = get_mic_cache_path(
+                generate_mol_save_dir,
+                strain_config['strain'],
+                target_MIC,
+                guidance_method,
+                strain_config['length'],
+                ckpt_path,
+            )
+            matched_file_name = find_matching_generated_file(
+                file_names,
+                strain_config['strain'],
+                target_MIC,
+                guidance_method,
+                strain_config['length'],
+            )
+            if matched_file_name is None or not cache_path.exists():
+                all_cache_ready = False
+                break
+        if not all_cache_ready:
+            break
 
+    tokenizer = None
+    mic_regressor = None
+    if all_cache_ready:
+        print(f'Using precomputed MIC caches from {CACHE_DIR}')
+    else:
+        model_name = "ibm-research/materials.selfies-ted"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        mic_regressor = MIC_regressor(config, ckpt_path, device)
+        mic_regressor.to(device)
+        mic_regressor.eval()
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+
+    for strain_config in strain_plot_configs:
+        generate_mol_save_dir = strain_config['generate_mol_save_dir']
+        file_names = [file.name for file in generate_mol_save_dir.iterdir()]
+        grouped_plot_values = {}
+
+        for target_MIC in target_MICs:
+            mic = get_mic(
+                generate_mol_save_dir,
+                file_names,
+                mic_regressor,
+                tokenizer,
+                strain_config['strain'],
+                target_MIC,
+                guidance_method,
+                strain_config['length'],
+                ckpt_path,
+            )
+
+            print(f"strain: {strain_config['strain']}")
             print(mic)
             print(f' target MIC: {target_MIC}')
             print(f' predicted mean MIC: {mic.mean()}')
             print(f' predicted median MIC: {torch.median(mic)}')
 
             top_k = 1
-
             min_values, _ = torch.topk(mic, top_k, largest=False)
-
             print(f'{top_k} min mics: {min_values}')
             print(f' mean: {min_values.mean()}')
             print(f' median: {min_values.median()}')
 
+            label = target_label_map[target_MIC]
             if show_log2:
-                mic_list.append(torch.log2(mic).detach().cpu().to(torch.float32).numpy())
+                grouped_plot_values[label] = torch.log2(mic).detach().cpu().to(torch.float32).numpy()
             else:
-                mic_list.append(mic.detach().cpu().to(torch.float32).numpy())
+                grouped_plot_values[label] = mic.detach().cpu().to(torch.float32).numpy()
 
-        data = []
-        for label, arr in zip(ax_labels, mic_list):
-            # 如果 mic_list 存的是 numpy 数组，就直接用；如果是 tensor，先转 numpy
-            values = arr if isinstance(arr, (list, np.ndarray)) else arr.numpy()
-            data.append(pd.DataFrame({"Guidance": label, "MIC": values}))
-        df = pd.concat(data, ignore_index=True)
+        x_positions = {
+            label: strain_config['center'] + offset
+            for label, offset in zip(GROUP_ORDER, GROUP_OFFSETS)
+        }
 
-        fig, ax = plt.subplots(figsize=(5, 5))
-        sns.violinplot(
-            x="Guidance",
-            y="MIC",
-            data=df,
-            ax=ax,
-            inner="quartile",  # 在 Violin 里显示四分位线
-            scale="width",  # 按组宽度等比例缩放
-            palette=palette,
-            cut=0,  # 不画超出数据范围的“胡须”
-            width=0.5,
+        for label in GROUP_ORDER:
+            values = grouped_plot_values[label]
+            parts = ax.violinplot(
+                [values],
+                positions=[x_positions[label]],
+                widths=0.22,
+                showmeans=False,
+                showmedians=False,
+                showextrema=False,
+                bw_method=0.35,
+                points=300,
+            )
+            violin_body = parts["bodies"][0]
+            style_violin_body(violin_body, label)
+            add_violin_outline(ax, violin_body, label)
+            add_distribution_summary(ax, violin_body, values, label)
 
+        add_p_value_annotation(
+            ax,
+            x_positions['Unconditional'],
+            x_positions['Guided'],
+            grouped_plot_values['Unconditional'],
+            grouped_plot_values['Guided'],
         )
 
-        ax.grid(axis="y", linestyle="--", alpha=0.35, linewidth=1.6)
+    def inv_log2(x, pos):
+        return int(2 ** x)
 
-        def inv_log2(x, pos):
-            orig = 2 ** x
-            # 如果数值足够大，改成科学记数法或保留整数
-            # if orig >= 1000:
-            #     return f"{orig:.1e}"
-            # else:
-            #     return f"{orig:.0f}"
-            return int(orig)
+    ax.grid(axis="y", linestyle="--", alpha=0.35, linewidth=1.3)
+    ax.set_axisbelow(True)
 
+    if show_log2:
+        ax.yaxis.set_major_formatter(FuncFormatter(inv_log2))
 
-        def lighten_color(color, amount=0.5):
-            """
-            将 color 提亮：color 可以是 RGB 或 RGBA tuple，也可以是 hex 字符串。
-            amount 越大越接近白色（0–1 之间）。
-            """
-            # 把任何 color 转成 RGB tuple (r, g, b)
-            c = mcolors.to_rgb(color)
-            # 混合白色：(c + (1-c)*amount)
-            return tuple(c_i + (1 - c_i) * amount for c_i in c)
+    centers = [config['center'] for config in strain_plot_configs]
+    ax.set_xlim(min(centers) + min(GROUP_OFFSETS) - 0.18, max(centers) + max(GROUP_OFFSETS) + 0.18)
+    ax.set_xticks(centers)
+    ax.set_xticklabels([config['label'] for config in strain_plot_configs], fontsize=13)
+    ax.set_xlabel("")
+    y_label = ax.set_ylabel("log 2 scale MIC value (µmol)")
+    y_label.set_fontsize(14)
+    ax.set_title("Generated Molecule MIC Distribution", fontsize=14)
 
+    legend_handles = [
+        Patch(
+            facecolor=GROUP_STYLE[label]["facecolor"],
+            edgecolor=GROUP_STYLE[label]["edgecolor"],
+            linewidth=2.8,
+            alpha=0.65,
+            label=label,
+        )
+        for label in GROUP_ORDER
+    ]
+    ax.legend(handles=legend_handles, frameon=False, loc="center left", bbox_to_anchor=(0.5, 0.1), fontsize=13)
 
-        edge_colors = []
-        for pc in [c for c in ax.collections if isinstance(c, PolyCollection)]:
-            # 取出原填充色（RGBA），我们只要前 3 个 channels
-            face_rgba = pc.get_facecolor()[0]
-            face_rgb = face_rgba[:3]
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_linewidth(1.6)
+    ax.spines["bottom"].set_linewidth(1.6)
+    ax.tick_params(axis='y', labelsize=10, width=1.6, length=6)
+    ax.tick_params(axis='x', labelsize=13, width=1.6, length=6)
 
-            # amount 控制提亮程度，0.0 不变，1.0 全白
-            edge_rgb = lighten_color(face_rgb, amount=-0.8)
-
-            pc.set_edgecolor(edge_rgb)
-            pc.set_linewidth(2.0)
-            edge_colors.append(edge_rgb)
-
-        for idx, line in enumerate(ax.lines):
-            violin_idx = idx // 3  # 每 3 条线对应一个 violin
-            line.set_color(edge_colors[violin_idx])
-            line.set_linewidth(2.0)  # 可根据需要调粗细
-            # line.set_linestyle('--')       # 如果想虚线也可以在这里再加
-
-        # 3) 应用到 y 轴主刻度
-        if show_log2:
-            ax.yaxis.set_major_formatter(FuncFormatter(inv_log2))
-
-        # if show_log2:
-        #     ax.set_yscale("log", base=2)  # 2 为底的对数坐标
-        #     ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f"{y:g}"))
-        ax.set_axisbelow(True)
-        ax.set_title(f"Generated molecule MIC distribution\nagainst {strain_show_name}", fontsize=14)
-        ax.set_xlabel("")  # 去掉 x 轴标题
-        y_label = ax.set_ylabel("log 2 scale MIC value (µmol)")  # 根据实际情况修改单位
-        y_label.set_fontsize(11)
-
-        plt.xticks(fontsize=10)
-
-        sns.despine(fig=fig, ax=ax,
-                    top=True, right=True, bottom=True, left=True)
-
-        ax.tick_params(axis='both', which='both', length=0)
-
-        plt.tight_layout()
-
-        # plt.savefig(f"/data2/tianang/projects/Synergy/paper_figs/{strain_show_names[0].split('-')[-1]}-guidance-MIC.pdf", format="pdf", bbox_inches="tight")
-        plt.show()
+    plt.tight_layout()
+    plt.savefig("/data2/tianang/projects/Synergy/paper_figs/3170-3197-guidance-MIC.pdf", format="pdf", bbox_inches="tight")
+    plt.show()
 
         # fig, ax = plt.subplots()
         # ax.violinplot(mic_list)
@@ -426,6 +634,3 @@ if __name__ == '__main__':
         #     ax.yaxis.set_major_formatter(FuncFormatter(inv_log2))
 
         # plt.show()
-
-
-
