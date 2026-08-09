@@ -1,0 +1,202 @@
+#!/usr/bin/env python
+"""Audit source-level contracts among ApexOracle Core, MDLM, and Generation."""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+
+def parse_args() -> argparse.Namespace:
+    repository_root = Path(__file__).resolve().parents[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mdlm-root", type=Path, default=repository_root)
+    parser.add_argument("--synergy-root", type=Path, required=True)
+    parser.add_argument("--generation-root", type=Path, required=True)
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=repository_root / "reproducibility" / "cross_repo_contracts.json",
+    )
+    parser.add_argument(
+        "--check-assets",
+        action="store_true",
+        help="Mmap and validate the trusted formal local checkpoints in the manifest.",
+    )
+    return parser.parse_args()
+
+
+def class_node(path: Path, class_name: str) -> ast.ClassDef:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == class_name:
+            return node
+    raise ValueError(f"Class {class_name!r} was not found in {path}.")
+
+
+def normalized_class_digest(path: Path, class_name: str) -> str:
+    payload = ast.dump(class_node(path, class_name), include_attributes=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def assigned_self_attributes(node: ast.ClassDef) -> set[str]:
+    attributes: set[str] = set()
+    for child in ast.walk(node):
+        targets: list[ast.expr] = []
+        if isinstance(child, ast.Assign):
+            targets.extend(child.targets)
+        elif isinstance(child, ast.AnnAssign):
+            targets.append(child.target)
+        for target in targets:
+            for item in ast.walk(target):
+                if (
+                    isinstance(item, ast.Attribute)
+                    and isinstance(item.value, ast.Name)
+                    and item.value.id == "self"
+                ):
+                    attributes.add(item.attr)
+    return attributes
+
+
+def check_formal_assets(
+    manifest: dict[str, Any], roots: dict[str, Path]
+) -> list[dict[str, Any]]:
+    import torch
+
+    from apexoracle_mdlm.checkpoints import (
+        validate_generation_dlm_checkpoint,
+        validate_generation_mic_guidance_checkpoint,
+        validate_generation_peptide_classifier_checkpoint,
+    )
+    from apexoracle_mdlm.models import FirstTokenCrossAttention, RegressionHead
+
+    contracts = {item["id"]: item for item in manifest["artifact_contracts"]}
+
+    def load(asset_id: str) -> tuple[Path, dict[str, Any]]:
+        contract = contracts[asset_id]
+        path = roots[contract["owner"]] / contract["relative_path"]
+        if not path.is_file():
+            raise FileNotFoundError(f"Missing formal asset {asset_id}: {path}")
+        payload = torch.load(
+            path,
+            map_location="cpu",
+            weights_only=False,
+            mmap=True,
+        )
+        return path, payload
+
+    results: list[dict[str, Any]] = []
+    path, payload = load("generation_dlm_v1")
+    validate_generation_dlm_checkpoint(payload)
+    results.append({"id": "generation_dlm_v1_schema", "status": "passed"})
+    del payload
+
+    path, payload = load("generation_peptide_classifier_v1")
+    validate_generation_peptide_classifier_checkpoint(payload)
+    classifier_state = {
+        key.removeprefix("ClsHead."): value
+        for key, value in payload["state_dict"].items()
+        if key.startswith("ClsHead.")
+    }
+    with torch.device("meta"):
+        classifier_head = RegressionHead(768, 384, 128, 1, 0.2)
+    classifier_head.load_state_dict(classifier_state, strict=True, assign=True)
+    results.append(
+        {"id": "generation_peptide_classifier_v1_strict_head", "status": "passed"}
+    )
+    del payload, classifier_head
+
+    for asset_id in (
+        "generation_noisy_mic_guidance",
+        "candidate_clean_mic_scorer",
+    ):
+        path, payload = load(asset_id)
+        validate_generation_mic_guidance_checkpoint(payload)
+        with torch.device("meta"):
+            regression_head = RegressionHead(12288, 3072, 128, 1, 0.2)
+            genome_attention = FirstTokenCrossAttention(
+                768, 8192, 4, 0.1, return_attention=False
+            )
+            text_attention = FirstTokenCrossAttention(
+                768, 4096, 4, 0.1, return_attention=False
+            )
+        regression_head.load_state_dict(
+            payload["re_head_state_dict"], strict=True, assign=True
+        )
+        genome_attention.load_state_dict(
+            payload["co_cross_attn_genome"], strict=True, assign=True
+        )
+        text_attention.load_state_dict(
+            payload["co_cross_attn_text"], strict=True, assign=True
+        )
+        results.append({"id": f"{asset_id}_strict_heads", "status": "passed"})
+        del payload, regression_head, genome_attention, text_attention
+
+    return results
+
+
+def main() -> None:
+    args = parse_args()
+    roots = {
+        "mdlm": args.mdlm_root.resolve(),
+        "synergy": args.synergy_root.resolve(),
+        "generation": args.generation_root.resolve(),
+    }
+    manifest: dict[str, Any] = json.loads(args.manifest.read_text(encoding="utf-8"))
+    results: list[dict[str, Any]] = []
+
+    for check in manifest["static_checks"]:
+        path = roots[check["repository"]] / check["path"]
+        source = path.read_text(encoding="utf-8")
+        missing = [
+            value for value in check["required_substrings"] if value not in source
+        ]
+        if missing:
+            raise RuntimeError(f"{check['id']} failed for {path}; missing={missing}")
+        results.append({"id": check["id"], "status": "passed"})
+
+    for check in manifest["ast_equivalence_checks"]:
+        left = check["left"]
+        right = check["right"]
+        left_digest = normalized_class_digest(
+            roots[left["repository"]] / left["path"], left["class"]
+        )
+        right_digest = normalized_class_digest(
+            roots[right["repository"]] / right["path"], right["class"]
+        )
+        if left_digest != right_digest:
+            raise RuntimeError(
+                f"{check['id']} failed: {left_digest} != {right_digest}."
+            )
+        results.append({"id": check["id"], "status": "passed", "sha256": left_digest})
+
+    for check in manifest["class_module_checks"]:
+        path = roots[check["repository"]] / check["path"]
+        attributes = assigned_self_attributes(class_node(path, check["class"]))
+        missing = sorted(set(check["required_self_attributes"]) - attributes)
+        if missing:
+            raise RuntimeError(f"{check['id']} failed for {path}; missing={missing}")
+        results.append({"id": check["id"], "status": "passed"})
+
+    if args.check_assets:
+        results.extend(check_formal_assets(manifest, roots))
+
+    print(
+        json.dumps(
+            {
+                "schema_version": manifest["schema_version"],
+                "status": "passed",
+                "checks": results,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,10 @@
 # MDLM 项目
 
+> **ApexOracle downstream MDLM 重构中。** 重构前 source-only 版本由 annotated tag
+> `legacy-code-snapshot-2026-08-09` 保护；当前不删除本地数据、checkpoint 或未完成 parity 的 legacy
+> 源码。阶段计划见 [`REFACTOR_PLAN.md`](REFACTOR_PLAN.md)，三仓库连接边界见
+> [`docs/CROSS_REPO_CONTRACTS.md`](docs/CROSS_REPO_CONTRACTS.md)。
+
 本仓库包含用于分子生成和 MIC（最低抑菌浓度）预测的工具，基于 MDLM（掩码扩散语言模型）。
 
 ## MIC 预测工具

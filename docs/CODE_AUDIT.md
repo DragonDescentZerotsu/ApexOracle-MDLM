@@ -58,7 +58,9 @@
 - 每个 clean/noisy/padding guidance checkpoint 的唯一 producer、resolved config 和正式角色；
 - Hugging Face 本地文件、public revision 与正式 DLM checkpoint 的对应关系；
 - milk/camel、attention 和 synergy guidance 哪些需要进入最终 public examples；
-- 哪些 legacy root files 仍被 Generation 或 Core 以跨仓库 import 方式调用。
+- 除已核对的 `judge_generated_mols_MIC.py` output consumer 外，其他 legacy root files 是否仍有未登记的
+  外部调用者；已验证 Generation 不 import MDLM package，而 Core reviewer runner 会动态 import
+  Generation runtime。
 
 ## 6. 迁移登记规则
 
@@ -101,3 +103,20 @@ snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
   checkpoint load 与 prediction parity 保留为 M3 caller migration 验收，不宣称已经完成；
 - legacy callers：本批未切换、未删除；恢复位置仍为
   `legacy-code-snapshot-2026-08-09`。
+
+### M3b cross-repo generation contracts（2026-08-09）
+
+- canonical 新入口：`apexoracle_mdlm.checkpoints` 三个 generation schema validators、
+  `apexoracle_mdlm.scoring` generated-file parser 和 `scripts/audit/cross_repo_contracts.py`；
+- 已验证事实：Generation 的 `RegressionHead` 与 MDLM pad/no-mask producer AST 完全一致；cross-attention
+  state modules 相同但返回约定不同；Core reviewer runner 通过 `sys.path` 动态 import Generation，
+  Generation 通过路径读取 MDLM/Core assets；
+- 正式资产只读验证：1.5 GB DLM、376 MB v1 classifier、两个各 8.6 GB MIC checkpoints 均通过 CPU
+  `mmap` schema 验证；canonical regression/genome/text/classifier heads 还以 `meta` module 对真实 state
+  dict 完成 `strict=True` load；该过程没有复制大 tensor、分配 GPU 或改写文件；
+- caller 迁移：仅将 `judge_generated_mols_MIC.py::find_matching_generated_file` 从脆弱 `_` split 改为
+  canonical parser，保持 legacy first-match/`None` contract；其他 scoring/model callers 未切换；
+- 验证：13 个新 focused tests passed；跨仓库 output writer、checkpoint loader、embedding config、Core
+  dynamic import、MDLM consumer、RegressionHead AST 和 attention modules 共 7 项 source audit passed；
+- 未完成：DLM encoder/full runtime load、固定 batch GPU logit/MIC parity 和 Generation clean release；
+  不能将本批描述为端到端等价完成。

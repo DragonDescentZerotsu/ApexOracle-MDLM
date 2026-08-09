@@ -42,6 +42,12 @@
   `extract_state_dict(payload, key)` 与 `strip_state_dict_prefix(state_dict, prefix)`；输出为原 payload、
   validated state mapping 或不修改输入的 `OrderedDict`。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_checkpoint_io -v`。
+- `apexoracle_mdlm.checkpoints` 的 generation schema validators：
+  `validate_generation_dlm_checkpoint(payload)`、
+  `validate_generation_mic_guidance_checkpoint(payload)` 与
+  `validate_generation_peptide_classifier_checkpoint(payload)`；输入为已加载的 CPU checkpoint mapping，
+  只核对冻结顶层键、prefix、head keys/shapes，不实例化模型或移动到 GPU。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_checkpoint_schemas -v`。
 - `apexoracle_mdlm.embeddings`：ATCC/text filename key normalization 与
   `load_atcc_embeddings`/`load_text_embeddings`；主要参数为 directory、scale、device 和
   `strict_unique`，输出 `dict[str, torch.Tensor]`。Focused 验证：
@@ -52,3 +58,13 @@
   state-dict schema；后者用 `return_attention` 显式选择 tensor-only 或 `(tensor, weights)` contract，
   并用 `legacy_squeeze` 冻结 batch-size-one 历史 shape。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_model_heads -v`。本批仍未切换 legacy callers。
+- `apexoracle_mdlm.scoring`：`parse_generated_molecule_filename`、
+  `format_generated_molecule_filename` 与 `find_generated_molecule_file`；canonical 输入 schema 为
+  `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt`，输出 parsed dataclass、filename
+  或匹配文件名。`judge_generated_mols_MIC.py` 已仅迁移此 parser，并显式保留 first-match legacy 行为。
+  Focused 验证：`PYTHONPATH=src python -m unittest tests.test_generated_files -v`。
+- 跨仓库只读审计入口：`PYTHONPATH=src python scripts/audit/cross_repo_contracts.py
+  --synergy-root <core> --generation-root <generation>`；主要参数为三个 repo roots 和可选 manifest，输出
+  stdout JSON，不写文件；`--check-assets` 仅用于 trusted formal checkpoints，以 CPU `mmap` 追加 schema
+  和 strict-head load。契约与资产角色见 `docs/CROSS_REPO_CONTRACTS.md` 和
+  `reproducibility/cross_repo_contracts.json`。

@@ -7,6 +7,7 @@
 
 - 重构阶段与验收：[`REFACTOR_PLAN.md`](REFACTOR_PLAN.md)
 - 代码功能与处置审计：[`docs/CODE_AUDIT.md`](docs/CODE_AUDIT.md)
+- Core/MDLM/Generation 跨仓库契约：[`docs/CROSS_REPO_CONTRACTS.md`](docs/CROSS_REPO_CONTRACTS.md)
 - Legacy 恢复方法：[`docs/LEGACY_SNAPSHOT.md`](docs/LEGACY_SNAPSHOT.md)
 
 在 canonical embedding/scoring CLI 完成前，下面的历史入口不能解释为最终 public quickstart。

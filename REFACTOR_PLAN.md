@@ -2,7 +2,7 @@
 
 > 建立日期：2026-08-09
 > 当前 branch：`refactor/apexoracle-mdlm`
-> 状态：M0 legacy snapshot 与 M1 package/shared I/O 已完成；M2/M3 尚未切换 legacy callers
+> 状态：M0/M1 已完成；M3 已冻结跨仓库 schema 并迁移一个低风险 parser，GPU caller parity 尚未完成
 
 ## 1. 目标与不变量
 
@@ -96,18 +96,29 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 
 ### M3：Guidance heads 与 candidate scoring
 
-状态：共享 heads 已迁移并通过 CPU parity；trainer/scoring caller 尚未切换。
+状态：共享 heads、generation checkpoint/file contracts 已迁移并通过 CPU/schema parity；仅
+`judge_generated_mols_MIC.py` 的 filename parser 已切换，模型 caller 尚未切换。
 
 共享 heads 实现 commit：`136905c`。
 
 - [x] 统一 `RegressionHead`、genome/text cross-attention 的 parameter/state-dict schema；
 - [x] 明确 attention 的 tensor-only 与 `(tensor, weights)` 两个历史返回 contract，禁止静默合并；
-- [ ] 以正式 checkpoint 验证 shared heads 严格加载，并逐个切换 trainer/scoring caller；
+- [x] 用 CPU `mmap` 对四个正式 generation/scoring checkpoint 验证顶层键、prefix、head keys/shapes；
+- [x] 用 `meta` modules 对两个正式 MIC checkpoints 的 regression/genome/text heads 和 v1 classifier
+  head 执行真实 `strict=True` state-dict load，不复制大 tensor、不使用 GPU；
+- [x] 冻结 Generation output filename schema，并将 `judge_generated_mols_MIC.py` 的 split parser 切换为
+  canonical parser，保持 first-match legacy contract；
+- [ ] 完成 DLM encoder/full runtime load 与固定 batch GPU prediction parity，并逐个切换 trainer/scoring
+  模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。
 
 验收：state-dict keys 严格一致；固定 batch predictions 达到约定的逐值或数值容差一致。
+
+跨仓库 source contract 记录于 `docs/CROSS_REPO_CONTRACTS.md`；机器可读资产/源码检查为
+`reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前七项
+source/AST 检查通过，但这不替代最终 GPU replay。
 
 ### M4：Legacy driver 收口
 

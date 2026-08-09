@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import argparse
 import json
 import hashlib
@@ -36,6 +37,12 @@ import matplotlib.colors as mcolors
 import ast
 import seaborn as sns
 from guaidance_regressor_all_data import FirstTokenAttention_genome, RegressionHead, load_all_genome_embeddings, load_text_wo_genome_embeddings
+
+PACKAGE_SOURCE = Path(__file__).resolve().parent / 'src'
+if str(PACKAGE_SOURCE) not in sys.path:
+    sys.path.insert(0, str(PACKAGE_SOURCE))
+
+from apexoracle_mdlm.scoring import find_generated_molecule_file
 
 current_directory = Path('/data2/tianang/projects/Synergy')
 CACHE_DIR = Path(__file__).resolve().parent / 'temp_data' / 'temp_precomputed_MIC_for_figs'
@@ -220,17 +227,15 @@ class MIC_regressor(nn.Module):
         return reg_logits
 
 def find_matching_generated_file(file_names, strain, target_MIC, guidance_method, target_length):
-    for file_name in file_names:
-        file_strain = file_name.split('.txt')[0].split('_')[1]
-        file_target_MIC = file_name.split('.txt')[0].split('_')[3]
-        try:
-            file_guidance_method = file_name.split('.txt')[0].split('_')[-1]
-            file_target_length = file_name.split('.txt')[0].split('_')[5]
-        except:
-            continue
-        if strain == file_strain and file_target_MIC == target_MIC and file_guidance_method == guidance_method and file_target_length == target_length:
-            return file_name
-    return None
+    return find_generated_molecule_file(
+        file_names,
+        strain=strain,
+        target_mic=target_MIC,
+        guidance_method=guidance_method,
+        target_length=target_length,
+        # Preserve the historical first-match behavior for this plotting driver.
+        require_unique=False,
+    )
 
 
 def get_mic_cache_path(generate_mol_save_dir, strain, target_MIC, guidance_method, target_length, ckpt_path):
