@@ -227,13 +227,22 @@ CLI；原脚本只显示四个 hard-coded p-value strings，不计算 statistics
 与 snapshot recovery 允许删除 root script，但不能据此声称正式 p 值已重算。完整证据见
 `docs/LEGACY_ANALYSIS_MIGRATION.md`。
 
-## 14. 下一轮人工核验队列
+## 14. Root debug 与一次性 embedding scripts 已完成清理
+
+`debug.py/debug_2.py/debug_3.py` 分别只是 dataframe peek、无 assertion/reference 的 hard-coded GPU smoke 和
+单 MolPort shard canonical-string diagnostic。两个 milk scripts byte-identical；它们与 `temp_stf_polymer.py`
+均复制同一 DLM wrapper，仅用于一次性 ignored embedding export。资产 key/shape/hash、source counts 和消费者
+搜索已冻结；没有任何 runtime/论文/reviewer/output consumer。正式 candidate scoring、MolPort matching 和
+现有 encoder 已覆盖当前所需行为，故不新建 API，六个 sources 全部由 snapshot 接管后删除。详见
+`docs/DEBUG_FILE_CLEANUP.md`。
+
+## 15. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
-1. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因前几轮队列聚焦画图而
-   自动放行。
+1. 下一批转向仍在 active tree 的 chemistry/catalog utilities 与 embedding producer family；继续先核对正式
+   consumer 和独有协议，再决定迁移或 snapshot-only。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为
 snapshot-only；两类都在 gate 满足后删除原始 root 文件。仍按小批次迁移与删除，不做一次性 filesystem

@@ -184,6 +184,47 @@ class CodeLineageLedgerTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / path).is_file(), path)
 
+    def test_root_debug_sources_are_snapshot_only_and_recoverable(self):
+        lineage = json.loads(
+            (
+                ROOT / "reproducibility" / "debug_file_cleanup_lineage.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(lineage["status"], "passed")
+        self.assertEqual(
+            lineage["disposition"],
+            "snapshot_only_sources_removed_assets_preserved_ignored",
+        )
+        for legacy_path, metadata in lineage["legacy_sources"].items():
+            self.assertNotIn(legacy_path, self.by_path)
+            legacy_source = subprocess.check_output(
+                ["git", "show", f"{lineage['snapshot_ref']}:{legacy_path}"],
+                cwd=ROOT,
+            )
+            self.assertEqual(
+                hashlib.sha256(legacy_source).hexdigest(), metadata["sha256"]
+            )
+        self.assertEqual(
+            lineage["legacy_sources"]["temp_save_milk_embedding.py"][
+                "byte_identical_to"
+            ],
+            "temp_milk_embedding.py",
+        )
+        self.assertEqual(
+            lineage["historical_assets"]["milk_embeddings"]["keys"], 41988
+        )
+        self.assertEqual(
+            lineage["historical_assets"]["polymer_embeddings"]["keys"], 12
+        )
+        self.assertEqual(
+            lineage["consumer_audit"],
+            {
+                "runtime_callers_found": 0,
+                "formal_paper_or_reviewer_consumers_found": 0,
+                "embedding_output_consumers_found": 0,
+            },
+        )
+
     def test_peptide_candidate_driver_is_replaced_and_recoverable(self):
         legacy_path = "temp_judge_mol_mic_with_fig.py"
         self.assertNotIn(legacy_path, self.by_path)

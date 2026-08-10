@@ -27,6 +27,10 @@ peptide candidate screening；代码、参数名、输出目录和 package 中�
   replay 为 1500×1500，所有 RGB channels 完全相同；
 - 正式 clean checkpoint、两条真实 BAA-999 input 上，tagged legacy/canonical scorer 的 logits 和 MIC
   `torch.equal`，最大差异 `0.0`。
+- 另有两个 byte-identical 的一次性 `temp_*milk_embedding.py` 从 42,010 条 first-column source strings 导出
+  41,988 个 `(1,768)` CLS tensors 到 ignored `milk_embeddings.pt`；没有代码消费者，且 candidate screening
+  已直接从 SELFIES 输入完成，因此该 embedding artifact 不是 canonical screen dependency。源码已由 snapshot
+  保存后删除，输入/output hashes 与 22-row failure-manifest 缺口见 `docs/DEBUG_FILE_CLEANUP.md`。
 
 全部 13 个输入、5 个输出、5 个 image trees 的完整 path/size/hash/count 见
 `reproducibility/historical_peptide_screen_case.json`；模型与迁移证据见

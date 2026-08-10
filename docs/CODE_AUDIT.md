@@ -40,7 +40,7 @@
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
 | Hugging Face | `huggingface/`、`huggingface_push.py` | model/tokenizer wrapper 与发布副本 | 核验现有 HF revision、权重 SHA 和 license 后决定 canonical exporter |
-| Case study/debug | `temp_milk*`、`debug*.py`、notebooks | milk/camel/in-vivo plotting、诊断和一次性分析混杂；paper attention、small-molecule debug、CFU display 已迁移清理 | 先由 tag 保存；必要者迁入通用 package/CLI，其余在 M4 归档移除 |
+| Case study/debug | notebooks 和历史 manifests | milk/camel/in-vivo plotting、诊断和一次性分析混杂；active root debug/temp sources 已完成消费者审计并迁移或 snapshot-only 清理 | 新项目特例只记 provenance；可复用行为进入通用 package/CLI |
 
 ## 3. 已确认不能直接合并的差异
 
@@ -94,6 +94,15 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 - `p_value_reference.py` 的 Fig. 5b display 行为已迁为参数化 CFU plotting library/CLI；由于 raw CSV 和
   statistical test definition 均未找到，只保留 reported p-value annotation contract，不声称正式统计 parity。
 - 完整事实、推断和待作者确认事项见 `docs/LEGACY_ANALYSIS_MIGRATION.md`。
+
+### Root debug/one-off embedding cleanup（2026-08-10）
+
+- 三个 `debug*.py` 没有保存结果或 consumer；MolPort canonical diagnostic 已被正式 two-sided RDKit
+  canonicalization protocol 覆盖。
+- 两个 milk scripts 完全相同，且与 polymer script 都是完整 DLM copy 加一次性 input adapter；冻结两个 ignored
+  outputs 的 hashes/keys/shapes 后确认无消费者，不创建项目特定 API。
+- 六个 source 均由 snapshot 恢复后删除；ignored data/embedding assets 保持原地。详见
+  `docs/DEBUG_FILE_CLEANUP.md` 和 `reproducibility/debug_file_cleanup_lineage.json`。
 
 ### M1 checkpoint/embedding I/O（2026-08-09）
 

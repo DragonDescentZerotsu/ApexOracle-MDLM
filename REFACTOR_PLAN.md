@@ -205,6 +205,12 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   显式 Day 1/2 CLI 和 manifest，并明确四个 hard-coded p-value labels 不等于重新计算 statistical test；
 - [x] 全机搜索未找到 Fig. 5b 两份 raw CFU CSV，manuscript 也未给 test definition；将这两项列为正式统计
   reproducibility 待补资产，而不是保留 hard-coded root script 掩盖缺口；旧文件由 snapshot tag 恢复；
+- [x] 核验剩余 `debug.py/debug_2.py/debug_3.py` 仅为 dataframe peek、无 assertion 的 fixed-token GPU smoke
+  和单分片 vendor-canonical diagnostic；正式 MolPort protocol 已使用更稳健的两侧 RDKit canonicalization；
+- [x] 确认两个 milk embedding scripts byte-identical，且与 `temp_stf_polymer.py` 都是完整 DLM copy 加一次性
+  input adapter；冻结 ignored outputs 的 key/shape/hash，确认无消费者后删除六个 root debug/temp sources；
+- [x] 不把 unused milk/polymer 文件名提升成 public API；ignored inputs/outputs 原地保留，未来 M2 通用
+  embedding producer 仍须独立完成参数化实现和正式 parity；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；

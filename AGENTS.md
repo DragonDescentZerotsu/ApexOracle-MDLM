@@ -18,6 +18,12 @@
   副本；对确认没有独有 runtime/论文/跨仓库角色的文件，由 ledger/provenance 和 snapshot tag 保存后从
   active tree 删除。最终 public branch 不建立第二个长期 `legacy/` 垃圾目录，也不因“不确定”而无限期
   保留 root-level 复制脚本。upstream 与 mixed-origin 代码仍按 attribution/runtime adapter 边界单独处理。
+- **2026-08-10 root debug 清理：** `debug.py`、`debug_2.py`、`debug_3.py`、两个 byte-identical milk
+  embedding scripts 和 `temp_stf_polymer.py` 均无 runtime/论文/reviewer consumer；dataframe peek、无 assertion
+  GPU smoke、vendor-canonical diagnostic 和一次性 unused embedding exports 不形成新 public API。六个 source
+  由 snapshot tag/`docs/DEBUG_FILE_CLEANUP.md` 恢复后从 active tree 删除，ignored inputs/outputs 原地保留。
+  通用 embedding exporter 仍属于 M2，未来只能基于 canonical encoder 和 failure manifest 新建，不能恢复这些
+  hard-coded scripts 充当 release implementation。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 
