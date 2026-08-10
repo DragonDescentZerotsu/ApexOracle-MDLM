@@ -21,6 +21,22 @@ python scripts/audit/build_code_lineage_ledger.py --check
 默认 upstream ref 为 `b06b09c`，snapshot ref 为 `legacy-code-snapshot-2026-08-09`。新增 tracked
 code/config 后必须重建并运行 `--check`。
 
+## `compare_legacy_peptide_classifier.py`
+
+用途：从 snapshot 临时提取三个 peptide-classifier trainers，比较 canonical head、三种 noisy encoder profile
+与正式 DLM/v1 classifier checkpoints。CPU 部分验证三份 `ClsHead` state dict/forward 和正式 checkpoint
+strict load；提供 `--backbone-checkpoint` 时在显式 GPU 上逐 profile 验证 train-mode fixed-seed hidden states。
+
+```bash
+CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
+  scripts/audit/compare_legacy_peptide_classifier.py \
+  --checkpoint /path/to/v1-classifier.ckpt \
+  --backbone-checkpoint /path/to/last_reg_v2.ckpt \
+  --output reproducibility/peptide_classifier_migration.json
+```
+
+冻结结果与 exact-producer 不确定性见 `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`。
+
 ## `verify_paper_figure_lineage.py`
 
 用途：核验正式 main Fig. 3a 的 tagged historical producer、canonical producer paths、四个 Generation inputs、四个 MIC caches、

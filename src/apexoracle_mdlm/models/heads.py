@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from os import PathLike
+
 import torch
 from torch import nn
+
+from apexoracle_mdlm.checkpoints import extract_state_dict, load_torch_file
 
 
 class RegressionHead(nn.Module):
@@ -32,6 +37,68 @@ class RegressionHead(nn.Module):
         x = self.activation_fn(x)
         x = self.dropout(x)
         return self.out_proj(x)
+
+
+class PeptideClassificationHead(RegressionHead):
+    """Checkpoint-compatible binary peptide/small-molecule classifier head."""
+
+    def __init__(
+        self,
+        input_dim: int = 768,
+        hidden_dim_1: int = 384,
+        hidden_dim_2: int = 128,
+        num_targets: int = 1,
+        pooler_dropout: float = 0.2,
+    ) -> None:
+        super().__init__(
+            input_dim,
+            hidden_dim_1,
+            hidden_dim_2,
+            num_targets,
+            pooler_dropout,
+        )
+
+
+def extract_peptide_classifier_head_state_dict(
+    state_dict: Mapping[str, torch.Tensor],
+    *,
+    prefix: str = "ClsHead.",
+) -> dict[str, torch.Tensor]:
+    """Extract and strip the Lightning ``ClsHead.`` namespace."""
+
+    if not isinstance(state_dict, Mapping):
+        raise TypeError("state_dict must be a mapping of tensor names to tensors.")
+    selected = {
+        str(key)[len(prefix) :]: value
+        for key, value in state_dict.items()
+        if str(key).startswith(prefix)
+    }
+    if not selected:
+        raise KeyError(f"No state-dict keys start with {prefix!r}.")
+    return selected
+
+
+def load_peptide_classifier_head(
+    checkpoint_path: str | PathLike[str],
+    *,
+    map_location: str | torch.device = "cpu",
+    mmap: bool | None = None,
+) -> PeptideClassificationHead:
+    """Strictly load the deployed head from a trusted Lightning checkpoint."""
+
+    payload = load_torch_file(
+        checkpoint_path,
+        map_location=map_location,
+        weights_only=False,
+        mmap=mmap,
+    )
+    state_dict = extract_state_dict(payload)
+    head = PeptideClassificationHead()
+    head.load_state_dict(
+        extract_peptide_classifier_head_state_dict(state_dict),
+        strict=True,
+    )
+    return head
 
 
 class FirstTokenCrossAttention(nn.Module):

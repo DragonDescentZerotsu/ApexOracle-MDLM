@@ -236,13 +236,26 @@ CLI；原脚本只显示四个 hard-coded p-value strings，不计算 statistics
 现有 encoder 已覆盖当前所需行为，故不新建 API，六个 sources 全部由 snapshot 接管后删除。详见
 `docs/DEBUG_FILE_CLEANUP.md`。
 
-## 15. 下一轮人工核验队列
+## 15. Peptide classifier 三 profile 已完成迁移
+
+三个 current-snapshot root trainer 共享同一 `ClsHead`，但随机时间/noising、padding、pooling、dataset version
+与 class balance 不同，不能作为重复文件直接保留一个。Core 另有已核验的 node002 v1 padding-preserved
+producer 记录，因此 clean API 共冻结四个 named profiles，并共享 checkpoint-compatible head、noisy encoder、
+frozen-encoder classifier 与参数化 training CLI。三份 head fixed-input parity 和三个正式-backbone GPU encoder
+parity 均为 `torch.equal`/最大差异 `0.0`；正式 v1 checkpoint 也完成 schema 与 strict head load。
+
+外部 source audit 只发现 Core 实验 README 的历史路径说明，没有 runtime import；该说明改为 snapshot/canonical
+入口后，三个 root source 由 tag 精确恢复并从 active tree 删除。正式 checkpoint 的 producer protocol/path
+已在 Core 冻结，但 exact node002 source 当前不可访问，本 MDLM Git tree 不伪造其 blob/hash。完整边界见
+`docs/PEPTIDE_CLASSIFIER_MIGRATION.md` 与 `reproducibility/peptide_classifier_migration.json`。
+
+## 16. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
-1. 下一批转向仍在 active tree 的 chemistry/catalog utilities 与 embedding producer family；继续先核对正式
-   consumer 和独有协议，再决定迁移或 snapshot-only。
+1. 下一批转向六个 `guaidance_regressor_all_data*.py`，按 clean/noisy、padding、CLS/mean profiles 提取正式
+   MIC guidance producer contract；随后核验 Core 唯一历史 source-path consumer。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为
 snapshot-only；两类都在 gate 满足后删除原始 root 文件。仍按小批次迁移与删除，不做一次性 filesystem

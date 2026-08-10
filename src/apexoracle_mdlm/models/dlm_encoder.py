@@ -183,3 +183,156 @@ def build_upstream_dlm_hidden_state_encoder(
         backbone_factory=lambda cfg, size: dit_module.DIT(cfg, vocab_size=size),
         noise_factory=noise_module.get_noise,
     )
+
+
+class NoisyDLMHiddenStateEncoder(DLMHiddenStateEncoder):
+    """Historical random-time encoder used to train guidance classifiers.
+
+    This is deliberately separate from :class:`DLMHiddenStateEncoder`: candidate
+    scoring uses clean ``t=0`` states, whereas the three historical peptide
+    classifier trainers sampled a random diffusion time on every forward pass.
+    ``preserve_padding`` and ``use_attention_mask`` make their two padding
+    variants explicit instead of hiding them in copied root scripts.
+    """
+
+    def __init__(
+        self,
+        config: Any,
+        vocab_size: int,
+        *,
+        backbone_factory: BackboneFactory,
+        noise_factory: NoiseFactory,
+        mask_index: int | None = None,
+        preserve_padding: bool = False,
+        pad_token_id: int | None = None,
+        use_attention_mask: bool = False,
+    ) -> None:
+        super().__init__(
+            config,
+            vocab_size,
+            backbone_factory=backbone_factory,
+            noise_factory=noise_factory,
+            mask_index=mask_index,
+        )
+        if preserve_padding and pad_token_id is None:
+            raise ValueError("pad_token_id is required when preserve_padding=True.")
+        self.preserve_padding = preserve_padding
+        self.pad_token_id = pad_token_id
+        self.use_attention_mask = use_attention_mask
+
+    @staticmethod
+    def _sample_t(n: int, device: torch.device) -> torch.Tensor:
+        sampling_eps = 1e-3
+        epsilon_t = torch.rand(n, device=device)
+        return (1 - sampling_eps) * epsilon_t + sampling_eps
+
+    def _forward_with_mask(
+        self,
+        token_ids: torch.Tensor,
+        sigma: torch.Tensor,
+        attention_mask: torch.Tensor | None,
+    ) -> torch.Tensor:
+        processed_sigma = self._process_sigma(sigma)
+        hidden = self.backbone.vocab_embed(token_ids)
+        conditioning = F.silu(self.backbone.sigma_map(processed_sigma))
+        rotary_cos_sin = self.backbone.rotary_emb(hidden)
+        autocast = (
+            torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+            if hidden.device.type == "cuda"
+            else nullcontext()
+        )
+        with autocast:
+            for block in self.backbone.blocks:
+                kwargs: dict[str, Any] = {"seqlens": None}
+                if self.use_attention_mask:
+                    if attention_mask is None:
+                        raise ValueError(
+                            "attention_mask is required by this noisy encoder profile."
+                        )
+                    kwargs["attnmask"] = attention_mask
+                hidden = block(hidden, rotary_cos_sin, conditioning, **kwargs)
+        return hidden
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        t = self._sample_t(input_ids.shape[0], input_ids.device)
+        sigma, _ = self.noise(t)
+        move_chance = 1 - torch.exp(-sigma[:, None])
+        move_indices = (
+            torch.rand(*input_ids.shape, device=input_ids.device) < move_chance
+        )
+        noisy_ids = torch.where(
+            move_indices,
+            torch.as_tensor(self.mask_index, device=input_ids.device),
+            input_ids,
+        )
+        if self.preserve_padding:
+            noisy_ids = torch.where(
+                input_ids.eq(self.pad_token_id),
+                input_ids,
+                noisy_ids,
+            )
+        return self._forward_with_mask(noisy_ids, sigma[:, None], attention_mask)
+
+
+def build_upstream_noisy_dlm_hidden_state_encoder(
+    config: Any,
+    vocab_size: int,
+    *,
+    runtime_root: str | PathLike[str] | None = None,
+    backbone_variant: str = "dit",
+    mask_index: int | None = None,
+    preserve_padding: bool = False,
+    pad_token_id: int | None = None,
+) -> NoisyDLMHiddenStateEncoder:
+    """Build one of the two attributed noisy guidance-training encoders."""
+
+    root = (
+        Path(runtime_root).resolve()
+        if runtime_root is not None
+        else Path(__file__).resolve().parents[3]
+    )
+    required = (root / "models" / "dit.py", root / "noise_schedule.py")
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(
+            "Attributed upstream MDLM runtime is incomplete; missing: "
+            + ", ".join(missing)
+        )
+    if backbone_variant not in {"dit", "dit_non_pad"}:
+        raise ValueError("backbone_variant must be 'dit' or 'dit_non_pad'.")
+    for module_name in ("models", "noise_schedule"):
+        loaded_module = sys.modules.get(module_name)
+        loaded_path = getattr(loaded_module, "__file__", None)
+        if loaded_path is not None and root not in Path(loaded_path).resolve().parents:
+            raise RuntimeError(
+                f"A conflicting top-level {module_name!r} module is already imported "
+                f"from {loaded_path}; expected the attributed runtime under {root}."
+            )
+    root_string = str(root)
+    inserted = root_string not in sys.path
+    if inserted:
+        sys.path.insert(0, root_string)
+    try:
+        dit_module = importlib.import_module("models.dit")
+        noise_module = importlib.import_module("noise_schedule")
+    finally:
+        if inserted:
+            sys.path.remove(root_string)
+
+    backbone_class = (
+        dit_module.DIT if backbone_variant == "dit" else dit_module.DIT_non_pad
+    )
+    return NoisyDLMHiddenStateEncoder(
+        config,
+        vocab_size,
+        backbone_factory=lambda cfg, size: backbone_class(cfg, vocab_size=size),
+        noise_factory=noise_module.get_noise,
+        mask_index=mask_index,
+        preserve_padding=preserve_padding,
+        pad_token_id=pad_token_id,
+        use_attention_mask=backbone_variant == "dit_non_pad",
+    )

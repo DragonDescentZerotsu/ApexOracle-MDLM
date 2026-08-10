@@ -20,6 +20,25 @@ Formal candidate scoring additionally needs the upstream-compatible MDLM runtime
 the supplied environment and three ApexOracle-Core condition-embedding directories. Checkpoints,
 embeddings, generated molecules, caches, and other large assets are intentionally not stored in Git.
 
+## Peptide-classifier guidance training
+
+The copied historical trainers and the separately audited deployed producer are represented by
+`v1_noisy_cls`, `v1_noisy_non_pad_mean`, `v1_noisy_padding_preserved_cls`, and
+`v2_noisy_padding_preserved_cls` profiles. Train the downstream head
+with explicit assets rather than editing a root script:
+
+```bash
+PYTHONPATH=src python scripts/reproduce/train_peptide_classifier.py \
+  --profile v1_noisy_cls \
+  --dataset /path/to/hf_pep_SM_cls_1024 \
+  --backbone-checkpoint /path/to/last_reg_v2.ckpt \
+  --output-dir results/peptide_classifier
+```
+
+This command does not pretrain the DLM backbone. The deployed v1 head strictly loads through
+`apexoracle_mdlm.models.load_peptide_classifier_head`; exact source/profile boundaries and GPU parity
+are recorded in `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`.
+
 ## Candidate MIC scoring
 
 `apexoracle_mdlm.scoring` owns the canonical clean candidate scorer. The CLI takes every repository

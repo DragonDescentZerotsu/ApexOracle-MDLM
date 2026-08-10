@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "sources": {
+    "guaidance_classifier_all_data.py": {
+      "sha256": "527f42a068f7fff5ea0edd7aa2e636bc8b76193bf61018c71e18ba24107db34f",
+      "bytes": 11010,
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_classifier_all_data.py"
+    },
+    "guaidance_classifier_all_data_non_pad_mean.py": {
+      "sha256": "1a98aec35f4d610b802f77df745375936f36ad62638657799101714c5a2a7686",
+      "bytes": 11917,
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_classifier_all_data_non_pad_mean.py"
+    },
+    "guaidance_classifier_all_data_pad_no_mask.py": {
+      "sha256": "a79d1352f767f399e1aab83398adb20e88a83514ca8aeeb3ed1aafd0534df53e",
+      "bytes": 11352,
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_classifier_all_data_pad_no_mask.py"
+    }
+  },
+  "profiles": {
+    "v1_noisy_cls": {
+      "name": "v1_noisy_cls",
+      "legacy_source": "guaidance_classifier_all_data.py",
+      "dataset_label": "hf_pep_SM_cls_1024",
+      "backbone_variant": "dit",
+      "pooling": "first_token",
+      "preserve_padding": false,
+      "positive_rate": 0.125,
+      "default_devices": 3,
+      "known_limitation": null
+    },
+    "v1_noisy_non_pad_mean": {
+      "name": "v1_noisy_non_pad_mean",
+      "legacy_source": "guaidance_classifier_all_data_non_pad_mean.py",
+      "dataset_label": "hf_pep_SM_cls_1024",
+      "backbone_variant": "dit_non_pad",
+      "pooling": "masked_mean",
+      "preserve_padding": false,
+      "positive_rate": 0.125,
+      "default_devices": 3,
+      "known_limitation": "The snapshot validation_step omitted the required attention_mask; the clean trainer supplies it consistently."
+    },
+    "v1_noisy_padding_preserved_cls": {
+      "name": "v1_noisy_padding_preserved_cls",
+      "legacy_source": "guaidance_classifier_all_data_pad_no_mask.py",
+      "dataset_label": "hf_pep_SM_cls_1024",
+      "backbone_variant": "dit",
+      "pooling": "first_token",
+      "preserve_padding": true,
+      "positive_rate": 0.125,
+      "default_devices": 4,
+      "known_limitation": "The exact 2025-05 node002 producer was verified in the Core asset ledger but is not byte-for-byte present in this repository snapshot; the snapshot source retains the padding algorithm with v2 main settings."
+    },
+    "v2_noisy_padding_preserved_cls": {
+      "name": "v2_noisy_padding_preserved_cls",
+      "legacy_source": "guaidance_classifier_all_data_pad_no_mask.py",
+      "dataset_label": "hf_pep_SM_cls_1024_v2",
+      "backbone_variant": "dit",
+      "pooling": "first_token",
+      "preserve_padding": true,
+      "positive_rate": 0.0008861772425766144,
+      "default_devices": 4,
+      "known_limitation": null
+    }
+  },
+  "head_parity": {
+    "v1_noisy_cls": {
+      "state_dict_keys_equal": true,
+      "forward_torch_equal": true,
+      "max_absolute_difference": 0.0
+    },
+    "v1_noisy_non_pad_mean": {
+      "state_dict_keys_equal": true,
+      "forward_torch_equal": true,
+      "max_absolute_difference": 0.0
+    },
+    "v1_noisy_padding_preserved_cls": {
+      "state_dict_keys_equal": true,
+      "forward_torch_equal": true,
+      "max_absolute_difference": 0.0
+    },
+    "v2_noisy_padding_preserved_cls": {
+      "state_dict_keys_equal": true,
+      "forward_torch_equal": true,
+      "max_absolute_difference": 0.0
+    }
+  },
+  "deployed_v1_checkpoint": {
+    "path": "/data2/tianang/projects/mdlm/cls-guide-pad-no-mask-checkpoints/epoch-epoch=1-step-step=134000-train_loss-train_loss=0.008.ckpt",
+    "bytes": 393226092,
+    "sha256": "40f638ca5668f20a641a538035015b1741ab69cded300cba27f7148cc291945b",
+    "schema_valid": true,
+    "strict_head_load": true,
+    "fixed_logits_shape": [
+      3,
+      1
+    ],
+    "fixed_logits_sha256": "527cb9ffa17b0113d9e8fe88ffc5c1e2d1daeae6ba76b8134607db5829d83584",
+    "positive_weight": 7.0,
+    "global_step": 134000,
+    "epoch": 1
+  },
+  "noisy_encoder_parity": {
+    "v1_noisy_cls": {
+      "shape": [
+        2,
+        32,
+        768
+      ],
+      "dtype": "torch.float32",
+      "torch_equal": true,
+      "max_absolute_difference": 0.0,
+      "mode": "train",
+      "fixed_seed": 20260810
+    },
+    "v1_noisy_non_pad_mean": {
+      "shape": [
+        2,
+        32,
+        768
+      ],
+      "dtype": "torch.float32",
+      "torch_equal": true,
+      "max_absolute_difference": 0.0,
+      "mode": "train",
+      "fixed_seed": 20260810
+    },
+    "v1_noisy_padding_preserved_cls": {
+      "shape": [
+        2,
+        32,
+        768
+      ],
+      "dtype": "torch.float32",
+      "torch_equal": true,
+      "max_absolute_difference": 0.0,
+      "mode": "train",
+      "fixed_seed": 20260810
+    },
+    "v2_noisy_padding_preserved_cls": {
+      "shape": [
+        2,
+        32,
+        768
+      ],
+      "dtype": "torch.float32",
+      "torch_equal": true,
+      "max_absolute_difference": 0.0,
+      "mode": "train",
+      "fixed_seed": 20260810
+    }
+  },
+  "external_exact_producer_record": {
+    "source": "ApexOracle-Core/experiments/peptide_classifier/README.md",
+    "historical_path": "node002:/data1/tianang/Projects/mdlm/guaidance_classifier_all_data_pad_no_mask.py",
+    "status": "Previously verified as the 2025-05 v1 producer; the exact source is not currently accessible from this MDLM checkout, so no Git blob or source hash is asserted here."
+  },
+  "verified_facts": [
+    "All three snapshot sources define an identical ClsHead contract.",
+    "The clean head has identical keys and fixed-input outputs for every source.",
+    "The three sources differ in noisy encoder, pooling, padding, and dataset profile."
+  ],
+  "inference": "The checkpoint metadata and Core's frozen node002 record support the v1_noisy_padding_preserved_cls protocol. The active MDLM snapshot does not contain that exact 2025-05 source blob, so this repository does not claim byte-for-byte training-source reproduction."
+}

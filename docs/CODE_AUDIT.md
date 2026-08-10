@@ -36,7 +36,7 @@
 | Fig. 2b DLM benchmark | snapshot 中的 `DBAASP_MLM_MDLM.py` | 19-task fivefold downstream MIC trainer，不是 embedding producer；已从 active tree 删除 | Core 的 `reproduce_fig2b_mdlm_cached_5fold.py` 与 `run_fig2b_shared_mdlm_online.py` |
 | Hierarchical MIC | `DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_*` | 大量 strain/species/phylum 复制 driver；Core 已有 canonical replacements | 不再作为本 repo 公共 API；验证 source mapping 后在 M4 从活动树移除 |
 | MIC guidance | `guaidance_regressor_all_data*.py` | clean/noisy、padding、CLS/mean 等不同历史协议 | M3 通过 profiles 统一代码，协议差异保留为 config，不改 checkpoint schema |
-| Peptide classifier | `guaidance_classifier_all_data*.py` | generation guidance head；v1 checkpoint 与 v2 label data 不可混写 | M3 分开 v1 provenance 与 v2 experimental trainer |
+| Peptide classifier | snapshot 中的 `guaidance_classifier_all_data*.py` | 三个 noisy/pooling/padding/data profiles 已分开；正式 v1 head strict load 和三 profile GPU parity 已完成，exact timestamped producer revision 仍未知 | `apexoracle_mdlm.models` + `scripts/reproduce/train_peptide_classifier.py`；旧 root copies 已删除 |
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
@@ -65,7 +65,8 @@
 
 ## 5. 仍待确认/验证
 
-- 哪个历史 trainer 精确产生 reviewer generation 使用的 v1 peptide classifier checkpoint；
+- 哪个 timestamped 历史 trainer revision 精确产生 reviewer generation 使用的 v1 peptide classifier
+  checkpoint；现有证据已确认 v1 family 与推理兼容，但不足以收紧到逐字节 producer；
 - 每个 clean/noisy/padding guidance checkpoint 的唯一 producer、resolved config 和正式角色；
 - public Hugging Face model card 的最终 license/weight rights 需作者确认；当前 source repo 为 Apache-2.0、
   IBM tokenizer 为 Apache-2.0，但 public ApexOracle model card 没有 license metadata；

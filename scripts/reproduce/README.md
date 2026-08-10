@@ -25,6 +25,25 @@ Frozen cache parity、synergy checkpoint drift 和 legacy 恢复信息见
 `docs/MOLECULE_EMBEDDING_MIGRATION.md`。Focused 验证：
 `PYTHONPATH=src python -m unittest tests.test_molecule_embeddings tests.test_dlm_encoder -v`。
 
+## `train_peptide_classifier.py`
+
+功能：只训练 downstream peptide/small-molecule classifier head，不预训练 DLM。`--profile` 显式区分
+`v1_noisy_cls`、`v1_noisy_non_pad_mean`、正式 producer 对应的 `v1_noisy_padding_preserved_cls` 与
+`v2_noisy_padding_preserved_cls`；dataset、backbone checkpoint、
+output、runtime/config 均由参数提供。默认关闭 W&B；传 `--wandb-project` 才启用。输出 Lightning checkpoints
+和 resolved `training_manifest.json`。
+
+```bash
+PYTHONPATH=src python scripts/reproduce/train_peptide_classifier.py \
+  --profile v1_noisy_cls --dataset /path/to/dataset \
+  --backbone-checkpoint /path/to/last_reg_v2.ckpt \
+  --output-dir /path/to/output
+```
+
+三 profile 的 source/head/noisy-encoder GPU parity 与正式 v1 checkpoint strict load 见
+`docs/PEPTIDE_CLASSIFIER_MIGRATION.md`。Focused 验证：
+`PYTHONPATH=src python -m unittest tests.test_model_heads -v`。
+
 ## `score_generated_molecule_mic.py`
 
 功能：加载正式 clean candidate MIC checkpoint、Core genome/text embedding banks 和 Generation SELFIES

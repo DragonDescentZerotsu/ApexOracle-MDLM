@@ -153,15 +153,56 @@ class CodeLineageLedgerTests(unittest.TestCase):
         self.assertTrue(drift["frozen_cache_matches_actual_cache_producer_checkpoint"])
         self.assertTrue(migration["credential_audit"]["active_source_removed"])
 
+    def test_peptide_classifier_trainers_are_replaced_and_recoverable(self):
+        migration = json.loads(
+            (ROOT / "reproducibility" / "peptide_classifier_migration.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        for legacy_path, metadata in migration["sources"].items():
+            self.assertNotIn(legacy_path, self.by_path)
+            legacy_source = subprocess.check_output(
+                ["git", "show", f"{migration['snapshot_ref']}:{legacy_path}"],
+                cwd=ROOT,
+            )
+            self.assertEqual(
+                hashlib.sha256(legacy_source).hexdigest(), metadata["sha256"]
+            )
+        self.assertEqual(
+            set(migration["profiles"]),
+            {
+                "v1_noisy_cls",
+                "v1_noisy_non_pad_mean",
+                "v1_noisy_padding_preserved_cls",
+                "v2_noisy_padding_preserved_cls",
+            },
+        )
+        self.assertTrue(
+            all(
+                item["forward_torch_equal"]
+                for item in migration["head_parity"].values()
+            )
+        )
+        self.assertTrue(
+            all(
+                item["torch_equal"]
+                for item in migration["noisy_encoder_parity"].values()
+            )
+        )
+        self.assertTrue(migration["deployed_v1_checkpoint"]["strict_head_load"])
+        for path in (
+            "src/apexoracle_mdlm/models/peptide_classifier.py",
+            "scripts/reproduce/train_peptide_classifier.py",
+        ):
+            self.assertTrue((ROOT / path).is_file(), path)
+
     def test_huggingface_release_audit_freezes_legacy_bug_and_clean_candidate(self):
         audit = json.loads(
             (ROOT / "reproducibility" / "huggingface_release_audit.json").read_text(
                 encoding="utf-8"
             )
         )
-        self.assertEqual(
-            audit["status"], "released_and_fresh_download_validated"
-        )
+        self.assertEqual(audit["status"], "released_and_fresh_download_validated")
         self.assertEqual(
             audit["public_model"]["revision"],
             "bb93daedb867488b1a009ce9522e037a530a2ab3",

@@ -73,6 +73,15 @@
   IDs，输出逐 token hidden states。`build_upstream_dlm_hidden_state_encoder` 默认从 source checkout 推导 root，
   并拒绝冲突的外部 `models` package；保持历史 RNG consumption、bfloat16 blocks 与 state keys。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_dlm_encoder -v`。
+- Peptide classifier canonical contract：`PeptideClassificationHead` 保持正式 `ClsHead.*` keys；
+  `load_peptide_classifier_head(checkpoint_path, map_location, mmap)` 对可信 Lightning checkpoint 做 strict load；
+  `NoisyDLMHiddenStateEncoder` 显式控制 random-time、padding preservation 和 non-pad attention；
+  `FrozenEncoderPeptideClassifier` 支持 `first_token`/`masked_mean` pooling。公开训练入口
+  `scripts/reproduce/train_peptide_classifier.py --profile
+  {v1_noisy_cls,v1_noisy_non_pad_mean,v1_noisy_padding_preserved_cls,v2_noisy_padding_preserved_cls}`
+  接收 dataset/backbone/output 等显式路径并输出 checkpoints 与 `training_manifest.json`。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_model_heads -v`；三 profile 正式 GPU parity 入口见
+  `scripts/audit/compare_legacy_peptide_classifier.py`。
 - `apexoracle_mdlm.scoring`：`CandidateMICRegressor`、`load_candidate_mic_regressor`、
   `load_condition_embedding_banks` 与 `score_selfies_strings`；输入为显式 checkpoint/embedding/tokenizer/
   strain/device，输出 MIC tensor。公开 CLI 为 `scripts/reproduce/score_generated_molecule_mic.py`，输出逐行

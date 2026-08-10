@@ -234,8 +234,17 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
   input adapter；冻结 ignored outputs 的 key/shape/hash，确认无消费者后删除六个 root debug/temp sources；
 - [x] 不把 unused milk/polymer 文件名提升成 public API；ignored inputs/outputs 原地保留，未来 M2 通用
   embedding producer 仍须独立完成参数化实现和正式 parity；
+- [x] 将三个 current-snapshot peptide-classifier trainers 与 Core 已核验的 node002 正式 producer 拆为
+  v1 noisy CLS、v1 non-pad mean、v1 padding-preserved CLS 与 v2 padding-preserved CLS 四个 profiles；统一
+  checkpoint-compatible head、noisy encoder、pooling 和 frozen-encoder classifier；
+- [x] 用三份 tagged source 验证 head fixed-input `torch.equal`，并以正式 `last_reg_v2.ckpt` 在 GPU train mode
+  验证三个 noisy encoder outputs 全部 `torch.equal`、最大差异 `0.0`；
+- [x] 对正式 376 MB v1 checkpoint 完成 schema、`strict=True` head load 和 fixed logits；Core 已核验 node002
+  v1 padding-preserved producer path/protocol，但 exact source 当前不可访问，MDLM Git tree 不伪造 blob/hash；
+- [x] 建立无绝对路径 `train_peptide_classifier.py`，修复 legacy non-pad validation 漏传 attention mask；确认
+  Core/Generation 无 runtime import 后删除三个 root copies，本地 datasets/checkpoints/outputs 不动；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
-- 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
+- 将 clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。
 
@@ -257,6 +266,10 @@ Small-molecule screen 迁移证据见 `reproducibility/small_molecule_screen_lin
 Peptide candidate screen 迁移证据见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`、
 `reproducibility/historical_peptide_screen_case.json` 与
 `reproducibility/peptide_candidate_screen_parity.json`。
+
+Peptide classifier 三 profile、正式 checkpoint strict load、noisy encoder GPU parity 和 exact-producer
+不确定性见 `docs/PEPTIDE_CLASSIFIER_MIGRATION.md` 与
+`reproducibility/peptide_classifier_migration.json`。三个旧 root trainers 已由 tag 接管并从 active tree 删除。
 
 Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 `docs/LEGACY_ANALYSIS_MIGRATION.md`、`reproducibility/small_molecule_postprocessing_lineage.json` 与
