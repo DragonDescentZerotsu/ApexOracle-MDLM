@@ -2,7 +2,7 @@
 
 > 建立日期：2026-08-09
 > 当前 branch：`refactor/apexoracle-mdlm`
-> 状态：M0/M1 已完成；M3 已冻结跨仓库 schema 并迁移一个低风险 parser，GPU caller parity 尚未完成
+> 状态：M0/M1/M1.5 已完成；M3 已冻结跨仓库 schema 并迁移一个低风险 parser，GPU caller parity 尚未完成
 
 ## 1. 目标与不变量
 
@@ -82,6 +82,30 @@ ApexOracle-MDLM/
 text-only embeddings，新旧 key 映射均为 0 mismatch/0 duplicate。新 modules 可独立 import，不需要
 下载模型、数据或 checkpoint。
 
+### M1.5：全量 code ledger、依赖血缘和论文 producer 血缘
+
+状态：**已完成第一版；后续每个迁移批次持续更新。**
+
+- [x] 以 upstream ref `b06b09c` 和 `legacy-code-snapshot-2026-08-09` 区分 upstream unmodified、
+  mixed-origin、ApexOracle legacy-added 与 post-snapshot canonical 资产；
+- [x] 覆盖全部 tracked `.py/.ipynb/.sh/.yaml/.yml/.json`，逐文件记录 family、功能、hash、imports、
+  external-repo references、plot/notebook 风险、目标处置、replacement、删除门槛和证据状态；
+- [x] 同时冻结 local-import edges 与 AST-normalized definition clone groups，避免复制代码因没有 import
+  而从依赖图中消失；
+- [x] 将正式 main Fig. 3a 从 Generation outputs、Core checkpoint/condition embeddings、MDLM scorer/cache、
+  377 exact plotted rows、source panel/assembled PDF 一直连接到 manuscript consumer；
+- [x] 明确记录组图 command 和精确 timestamped producer revision 仍未找到，不把推断冒充 verified fact；
+- [x] 本批不删除、不移动 legacy 或 ignored assets，也不修改 Core/Generation checkout。
+
+Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable records 位于
+`reproducibility/code_*`、`reproducibility/definition_clone_groups.csv` 和
+`reproducibility/paper_figure_lineage.json`。构建、stale check 和 Fig. 3a 验证入口见
+`scripts/audit/README.md`。
+
+验收：ledger 与 Git-tracked code/config 集合精确一致；每行均有非空删除决策字段且没有任何
+`delete_ready`；Fig. 3a plotted-data 377 rows、sample counts、medians、p-values 和全部小资产 hash 可重复
+核验。
+
 ### M2：DLM inference 与 molecule embedding
 
 状态：待执行。
@@ -129,6 +153,7 @@ Cross-repository contract 实现 commit：`4521c53`。
 
 状态：待执行。
 
+- 只从 ledger 中逐文件满足 deletion gate、经证据更新为 `delete_ready` 的条目开始清理；
 - Core 已替代的 `DP_inhouse_*` hierarchical drivers 从活动入口撤下；
 - synergy guidance、interpretability、milk/camel case study 分为 experimental/examples；
 - debug、一次性绘图和 superseded temp scripts 在 source mapping 完成后从活动树删除；

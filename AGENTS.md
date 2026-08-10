@@ -70,3 +70,13 @@
   正式 noisy guidance 权重比较 Generation copy 与 canonical heads 的 fixed-seed bfloat16 outputs，不启动
   sampler。契约与资产角色见 `docs/CROSS_REPO_CONTRACTS.md` 和
   `reproducibility/cross_repo_contracts.json`。
+- 全量 tracked-code ledger 入口：`python scripts/audit/build_code_lineage_ledger.py`；主要参数为
+  `--repo-root`、`--upstream-ref`、`--snapshot-ref`、`--output-dir` 和只读 stale check `--check`，输出
+  `reproducibility/code_asset_ledger.csv`、dependency edges、definition clone groups 与 summary JSON。
+  删除 legacy 文件前必须满足对应行的 `deletion_gate`；自动分类不得直接产生 `delete_ready`。完整规则见
+  `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
+- 正式 main Fig. 3a 血缘核验入口：`/home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm
+  python scripts/audit/verify_paper_figure_lineage.py`；默认只读验证 small assets、condition directory counts、
+  cache statistics、p-values、manuscript consumer 和 frozen 377-row plotted-data CSV。只有显式
+  `--include-large-assets` 才重新 hash 9.17 GB checkpoint，只有有意更新 capsule 时才用
+  `--write-plotted-data`。manifest 为 `reproducibility/paper_figure_lineage.json`。

@@ -1,7 +1,7 @@
 # Downstream MDLM 代码与文件系统审计
 
 > 审计日期：2026-08-09
-> 状态：第一轮静态审计完成；后续迁移证据持续追加
+> 状态：全量逐文件 ledger、复制血缘和 Fig. 3a 正式 producer 血缘已建立；后续迁移证据持续追加
 
 ## 1. 已由 Git/文件系统/AST 验证的事实
 
@@ -16,6 +16,15 @@
   `show_interpretability.ipynb` 为 95 outputs/15 executed cells。
 - `origin` 为上游 `kuleshov-group/mdlm`；ApexOracle public remote 为 `custom`。snapshot 前本地基线与
   `custom/master` 均为 `7a6a7d1`，但本地另有修改和未跟踪源码。
+- 已用 Git tree/blob 将当前 tracked code/config 逐项分为 upstream unmodified、upstream locally
+  modified、ApexOracle legacy-added 和 post-snapshot canonical；canonical 逐文件结果为
+  `reproducibility/code_asset_ledger.csv`，不再只依赖本文件的 family-level 概述。
+- 已同时生成 local-import/external-reference edges 和 AST-normalized function/class clone groups。复制代码
+  没有 import 也会进入 `definition_clone_groups.csv`，因此后续删除不会遗漏隐式实现血缘。
+- 正式 main Fig. 3a 的 producer 已确认位于 `judge_generated_mols_MIC.py`；377 个 exact plotted rows、
+  Generation inputs、Core checkpoint/condition embeddings、四个 cache、source/assembled PDFs 和 manuscript
+  consumer 已冻结在 `reproducibility/paper_figure_lineage.json`。它在 canonical capsule/parity 完成前为
+  P0 release-critical hold，不得删除。
 
 ## 2. 功能家族与处置
 
@@ -64,8 +73,12 @@
 
 ## 6. 迁移登记规则
 
-每次从活动树移除 legacy 文件前，在本文件追加：旧路径、功能、canonical 新入口、验证命令、结果、
-snapshot tag 和资产是否变化。没有这些字段的文件不得删除。
+每次从活动树移除 legacy 文件前，必须先更新 `code_asset_ledger.csv` 对应行的旧路径、功能、canonical
+新入口、验证命令/结果、snapshot tag、资产变化和外部 caller/论文 consumer audit，并在本文件追加迁移批次。
+只有 deletion gate 全部满足且人工更新为 `delete_ready` 的文件才允许进入删除 commit。自动分类出的
+`snapshot-only candidate` 不等于可删除。
+
+完整规则、保护等级和人工 plotting/notebook 核验队列见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
 
 ## 7. 已完成迁移批次
 

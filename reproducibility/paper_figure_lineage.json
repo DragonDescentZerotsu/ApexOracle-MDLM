@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-08-09",
+  "figure_id": "ApexOracle_main_Fig3a",
+  "role": "Predicted MIC distributions for unconditional and predictor-guided generation",
+  "status": "release_critical_hold",
+  "consumer": {
+    "owner": "manuscript",
+    "relative_path": "sn-article.tex",
+    "line_span_at_audit": "173-181",
+    "included_asset": "Fig4.pdf",
+    "printed_figure_number_basis": "This is the third main figure environment in the audited manuscript, although the historical filename and LaTeX label are Fig4/fig:4."
+  },
+  "producer": {
+    "owner": "mdlm",
+    "relative_path": "judge_generated_mols_MIC.py",
+    "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+    "snapshot_file_sha256": "980a49c3044be5d956b34e3472236ffbab8423188b7964ff4409dd9eb857a2ab",
+    "snapshot_file_bytes": 23990,
+    "current_file_sha256_at_audit": "233085574ecd1adaadb1ca8fe5d6eb7edbecf6612c028e15b516ebaae2c1fb6b",
+    "current_difference": "Only the generated-output filename parser was redirected to apexoracle_mdlm.scoring while preserving first-match behavior; the scoring, statistics and plotting code was unchanged.",
+    "historical_invocation": "Direct script execution; device and all formal paths are hard-coded in the legacy entrypoint.",
+    "source_revision_confidence": "high_but_not_timestamp_proven",
+    "source_revision_note": "The snapshot script reproduces the exact labels, groups and displayed p-values and names the source-panel output. No commit or execution log timestamped exactly to the 2026-04-03 PDF creation was found."
+  },
+  "assets": [
+    {
+      "id": "candidate_clean_mic_scorer",
+      "owner": "core",
+      "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+      "sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
+      "bytes": 9168011488,
+      "large_asset": true,
+      "role": "DLM encoder, genome/text attention and clean candidate MIC regression weights"
+    },
+    {
+      "id": "baa3170_unconditional_generation",
+      "owner": "generation",
+      "relative_path": "outputs/generated_mol_SELFIES-new-test/strain_BAA-3170_MIC_1000_length_368_noise.txt",
+      "sha256": "bac140cdfade83c022f8ef15b3df986f1e5578ef9a8106ff10decc40d1f85468",
+      "bytes": 45197,
+      "large_asset": false,
+      "role": "Historical operational-label unconditional source; target_MIC=1000"
+    },
+    {
+      "id": "baa3170_guided_generation",
+      "owner": "generation",
+      "relative_path": "outputs/generated_mol_SELFIES-new-test/strain_BAA-3170_MIC_1_length_368_noise.txt",
+      "sha256": "079b8c43e66e877dfad852bd071fc6e0cbce6fda856748dbbd4f1fc98acff51d",
+      "bytes": 334653,
+      "large_asset": false,
+      "role": "MIC-guided source; target_MIC=1"
+    },
+    {
+      "id": "baa3197_unconditional_generation",
+      "owner": "generation",
+      "relative_path": "outputs/generated_mol_SELFIES/strain_BAA-3197_MIC_1000_length_232_noise.txt",
+      "sha256": "b51f9f2d497f07083300075521913f1e983d07bc7c61496c6b7094344558b6b6",
+      "bytes": 65971,
+      "large_asset": false,
+      "role": "Historical operational-label unconditional source; target_MIC=1000"
+    },
+    {
+      "id": "baa3197_guided_generation",
+      "owner": "generation",
+      "relative_path": "outputs/generated_mol_SELFIES/strain_BAA-3197_MIC_1_length_232_noise.txt",
+      "sha256": "037477a351253b75cd69dbb9b83a569f8981f681ebeff3b70faf3ba026cebd3e",
+      "bytes": 116787,
+      "large_asset": false,
+      "role": "MIC-guided source; target_MIC=1"
+    },
+    {
+      "id": "baa3170_unconditional_scoring_cache",
+      "owner": "mdlm",
+      "relative_path": "temp_data/temp_precomputed_MIC_for_figs/BAA-3170_MIC_1000_length_368_noise_f2144ce9b2a1.pt",
+      "sha256": "7ee7b669cb8c44ba0fb45f0720d3ac14e34fe3df6e08c986149fcd84ec1a81b4",
+      "bytes": 2084,
+      "large_asset": false,
+      "role": "Exact plotted MIC cache"
+    },
+    {
+      "id": "baa3170_guided_scoring_cache",
+      "owner": "mdlm",
+      "relative_path": "temp_data/temp_precomputed_MIC_for_figs/BAA-3170_MIC_1_length_368_noise_56eade23483e.pt",
+      "sha256": "b7959fc3d0eb86b97d100b554aa23da6870748ece6b5af87b44adfbfc5327500",
+      "bytes": 2709,
+      "large_asset": false,
+      "role": "Exact plotted MIC cache"
+    },
+    {
+      "id": "baa3197_unconditional_scoring_cache",
+      "owner": "mdlm",
+      "relative_path": "temp_data/temp_precomputed_MIC_for_figs/BAA-3197_MIC_1000_length_232_noise_c4ba9522136c.pt",
+      "sha256": "c145e7bdc25cca35c1716e0c8eb1b7e2f7c7764ef12a4389ea1f3a194ec24b59",
+      "bytes": 2212,
+      "large_asset": false,
+      "role": "Exact plotted MIC cache"
+    },
+    {
+      "id": "baa3197_guided_scoring_cache",
+      "owner": "mdlm",
+      "relative_path": "temp_data/temp_precomputed_MIC_for_figs/BAA-3197_MIC_1_length_232_noise_1c88a8e39501.pt",
+      "sha256": "02954897900531d053c49edfbfa332f2920143848a1cc6e778fedbb17d02668f",
+      "bytes": 2389,
+      "large_asset": false,
+      "role": "Exact plotted MIC cache"
+    },
+    {
+      "id": "fig3a_source_panel_pdf",
+      "owner": "core",
+      "relative_path": "paper_figs/3170-3197-guidance-MIC.pdf",
+      "sha256": "201de0bae67c22d39ef457af238f50856a47d13305c9be8f7cffa665d94c91df",
+      "bytes": 69329,
+      "large_asset": false,
+      "role": "Direct Matplotlib source panel created 2026-04-03"
+    },
+    {
+      "id": "main_figure_assembled_pdf",
+      "owner": "manuscript",
+      "relative_path": "Fig4.pdf",
+      "sha256": "b48e94680214dccf209ea75e14e98b1bf8fa30c33b01dbb12aa5ae471a7b23d6",
+      "bytes": 799872,
+      "large_asset": false,
+      "role": "Four-panel assembled main figure consumed by LaTeX"
+    }
+  ],
+  "condition_assets": [
+    {
+      "owner": "core",
+      "relative_path": "DataPrepare/Data/Genome_embs",
+      "verified_file_count": 567,
+      "legacy_scale": 100000000000000.0
+    },
+    {
+      "owner": "core",
+      "relative_path": "DataPrepare/Data/Text_Description/ATCC/embeddings",
+      "verified_file_count": 568,
+      "legacy_scale": 1.0
+    },
+    {
+      "owner": "core",
+      "relative_path": "DataPrepare/Data/Text_Description/wo_ATCC/embeddings",
+      "verified_file_count": 1079,
+      "legacy_scale": 1.0
+    }
+  ],
+  "frozen_statistics": [
+    {
+      "strain": "BAA-3170",
+      "display_name": "E. coli AR-0349",
+      "target_length": 368,
+      "unconditional_n": 24,
+      "unconditional_mean_mic": 203.2864532470703,
+      "unconditional_plotted_median_mic": 223.0,
+      "guided_n": 188,
+      "guided_mean_mic": 100.37005615234375,
+      "guided_plotted_median_mic": 43.0,
+      "mann_whitney_two_sided_p": 0.00044096955488373676,
+      "displayed_p": "0.0004"
+    },
+    {
+      "strain": "BAA-3197",
+      "display_name": "P. aeruginosa PA5257",
+      "target_length": 232,
+      "unconditional_n": 59,
+      "unconditional_mean_mic": 130.02012634277344,
+      "unconditional_plotted_median_mic": 98.0,
+      "guided_n": 106,
+      "guided_mean_mic": 95.10111999511719,
+      "guided_plotted_median_mic": 61.0,
+      "mann_whitney_two_sided_p": 0.020967445335421817,
+      "displayed_p": "0.0210"
+    }
+  ],
+  "verified_facts": [
+    "The legacy MDLM script writes the source-panel PDF and uses the four named Generation output files, the clean candidate MIC checkpoint and Core genome/text embeddings.",
+    "The four ignored caches identify the same source filenames and checkpoint and reproduce the plotted sample counts, medians and displayed two-sided Mann-Whitney p-values.",
+    "The audited manuscript includes Fig4.pdf and describes its panel a as the same unconditional-versus-guided predicted MIC comparison."
+  ],
+  "inferences": [
+    "Visual layout, labels and p-values establish that the MDLM source PDF is the panel-a source used in the assembled figure with high confidence."
+  ],
+  "pending_confirmation": [
+    "The external application or exact command used to assemble the four-panel Fig4.pdf was not found in tracked source.",
+    "A timestamped commit or execution log proving the exact judge_generated_mols_MIC.py revision used on 2026-04-03 was not found."
+  ],
+  "deletion_gate": "Do not remove judge_generated_mols_MIC.py, its unique scoring behavior, or the four cache records until a canonical scoring/plotting capsule exports exact plotted data and passes checkpoint/input/output parity, and the manuscript provenance points to that canonical capsule."
+}

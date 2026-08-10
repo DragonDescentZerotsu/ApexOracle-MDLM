@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "scope": "all git-tracked .py/.ipynb/.sh/.yaml/.yml/.json assets",
+  "upstream_ref": "b06b09c",
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "tracked_asset_count": 145,
+  "origin_counts": {
+    "apexoracle_legacy_added": 71,
+    "post_snapshot_canonical": 23,
+    "upstream_locally_modified": 6,
+    "upstream_unmodified": 45
+  },
+  "family_counts": {
+    "candidate_scoring": 8,
+    "canonical_refactor": 23,
+    "chemistry_legacy": 4,
+    "debug_case_study": 12,
+    "hierarchical_mic": 11,
+    "historical_config": 1,
+    "huggingface_export": 16,
+    "interpretability": 3,
+    "mic_guidance": 6,
+    "molecule_embedding": 4,
+    "peptide_classifier": 3,
+    "synergy_guidance": 3,
+    "upstream_modified": 6,
+    "upstream_runtime": 45
+  },
+  "plotting_or_notebook_assets": 18,
+  "assets_with_absolute_paths": 57,
+  "static_dependency_edge_count": 213,
+  "definition_clone_group_count": 258,
+  "definition_clone_occurrence_count": 1407,
+  "deletion_policy": "No file is delete-ready merely because it is listed. Apply each row's deletion_gate and docs/LEGACY_CODE_LINEAGE_LEDGER.md."
+}
