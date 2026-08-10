@@ -129,7 +129,7 @@ def partition_guidance_rows(
     return genome_text, text_only
 
 
-def _pad_conditions(
+def pad_condition_embeddings(
     tensors: Sequence[torch.Tensor],
 ) -> tuple[torch.Tensor, torch.Tensor]:
     if not tensors:
@@ -169,7 +169,7 @@ def collate_guidance_mic(
     attention_mask = torch.zeros(len(batch), max_length, dtype=torch.bool)
     for index, item in enumerate(token_ids):
         attention_mask[index, : item.numel()] = True
-    text_embeddings, text_valid_mask = _pad_conditions(
+    text_embeddings, text_valid_mask = pad_condition_embeddings(
         [torch.as_tensor(item["text_embedding"]) for item in batch]
     )
     has_genome = ["genome_embedding" in item for item in batch]
@@ -186,7 +186,7 @@ def collate_guidance_mic(
         "strain_names": [str(item["strain_name"]) for item in batch],
     }
     if all(has_genome):
-        genome_embeddings, genome_valid_mask = _pad_conditions(
+        genome_embeddings, genome_valid_mask = pad_condition_embeddings(
             [torch.as_tensor(item["genome_embedding"]) for item in batch]
         )
         result["genome_embeddings"] = genome_embeddings

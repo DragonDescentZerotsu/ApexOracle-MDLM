@@ -11,6 +11,7 @@ from torch.nn import functional as F
 
 from apexoracle_mdlm.models import (
     DLMHiddenStateEncoder,
+    NoisyDLMHiddenStateEncoder,
     build_upstream_dlm_hidden_state_encoder,
 )
 
@@ -60,6 +61,16 @@ class ToyBackbone(nn.Module):
 class ZeroNoise(nn.Module):
     def forward(self, t):
         return torch.zeros_like(t), torch.ones_like(t)
+
+
+class RecordingNoise(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.last_t = None
+
+    def forward(self, t):
+        self.last_t = t.detach().clone()
+        return t, torch.ones_like(t)
 
 
 class LegacyReferenceEncoder(nn.Module):
@@ -123,6 +134,21 @@ class DLMHiddenStateEncoderTests(unittest.TestCase):
         )
         processed = encoder._process_sigma(torch.tensor([[3.0], [4.0]]))
         self.assertTrue(torch.equal(processed, torch.zeros(2)))
+
+    def test_explicit_clean_noisy_encoder_preserves_legacy_zero_time(self):
+        config = SimpleNamespace(parameterization="subs", time_conditioning=True)
+        noise = RecordingNoise()
+        encoder = NoisyDLMHiddenStateEncoder(
+            config,
+            11,
+            backbone_factory=lambda _config, _size: ToyBackbone(),
+            noise_factory=lambda _config: noise,
+            pad_token_id=3,
+            preserve_padding=True,
+        )
+        torch.manual_seed(20260810)
+        encoder(torch.tensor([[1, 2, 3]]), apply_noise=False)
+        self.assertTrue(torch.equal(noise.last_t, torch.zeros(1)))
 
     def test_runtime_root_must_contain_attributed_upstream_files(self):
         config = SimpleNamespace(parameterization="subs", time_conditioning=True)

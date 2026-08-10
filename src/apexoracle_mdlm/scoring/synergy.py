@@ -14,61 +14,13 @@ from apexoracle_mdlm.checkpoints import (
     validate_generation_synergy_guidance_checkpoint,
 )
 from apexoracle_mdlm.models import (
-    FirstTokenCrossAttention,
     RegressionHead,
+    build_lora_condition_attention,
     build_upstream_dlm_hidden_state_encoder,
+    symmetric_pair_logits,
 )
 
 from .mic import ConditionEmbeddingBanks, Tokenizer, normalize_selfies_for_tokenizer
-
-
-def build_lora_condition_attention(
-    molecule_dim: int,
-    condition_dim: int,
-    *,
-    num_heads: int = 4,
-    attention_dropout: float = 0.1,
-    lora_rank: int = 64,
-    lora_alpha: int = 32,
-) -> nn.Module:
-    """Build the PEFT wrapper used by the frozen synergy checkpoints."""
-
-    from peft import LoraConfig, TaskType, get_peft_model
-
-    base = FirstTokenCrossAttention(
-        molecule_dim,
-        condition_dim,
-        num_heads,
-        attention_dropout,
-        legacy_squeeze=True,
-    )
-    config = LoraConfig(
-        r=lora_rank,
-        lora_alpha=lora_alpha,
-        target_modules=[
-            "mol_to_genome_dim",
-            "key_value_projection",
-            "mha.out_proj",
-            "ffn.0",
-            "ffn.2",
-        ],
-        task_type=TaskType.FEATURE_EXTRACTION,
-        lora_dropout=0.1,
-        bias="none",
-    )
-    return get_peft_model(base, config)
-
-
-def symmetric_pair_logits(
-    head: nn.Module,
-    first: torch.Tensor,
-    second: torch.Tensor,
-) -> torch.Tensor:
-    """Average both molecule orders used by the historical classifier."""
-
-    first_order = head(torch.cat((first, second), dim=1))
-    second_order = head(torch.cat((second, first), dim=1))
-    return (first_order + second_order) / 2
 
 
 def load_partner_embedding(

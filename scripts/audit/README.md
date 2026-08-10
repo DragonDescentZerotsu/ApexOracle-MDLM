@@ -137,6 +137,27 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src pyth
 
 冻结结果见 `reproducibility/candidate_synergy_migration_parity.json`。
 
+## `compare_legacy_synergy_guidance.py`
+
+用途：从 snapshot 临时提取三个已删除的 synergy-guidance producers，确认两份 asymmetric sources
+byte-identical，并分别使用正式 `1-255000-fine-tune.ckpt` 与 `last_reg_v1.ckpt` 比较
+first-clean/second-noisy 和 both-clean 两 profile 的 DLM outputs。审计保持 legacy RNG 顺序、padding 和
+bfloat16 GPU path，并追加两个正式 4.11 GB classifier schema、Generation live/commented consumer 分类和删除
+gate。该入口验证 producer mechanics，不执行 40-epoch full retrain。
+
+```bash
+CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src python \
+  scripts/audit/compare_legacy_synergy_guidance.py \
+  --core-root /path/to/ApexOracle-Core \
+  --generation-root /path/to/ApexOracle-Generation \
+  --asymmetric-backbone-checkpoint /path/to/1-255000-fine-tune.ckpt \
+  --clean-backbone-checkpoint /path/to/last_reg_v1.ckpt \
+  --output reproducibility/synergy_guidance_migration.json
+```
+
+正式结果见 `reproducibility/synergy_guidance_migration.json`；Generation candidate inference 的独立 exact
+parity 仍见 `reproducibility/candidate_synergy_migration_parity.json`。
+
 ## `compare_legacy_mic_attention.py`
 
 用途：从 snapshot 提取 `visualize_attn.py`，加载正式 clean MIC checkpoint 与 candidate，一次比较多个 strain

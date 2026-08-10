@@ -262,7 +262,7 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
 迁移证据见 `reproducibility/candidate_mic_migration_parity.json` 与
 `reproducibility/peptide_table_migration_parity.json`。跨仓库 source contract 记录于
 `docs/CROSS_REPO_CONTRACTS.md`；机器可读资产/源码检查为
-`reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前七项
+`reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前 14 项
 source/AST 检查通过；candidate scorer 已完成正式 GPU replay，但 full sampler 仍未完成。
 
 Cross-repository contract 实现 commit：`4521c53`。
@@ -291,7 +291,7 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 
 ### M4：Legacy driver 收口
 
-状态：**执行中；hierarchical MIC 与 root chemistry 批次已满足删除 gate。**
+状态：**执行中；hierarchical MIC、root chemistry 与 synergy-guidance producer 已满足删除 gate。**
 
 - 只从 ledger 中逐文件满足 deletion gate、经证据更新为 `delete_ready` 的条目开始清理；
 - [x] Core 已替代的 11 个 `DP_inhouse_*` hierarchical drivers 完成逐文件 source/profile mapping、跨仓库
@@ -299,8 +299,11 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 - [x] 两个 root chemistry utilities 已迁为通用 SMILES→SELFIES table converter 和 supplier-neutral streaming
   catalogue matcher；正式 11,401-row conversion byte-exact，5,887,458-row catalogue rescan 精确恢复
   276-row semantic match set，旧 root copies 从活动入口撤下；
-- synergy guidance、interpretability、milk/camel case study 中独有且仍需发布的行为重构为
-  `experimental/`、`examples/` 或 canonical library，不保留原始 root-level 副本；
+- [x] 三个 synergy-guidance root producers 归并为两个 explicit profiles、prepared-table contract 与参数化
+  training CLI；两 profile DLM encoder GPU outputs 和 Generation candidate inference 均 exact parity，正式两个
+  checkpoint schema 与 no-live-source-consumer 已验证，旧 root copies 由 snapshot 接管；
+- interpretability、milk/camel case study 中独有且仍需发布的行为重构为 `experimental/`、`examples/` 或
+  canonical library，不保留原始 root-level 副本；
 - debug、一次性绘图和 superseded temp scripts 在 source/consumer mapping 完成后从活动树删除；若其中
   存在独有重要行为，先迁移并通过 parity，再删除原文件；
 - 不建立第二份 `legacy/` 目录，统一由 tag 恢复。
@@ -316,6 +319,10 @@ Hierarchical MIC 的完整 mapping、恢复命令与不能声称 exact historica
 Chemistry migration 见 `docs/CHEMISTRY_LEGACY_MIGRATION.md` 和
 `reproducibility/chemistry_legacy_migration.json`；ignored raw catalogue/output 不移动、不删除、不提交。
 本批删除后 MDLM 全仓 110 tests 与 13 项跨仓库 contracts 均通过。
+
+Synergy-guidance producer migration 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md` 与
+`reproducibility/synergy_guidance_migration.json`。`asymmetric_partner_noise` 固定 first clean/second noisy，
+`clean_pair` 固定两边 clean；二者都属于 experimental all-data Generation guidance，不是 Core paper CV。
 
 ### M5：Clean module release
 

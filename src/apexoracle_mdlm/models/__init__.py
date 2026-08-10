@@ -26,6 +26,14 @@ from .peptide_classifier import (
     get_peptide_classifier_profile,
     masked_mean_pool,
 )
+from .synergy_guidance import (
+    SYNERGY_GUIDANCE_PROFILES,
+    SynergyGuidanceClassifier,
+    SynergyGuidanceProfile,
+    build_lora_condition_attention,
+    get_synergy_guidance_profile,
+    symmetric_pair_logits,
+)
 
 __all__ = [
     "DLMHiddenStateEncoder",
@@ -39,11 +47,17 @@ __all__ = [
     "PeptideClassificationHead",
     "PeptideClassifierProfile",
     "RegressionHead",
+    "SYNERGY_GUIDANCE_PROFILES",
+    "SynergyGuidanceClassifier",
+    "SynergyGuidanceProfile",
+    "build_lora_condition_attention",
     "build_upstream_dlm_hidden_state_encoder",
     "build_upstream_noisy_dlm_hidden_state_encoder",
     "extract_peptide_classifier_head_state_dict",
     "get_peptide_classifier_profile",
     "get_mic_guidance_profile",
+    "get_synergy_guidance_profile",
     "load_peptide_classifier_head",
     "masked_mean_pool",
+    "symmetric_pair_logits",
 ]

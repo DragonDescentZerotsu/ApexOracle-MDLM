@@ -516,26 +516,36 @@ class CodeLineageLedgerTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / path).is_file(), path)
 
-    def test_remaining_synergy_definition_group_is_preserved(self):
+    def test_synergy_guidance_clones_are_replaced_and_recoverable(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""
         ) as handle:
             clones = list(csv.DictReader(handle))
         regression = [row for row in clones if row["symbol_names"] == "RegressionHead"]
-        self.assertTrue(regression)
-        # M2--M4 removed migrated embedding, MIC-guidance, and Core-owned
-        # hierarchical copies. The three synergy-guidance producers remain
-        # visible until their separate migration gate closes.
-        self.assertEqual(max(int(row["file_count"]) for row in regression), 3)
+        self.assertFalse(regression)
+        legacy_paths = {
+            "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification.py",
+            "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification_clean.py",
+            "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification_noise.py",
+        }
+        self.assertTrue(legacy_paths.isdisjoint(self.by_path))
+        manifest = json.loads(
+            (ROOT / "reproducibility" / "synergy_guidance_migration.json").read_text(
+                encoding="utf-8"
+            )
+        )
         self.assertEqual(
-            set(regression[0]["paths"].split(";")),
-            {
-                "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification.py",
-                "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification_clean.py",
-                "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification_noise.py",
-            },
+            set(manifest["legacy_sources"]),
+            legacy_paths,
+        )
+        self.assertEqual(manifest["deletion_gate"]["status"], "delete_ready")
+        self.assertEqual(
+            manifest["deletion_gate"]["generation_live_source_consumer_count"], 0
         )
         self.assertTrue((ROOT / "src/apexoracle_mdlm/models/heads.py").is_file())
+        self.assertTrue(
+            (ROOT / "src/apexoracle_mdlm/models/synergy_guidance.py").is_file()
+        )
 
     def test_fig3a_exact_plotted_rows_match_manifest(self):
         manifest = json.loads(

@@ -34,6 +34,11 @@ def parse_args() -> argparse.Namespace:
         "--producer-path-in-ref",
         default="synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification.py",
     )
+    parser.add_argument(
+        "--judge-dependency-path-in-ref",
+        default="guaidance_regressor_all_data.py",
+        help="Snapshot-only module imported by the legacy judge at import time.",
+    )
     parser.add_argument("--core-root", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--partner-embeddings", type=Path, required=True)
@@ -80,6 +85,9 @@ def compare(args: argparse.Namespace, judge_path: Path, producer_path: Path) -> 
     root = args.mdlm_root.resolve()
     if str(root) not in sys.path:
         sys.path.insert(0, str(root))
+    temp_root = judge_path.parent.resolve()
+    if str(temp_root) not in sys.path:
+        sys.path.insert(0, str(temp_root))
 
     producer = load_module("legacy_synergy_producer", producer_path)
     judge = load_module("legacy_synergy_judge", judge_path)
@@ -181,6 +189,7 @@ def main() -> None:
         for label, path_in_ref in (
             ("judge", args.judge_path_in_ref),
             ("producer", args.producer_path_in_ref),
+            ("judge_dependency", args.judge_dependency_path_in_ref),
         ):
             source = subprocess.check_output(
                 ["git", "show", f"{args.legacy_ref}:{path_in_ref}"],

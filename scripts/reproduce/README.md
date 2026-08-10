@@ -66,6 +66,34 @@ PYTHONPATH=src python scripts/reproduce/train_mic_guidance.py \
 见 `docs/MIC_GUIDANCE_MIGRATION.md`。Focused 验证：
 `PYTHONPATH=src python -m pytest -q tests/test_mic_guidance.py`。
 
+## `prepare_synergy_guidance_table.py` / `train_synergy_guidance.py`
+
+功能：前者把显式 molecule-pair SMILES columns 转为
+`input_ids_1,input_ids_2,strain_name,FICI` prepared table；后者训练 Generation 历史使用的 experimental
+all-data synergy-guidance classifier。`--profile asymmetric_partner_noise` 固定 molecule 1 clean / molecule 2
+random-time noisy，`--profile clean_pair` 固定两边 clean。两者都保持 FICI `<0.5` label、rank-64 condition
+LoRA、symmetric pair logits 和正式 checkpoint fields。
+
+该入口不是 Core paper synergy CV runner，训练时必须显式确认
+`--confirm-experimental-all-data`。raw strain-name/taxonomy cleanup 不隐藏在 trainer 中，输入必须已使用与
+condition embeddings 一致的 canonical strain keys。
+
+```bash
+PYTHONPATH=src python scripts/reproduce/train_synergy_guidance.py \
+  --profile asymmetric_partner_noise --confirm-experimental-all-data \
+  --input /path/to/prepared_synergy.csv \
+  --genome-embeddings /path/to/Genome_embs \
+  --text-embeddings-atcc /path/to/Text_Description/ATCC/embeddings \
+  --text-only-embeddings /path/to/Text_Description/wo_ATCC/embeddings \
+  --backbone-checkpoint /path/to/1-255000-fine-tune.ckpt \
+  --base-mic-checkpoint /path/to/noise_guidance_best_R2_all_peptide_epoch_100.pth \
+  --output-dir /path/to/guidance_noise_synergy/cls
+```
+
+Focused 验证：`PYTHONPATH=src python -m pytest -q tests/test_synergy_guidance.py
+tests/test_dlm_encoder.py tests/test_candidate_synergy_scoring.py`。两 profile producer GPU parity 与 Generation
+正式 candidate inference parity 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md`。
+
 ## `score_generated_molecule_mic.py`
 
 功能：加载正式 clean candidate MIC checkpoint、Core genome/text embedding banks 和 Generation SELFIES

@@ -133,9 +133,19 @@
       "path": "src/apexoracle_mdlm/scoring/synergy.py",
       "required_substrings": [
         "class CandidateSynergyClassifier",
-        "def symmetric_pair_logits",
         "def load_candidate_synergy_classifier",
         "def score_selfies_synergy"
+      ]
+    },
+    {
+      "id": "mdlm_synergy_guidance_producer",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/models/synergy_guidance.py",
+      "required_substrings": [
+        "class SynergyGuidanceClassifier",
+        "def symmetric_pair_logits",
+        "asymmetric_partner_noise",
+        "clean_pair"
       ]
     },
     {

@@ -59,6 +59,17 @@ This also does not pretrain DLM. The output checkpoint fields remain compatible 
 ApexOracle-Generation. Source hashes, all five formal checkpoint schemas, and exact Generation MIC
 regression parity are recorded in `docs/MIC_GUIDANCE_MIGRATION.md`.
 
+## Experimental synergy-guidance training
+
+Generation's historical all-data synergy classifier has two explicit profiles:
+`asymmetric_partner_noise` (first molecule clean, second noisy) and `clean_pair` (both clean).
+Prepare the pair table and train with explicit assets through
+`scripts/reproduce/prepare_synergy_guidance_table.py` and
+`scripts/reproduce/train_synergy_guidance.py`. The trainer requires
+`--confirm-experimental-all-data` because this workflow is not the paper's Core synergy
+cross-validation benchmark. Formal checkpoint, source, and GPU parity are recorded in
+`docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md`.
+
 ## Candidate MIC scoring
 
 `apexoracle_mdlm.scoring` owns the canonical clean candidate scorer. The CLI takes every repository

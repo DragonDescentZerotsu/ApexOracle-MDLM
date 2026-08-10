@@ -46,6 +46,15 @@
   `docs/CHEMISTRY_LEGACY_MIGRATION.md` 恢复后删除；全仓 110 tests 与 13 项跨仓库 contracts 通过；ignored
   catalogue/predictions/output 原地保留。公共 API 必须保持 supplier-neutral，不能把 MolPort 或某个项目名
   固化进 function/CLI 名。
+- **2026-08-10 synergy-guidance producer cleanup：** 三个
+  `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` 已归并为
+  `asymmetric_partner_noise`（first clean/second noisy）与 `clean_pair` 两 profile；canonical model/data/CLI 为
+  `SynergyGuidanceClassifier`、`SynergyGuidanceDataset`、`prepare_synergy_guidance_table.py` 和
+  `train_synergy_guidance.py`。两 profile 正式 backbone GPU encoder outputs 逐元素 exact，Generation 正式
+  candidate logit/probability exact，两个 4.11 GB checkpoint schema 通过。Generation 只 live-load checkpoint；
+  13 条旧 producer 路径都是 shell comments。旧 root copies 由 snapshot 与
+  `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md` 恢复；该功能始终标为 experimental all-data guidance，不能
+  写成 Core paper synergy CV。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 
@@ -134,6 +143,13 @@
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_candidate_synergy_scoring
   tests.test_checkpoint_schemas -v`；正式单条 GPU parity 见
   `reproducibility/candidate_synergy_migration_parity.json`。
+- Experimental synergy-guidance producer：`SYNERGY_GUIDANCE_PROFILES`、
+  `SynergyGuidanceClassifier` 与 `apexoracle_mdlm.training` 的 pair-table contract；公开准备/训练入口为
+  `scripts/reproduce/prepare_synergy_guidance_table.py` 和 `train_synergy_guidance.py`，后者要求
+  `--confirm-experimental-all-data` 及显式 table/backbone/base-MIC/condition/output paths，输出兼容 checkpoint 与
+  `training_manifest.json`。Focused 验证：`PYTHONPATH=src python -m pytest -q
+  tests/test_synergy_guidance.py tests/test_dlm_encoder.py tests/test_candidate_synergy_scoring.py`；正式 parity 入口为
+  `scripts/audit/compare_legacy_synergy_guidance.py`。
 - MIC interpretability：`CandidateMICRegressor.forward_with_attention` 返回 prediction 与 genome/text averaged
   attention；`apexoracle_mdlm.interpretability` 验证 saved tensor/FASTA/GenBank window contract 并映射 overlap
   CDS。公开入口为 `scripts/reproduce/analyze_mic_attention.py`，输出 genome/text attention CSV、annotation CSV

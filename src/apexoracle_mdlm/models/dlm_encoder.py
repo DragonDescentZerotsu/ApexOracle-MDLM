@@ -261,6 +261,8 @@ class NoisyDLMHiddenStateEncoder(DLMHiddenStateEncoder):
         self,
         input_ids: torch.Tensor,
         attention_mask: torch.Tensor | None = None,
+        *,
+        apply_noise: bool | None = None,
     ) -> torch.Tensor:
         if self.fixed_t is None:
             t = self._sample_t(input_ids.shape[0], input_ids.device)
@@ -270,6 +272,12 @@ class NoisyDLMHiddenStateEncoder(DLMHiddenStateEncoder):
                 self.fixed_t,
                 device=input_ids.device,
             )
+        # The synergy-guidance producers always drew ``t`` first and only then
+        # multiplied it by zero for the clean member of a molecule pair.  Keep
+        # that RNG consumption when callers explicitly request a clean pass.
+        # ``None`` preserves the original always-noisy classifier contract.
+        if apply_noise is False:
+            t = t * 0
         sigma, _ = self.noise(t)
         move_chance = 1 - torch.exp(-sigma[:, None])
         move_indices = (

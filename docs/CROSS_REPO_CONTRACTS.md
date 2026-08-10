@@ -131,6 +131,8 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
 consumer、Core/MDLM saved-window coordinates，并分别验证 MDLM canonical `RegressionHead` 与 Generation
 cross-attention 所需 state modules。旧 trainer 已由 snapshot/migration manifest 保存，不再要求 active root
 copy 与 Generation 做 AST equality；实际参数/数值兼容由 strict load 和下述正式 GPU parity 负责。
+当前 source contract 为 14 项，新增项直接检查 canonical synergy-guidance producer 的两个 named profiles 与
+symmetric-pair implementation。
 
 在作者机器上核验 trusted formal checkpoints 时追加 `--check-assets`。该模式以 CPU `mmap` 读取 manifest
 中的 DLM、classifier、MIC、synergy checkpoint 与 synergy partner dictionary，执行 schema、partner-key
@@ -147,6 +149,8 @@ output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
 `torch.equal`，最大差异 `0.0`。clean candidate scorer 也已用正式 checkpoint、真实 BAA-3170 inputs 完成
 逐条和 batch=2 端到端 parity，logits/MIC 均 `torch.equal`，最大差异 `0.0`。experimental synergy
 candidate scorer 已用正式 Generation checkpoint、真实 input 和 partner 完成单 candidate、双 pair-order parity，
-logits/probabilities 同样 `torch.equal`、最大差异 `0.0`。仍待完成 full sampler、Core
+logits/probabilities 同样 `torch.equal`、最大差异 `0.0`。synergy producer 也已用两个正式 backbone 对
+snapshot/canonical 的 first-clean/second-noisy 与 both-clean encoder outputs 完成四项 `torch.equal`、最大差异
+`0.0`。仍待完成 full sampler、Core
 compatibility-bridge caller 迁移、Generation clean branch/自有 remote、顶层 asset resolver 与 fresh-clone
 smoke。因此可以分别声明 head 与 candidate-scoring parity，不能声明三仓库整体 release 已端到端验收。

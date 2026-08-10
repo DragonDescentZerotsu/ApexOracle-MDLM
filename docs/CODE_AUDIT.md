@@ -2,8 +2,8 @@
 
 > 审计日期：2026-08-09
 > 状态：全量逐文件 ledger 和复制血缘已建立；candidate scoring、论文图、classifier 与 MIC guidance
-> producer 已分批迁移；hierarchical MIC duplicate drivers 已完成 Core handoff；剩余
-> synergy/chemistry/upstream families 继续逐项追加证据
+> producer 已分批迁移；hierarchical MIC duplicate drivers 已完成 Core handoff；root chemistry 与
+> synergy-guidance producers 已清理；剩余 upstream/runtime 边界继续逐项追加证据
 
 ## 1. 已由 Git/文件系统/AST 验证的事实
 
@@ -38,7 +38,7 @@
 | Hierarchical MIC | snapshot 中的 `DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_*` | 11 个 strain/species/phylum 复制 driver 已逐项映射到 Core；无 live filename consumer，43 项 Core tests 通过 | 不再作为本 repo 公共 API；root copies 已由 snapshot/lineage 接管并删除 |
 | MIC guidance | snapshot 中的 `guaidance_regressor_all_data*.py` | 六份 sources 已归并为五个 clean/noisy/padding/non-pad/eval profiles；五个正式 checkpoint schema 与 Generation regression exact parity 已验证 | `apexoracle_mdlm.models` + `apexoracle_mdlm.training` + `scripts/reproduce/train_mic_guidance.py`；旧 root copies 已删除 |
 | Peptide classifier | snapshot 中的 `guaidance_classifier_all_data*.py` | 三个 noisy/pooling/padding/data profiles 已分开；正式 v1 head strict load 和三 profile GPU parity 已完成，exact timestamped producer revision 仍未知 | `apexoracle_mdlm.models` + `scripts/reproduce/train_peptide_classifier.py`；旧 root copies 已删除 |
-| Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
+| Synergy guidance | snapshot 中的 `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | 三份 source 已归并为 asymmetric partner noise 与 clean-pair 两 profile；正式 producer/candidate GPU parity 和 Generation checkpoint-only consumer 已验证 | `apexoracle_mdlm.models` + prepared data + `train_synergy_guidance.py`；旧 root copies 已删除，默认 quickstart 不启用 |
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | snapshot 中的四个 root utilities | peptide parser/builders 已在早期批次清理；最后两个 table conversion/catalog matching 已迁为通用 API 并通过正式资产验证 | `apexoracle_mdlm.chemistry` + 两个参数化 reproduce CLI；旧 root copies 已删除 |
 | Hugging Face | canonical `huggingface/release/`；旧 `huggingface_model/`/`huggingface_push.py` 由 snapshot 恢复 | 正式 18-file Hub revision 已 fresh-download 验收；旧 wrapper/runtime/exporter 无 active consumer，三份 tokenizer byte-exact 迁入 release template | clean builder/publisher + `apexoracle_mdlm.hub`；旧 tracked 副本已清除，ignored weight 原地保留 |
@@ -72,7 +72,8 @@
   resolved config/command 没有独立 timestamped manifest，不能声称已逐次重建；
 - public Hugging Face model card 的最终 license/weight rights 需作者确认；当前 source repo 为 Apache-2.0、
   IBM tokenizer 为 Apache-2.0，但 public ApexOracle model card 没有 license metadata；
-- milk/camel、attention 和 synergy guidance 哪些需要进入最终 public examples；
+- milk/camel 与 attention 哪些需要进入最终 public examples；synergy guidance 已确定只保留 experimental
+  library/CLI，不进入默认 quickstart；
 - 除已迁移的 `judge_generated_mols_MIC.py` family 外，其他 legacy root files 是否仍有未登记的
   外部调用者；已验证 Generation 不 import MDLM package，而 Core reviewer runner 会动态 import
   Generation runtime。
@@ -104,6 +105,16 @@ membership，且多个 checkpoint grids 不完整或共用目录，因此这里�
 catalogue matcher；12-shard/5,887,458-row full rescan 恢复历史 276-row semantic set，覆盖 179 IDs/structures。
 历史 order 不稳定，因此不宣称 CSV byte parity；ignored source/data/output 均原地保留。完整证据见
 `docs/CHEMISTRY_LEGACY_MIGRATION.md`。
+
+## 9. Synergy-guidance producers 已完成迁移
+
+三个 root trainers 中两个为 byte-identical；实际只存在 first-clean/second-noisy 和 both-clean 两种协议。
+Canonical profiles、prepared pair-table contract 与训练 CLI 已固定 FICI `<0.5`、`2B × 1024` interleave、
+padding preservation、MIC condition-base initialization、rank-64 LoRA、symmetric pair head 和 checkpoint schema。
+两个正式 backbone/profile 的 GPU encoder parity 均为逐元素 exact；Generation 正式 checkpoint 的真实 candidate
+inference parity 也为 exact。Generation live config 只加载 checkpoint，13 条 producer path 均为 shell comments。
+完整事实、推断、未完成的 full retrain 边界与恢复命令见
+`docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md`。
 
 作者于 2026-08-09 确认：这里的保守 gate 用于防止误删，不表示把可疑 legacy 文件永久留在 public
 branch。重要或暂时不确定的代码应先重构独有行为，再删除原始副本；确认没有独有功能的代码完成
