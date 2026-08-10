@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "repositories": {
+    "mdlm": {
+      "release_module": "modules/mdlm",
+      "role": "DLM runtime assets, guidance checkpoint producers, and candidate scoring"
+    },
+    "synergy": {
+      "release_module": "modules/core",
+      "role": "ApexOracle predictor, genome/text embeddings, reviewer runners, and MIC checkpoints"
+    },
+    "generation": {
+      "release_module": "modules/generation",
+      "role": "Guided discrete-diffusion and ReMDM sampling"
+    }
+  },
+  "artifact_contracts": [
+    {
+      "id": "generation_dlm_v1",
+      "owner": "mdlm",
+      "relative_path": "Checkpoints_fangping/last_reg_v1.ckpt",
+      "consumer": "generation",
+      "sha256": "a509b94e3780a0848b3f799ccfe754ed07524169973b08d85fdbc597f0592615",
+      "schema": "lightning state_dict with backbone.* keys"
+    },
+    {
+      "id": "generation_peptide_classifier_v1",
+      "owner": "mdlm",
+      "relative_path": "cls-guide-pad-no-mask-checkpoints/epoch-epoch=1-step-step=134000-train_loss-train_loss=0.008.ckpt",
+      "consumer": "generation",
+      "sha256": "40f638ca5668f20a641a538035015b1741ab69cded300cba27f7148cc291945b",
+      "schema": "lightning state_dict with backbone.backbone.* and ClsHead.* keys"
+    },
+    {
+      "id": "generation_noisy_mic_guidance",
+      "owner": "synergy",
+      "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_pad_no_mask/noise_guidance_best_R2_all_peptide_epoch_100.pth",
+      "consumer": "generation",
+      "sha256": "f24faf670b804edebbd4d6530a42c1351b62040046e14ebded67335aefc9c3a4",
+      "schema": "generation MIC-guidance 768/8192/4096 profile"
+    },
+    {
+      "id": "candidate_clean_mic_scorer",
+      "owner": "synergy",
+      "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+      "consumer": "mdlm",
+      "sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
+      "schema": "generation MIC-guidance 768/8192/4096 profile"
+    },
+    {
+      "id": "generation_synergy_guidance",
+      "owner": "synergy",
+      "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_noise_synergy/cls/synergy_noise_clsfier_best.ckpt",
+      "consumer": "generation,mdlm",
+      "sha256": "c1e40581c88e3b32c86d775e739320d15f111580fb55e9319adc8c3549273bc8",
+      "schema": "experimental symmetric-pair synergy profile with LoRA genome/text attention"
+    },
+    {
+      "id": "synergy_partner_embeddings",
+      "owner": "synergy",
+      "relative_path": "DataPrepare/Data/synergy_mol_emb_dict_cls_wo_pad.pt",
+      "consumer": "generation,mdlm",
+      "sha256": "6c42d81f38d89e3ca31f5ebc49be86cd290ba3d0e87bd3ce3ceffa4e82a36484",
+      "schema": "mixed string/integer keys mapped to one 768-dimensional partner embedding"
+    },
+    {
+      "id": "genome_embeddings",
+      "owner": "synergy",
+      "relative_path": "DataPrepare/Data/Genome_embs",
+      "consumer": "generation,mdlm",
+      "schema": "ATCC/custom filename keys; tensors scaled by 1e14 at load"
+    },
+    {
+      "id": "atcc_text_embeddings",
+      "owner": "synergy",
+      "relative_path": "DataPrepare/Data/Text_Description/ATCC/embeddings",
+      "consumer": "generation,mdlm",
+      "schema": "ATCC filename keys; tensors loaded at scale 1"
+    },
+    {
+      "id": "text_only_embeddings",
+      "owner": "synergy",
+      "relative_path": "DataPrepare/Data/Text_Description/wo_ATCC/embeddings",
+      "consumer": "generation,mdlm",
+      "schema": "escaped text filename keys; tensors loaded at scale 1"
+    }
+  ],
+  "static_checks": [
+    {
+      "id": "generation_output_writer",
+      "repository": "generation",
+      "path": "eval_utils.py",
+      "required_substrings": [
+        "strain_{config.sampling.strain}_MIC_{config.sampling.target_MIC}_length_{config.sampling.target_length}_{guidance_method}.txt"
+      ]
+    },
+    {
+      "id": "generation_guidance_checkpoint_loader",
+      "repository": "generation",
+      "path": "models/dit.py",
+      "required_substrings": [
+        "checkpoint_reg['mdlm_model_state_dict']",
+        "checkpoint_reg['re_head_state_dict']",
+        "checkpoint_reg['co_cross_attn_genome']",
+        "checkpoint_reg['co_cross_attn_text']",
+        "checkpoint_cls['state_dict']",
+        "backbone.backbone."
+      ]
+    },
+    {
+      "id": "generation_synergy_guidance_loader",
+      "repository": "generation",
+      "path": "models/dit.py",
+      "required_substrings": [
+        "syn_classifier_checkpoint_path",
+        "FICI_input_1 = torch.cat((mol_cls_embedding_1, mol_cls_embedding_2)",
+        "FICI_input_2 = torch.cat((mol_cls_embedding_2, mol_cls_embedding_1)",
+        "logits = (logits_1 + logits_2) / 2"
+      ]
+    },
+    {
+      "id": "generation_synergy_output_writer",
+      "repository": "generation",
+      "path": "eval_utils.py",
+      "required_substrings": [
+        "synoguide_{config.sampling.synergy_mol_name}_length_",
+        "syn_{config.sampling.synergy_mol_name}_length_"
+      ]
+    },
+    {
+      "id": "mdlm_candidate_synergy_scorer",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/scoring/synergy.py",
+      "required_substrings": [
+        "class CandidateSynergyClassifier",
+        "def load_candidate_synergy_classifier",
+        "def score_selfies_synergy"
+      ]
+    },
+    {
+      "id": "mdlm_synergy_guidance_producer",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/models/synergy_guidance.py",
+      "required_substrings": [
+        "class SynergyGuidanceClassifier",
+        "def symmetric_pair_logits",
+        "asymmetric_partner_noise",
+        "clean_pair"
+      ]
+    },
+    {
+      "id": "core_saved_tensor_window_contract",
+      "repository": "synergy",
+      "path": "src/apexoracle/evaluation/genome_condition_reviewer.py",
+      "required_substrings": [
+        "def build_saved_tensor_windows",
+        "while fragment_index * step < record_length",
+        "\"fragment_index\": fragment_index",
+        "\"contig_index\": record_index"
+      ]
+    },
+    {
+      "id": "mdlm_mic_attention_interpretability",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/interpretability/attention.py",
+      "required_substrings": [
+        "def build_saved_tensor_windows",
+        "def load_verified_genome_assets",
+        "def attention_rows",
+        "def annotate_selected_windows"
+      ]
+    },
+    {
+      "id": "generation_embedding_config",
+      "repository": "generation",
+      "path": "configs/config.yaml",
+      "required_substrings": [
+        "ATCC_genome_emb:",
+        "ATCC_text_emb:",
+        "only_text_emb:"
+      ]
+    },
+    {
+      "id": "synergy_dynamic_generation_import",
+      "repository": "synergy",
+      "path": "scripts/reproduce/run_remasking_schedule_reviewer.py",
+      "required_substrings": [
+        "sys.path.insert(0, str(producer_root))",
+        "import classifier",
+        "import diffusion",
+        "import models",
+        "sampling.pretrained_ckpt_path",
+        "guidance.regressor_checkpoint_path",
+        "guidance.classifier_checkpoint_path"
+      ]
+    },
+    {
+      "id": "mdlm_candidate_mic_compatibility_bridge",
+      "repository": "mdlm",
+      "path": "judge_generated_mols_MIC.py",
+      "required_substrings": [
+        "from apexoracle_mdlm.scoring import",
+        "load_candidate_mic_regressor",
+        "class MIC_regressor",
+        "current_directory"
+      ]
+    }
+  ],
+  "ast_equivalence_checks": [],
+  "class_module_checks": [
+    {
+      "id": "mdlm_canonical_regression_head_state_modules",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/models/heads.py",
+      "class": "RegressionHead",
+      "required_self_attributes": [
+        "dense_1",
+        "dense_2",
+        "activation_fn",
+        "dropout",
+        "out_proj"
+      ]
+    },
+    {
+      "id": "generation_cross_attention_state_modules",
+      "repository": "generation",
+      "path": "models/antibiotic_classifier.py",
+      "class": "FirstTokenAttention_genome",
+      "required_self_attributes": [
+        "mol_to_genome_dim",
+        "key_value_projection",
+        "mha",
+        "attn_norm",
+        "norm1",
+        "ffn",
+        "norm2"
+      ]
+    }
+  ]
+}

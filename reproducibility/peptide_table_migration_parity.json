@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-08-09",
+  "status": "passed",
+  "legacy_source": {
+    "git_ref": "legacy-code-snapshot-2026-08-09",
+    "relative_path": "temp_predict_mic_from_peptide_csv.py",
+    "sha256": "576cf4597bdc0756a499bce4cbfe879a8d258ba793ad4fba036d438c24c2eb8d",
+    "active_tree_removed": true
+  },
+  "canonical_components": [
+    "src/apexoracle_mdlm/scoring/mic.py",
+    "src/apexoracle_mdlm/scoring/peptide_table.py",
+    "src/apexoracle_mdlm/figures/mic_distribution.py",
+    "scripts/reproduce/score_peptide_table_mic.py"
+  ],
+  "historical_case_study": {
+    "role": "internal camel-milk peptide-table screen; no formal manuscript, reviewer, Core, or Generation caller was found",
+    "input": {
+      "relative_path": "temp_data/camel_milk_raw/Camel_All_Peptide_Protein_unique.csv",
+      "sha256": "29eb29ccaba33cbf42fa0acb47885ee73722ed3e8ebb7566be9839a7a13729a9",
+      "bytes": 2615963,
+      "rows": 73520
+    },
+    "preprocessed_output": {
+      "relative_path": "temp_data/camel_milk/camel_milk_preprocessed.csv",
+      "sha256": "d418fac75794dd6fa89be99d18a97d73dcf6c3824c676d6b25515f0c83999308",
+      "bytes": 94269437,
+      "rows": 73520
+    },
+    "prediction_output": {
+      "relative_path": "temp_data/camel_milk/camel_milk_mic_predictions.csv",
+      "sha256": "99e6459cfbc27470b8dc12491812bf43dffc6233d438c5820653c673b9097426",
+      "bytes": 99925863,
+      "rows": 73520,
+      "strain_columns": 13
+    },
+    "conversion_counts": {
+      "valid": 73456,
+      "invalid": 64,
+      "invalid_reason_counts": {
+        "contains_X": 64
+      }
+    },
+    "git_policy": "All three data/output files remain ignored local assets and are not committed."
+  },
+  "formal_parity": {
+    "checkpoint_owner": "ApexOracle-Core",
+    "checkpoint_relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "checkpoint_sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
+    "selected_row_ids": "0-31 plus invalid row 534",
+    "valid_samples": 32,
+    "padded_token_shape": [32, 354],
+    "strains": ["#002", "15697"],
+    "conversion_frame_exact": true,
+    "conversion_matches_historical_rows": true,
+    "cls_torch_equal": true,
+    "cls_max_abs_difference": 0.0,
+    "logits_torch_equal": true,
+    "logits_max_abs_difference": 0.0,
+    "prediction_frame_exact": true,
+    "historical_prediction_rows_exact_after_float32_roundtrip": true,
+    "peak_gpu_memory_bytes": 9170008576
+  },
+  "canonical_cli_smoke": {
+    "input_rows": 32,
+    "valid_rows": 32,
+    "strains": ["#002", "15697"],
+    "batch_size": 32,
+    "structures_csv_sha256": "2215f14b1e4fe13b5bec1a3e22e982b62a0a3e18cb40707f739feac3ee107814",
+    "predictions_csv_sha256": "97e934e3909d28d4463ea3660f31bcf78ad950bcf6713b939bcd076676d6804b",
+    "prediction_columns_match_historical_float32": true,
+    "max_abs_difference_by_strain": {
+      "#002": 0.0,
+      "15697": 0.0
+    },
+    "manifest_written": true,
+    "nonempty_violin_pdfs": 2
+  },
+  "protocol_boundary": {
+    "historical_batch_size": 32,
+    "batch_size_is_prediction_relevant": true,
+    "reason": "The attributed legacy DLM path receives padded token IDs but ignores the tokenizer attention mask, so changing batch composition or size can change padding and first-token states.",
+    "release_requirement": "Record batch_size in every manifest; use 32 to reproduce the historical camel-milk output. Changing this behavior requires a separately versioned protocol and new validation."
+  },
+  "deletion_decision": {
+    "external_runtime_callers_found": 0,
+    "formal_paper_or_reviewer_consumers_found": 0,
+    "legacy_body_replacement_complete": true,
+    "recovery": "git show legacy-code-snapshot-2026-08-09:temp_predict_mic_from_peptide_csv.py"
+  }
+}

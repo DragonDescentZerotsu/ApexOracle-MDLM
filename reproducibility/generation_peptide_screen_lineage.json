@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "snapshot": {
+    "tag": "legacy-code-snapshot-2026-08-09",
+    "commit": "79eed10cac8d5feb446be886eee0c5b356b23b06"
+  },
+  "legacy_sources": {
+    "judge_mol_mic_with_fig.py": {
+      "bytes": 18776,
+      "lines": 434,
+      "sha256": "7c51b517c96121d60576c7b1f5598a1b9abc1ecbc8b33f10bd9e98f4dfc3f397"
+    },
+    "judge_smi2pep2smi_mol_mic_with_fig.py": {
+      "bytes": 19250,
+      "lines": 450,
+      "sha256": "8dbdea07e07f78e3979f2e8e8c7c221f755f62fa7981d60e6d2f0e5ee7b90147"
+    },
+    "aa_seq_to_smiles.py": {
+      "bytes": 140324,
+      "lines": 2325,
+      "sha256": "e0034b684560fcfc2573bd760969e2c81cbf34693360e8b1fd65c154eaec8688"
+    },
+    "smiles_to_peptide.py": {
+      "bytes": 16333,
+      "lines": 349,
+      "sha256": "ce4dc6d36d59a71e71ba75c7f63b1b77d81ee5473f2ce515040ad72ad2c10cbc",
+      "active_tree_bridge_before_removal": {
+        "bytes": 727,
+        "lines": 25,
+        "sha256": "c46aa6ad18c74fa829c4c89a9251da22ae7494f2eaac38c5f8b0c037156eee49"
+      }
+    }
+  },
+  "formal_candidate_pool": {
+    "role": "historical 73-row target-strain candidate layout; producer revision not recovered",
+    "candidate_files": 81,
+    "bytes": 120069,
+    "rows": 73,
+    "tree_sha256": "4990e19c38c3995b0a6b2380ef1e8a5ada5f939176ca1bcd869578190e799666",
+    "by_strain": {
+      "BAA-3170": {"files": 41, "rows": 23, "bytes": 36205},
+      "BAA-3197": {"files": 40, "rows": 50, "bytes": 83864}
+    },
+    "synergy_frozen_manifest": {
+      "bytes": 69842,
+      "lines": 1295,
+      "sha256": "f0cd2726f0cd681c16ace3e30564f03bd42b47f3173d0e53dc530d32434e4898"
+    }
+  },
+  "current_legacy_bs_profile_assets": {
+    "genome_embeddings": {
+      "files": 7,
+      "bytes": 53223642,
+      "tree_sha256": "41d6cf33cae03e4c9f4061749a3f5d230d470ea2e1b7dcc9c1e6e69ec3329cce"
+    },
+    "text_embeddings": {
+      "files": 7,
+      "bytes": 8838693,
+      "tree_sha256": "f86fdbf6498d0a75fcb9ba09307911281f2a92bebd0dbabbee8fcec86634e166"
+    }
+  },
+  "roundtrip_diagnostic": {
+    "consumer_search": "no external runtime, paper, or reviewer consumer found",
+    "formal_candidate_screen_protocol": false,
+    "outputs": {
+      "working_directory_copy": {
+        "rows": 9,
+        "bytes": 13882,
+        "sha256": "ab31652d87e2243fade7e18bdb39d21e434685d22632c7d0d9f51633805181db"
+      },
+      "candidate_layout_copy": {
+        "rows": 23,
+        "bytes": 39874,
+        "sha256": "c2f669cc41e77c6d0e46821e42e2f0b247e69f3812875b906425765fe1dfc89f"
+      },
+      "images": {
+        "files": 15,
+        "bytes": 1298633,
+        "tree_sha256": "b87aa6828f15c81850c750a8297f7f4e1178993ad70381e7f0232c5760a72dbb"
+      }
+    },
+    "disposition": "snapshot_only_internal_normalization_diagnostic"
+  },
+  "canonical_replacement": {
+    "library": [
+      "apexoracle_mdlm.scoring.load_peptide_screen_jobs",
+      "apexoracle_mdlm.scoring.score_selfies_strings",
+      "apexoracle_mdlm.scoring.qualify_peptide_candidates",
+      "apexoracle_mdlm.chemistry.smiles_to_peptide_sequence",
+      "apexoracle_mdlm.figures.render_annotated_candidate"
+    ],
+    "cli": "scripts/reproduce/screen_peptide_candidates.py",
+    "multi_file_mode": "--job-manifest with job_id,strain,input CSV",
+    "scientific_protocol": {
+      "molecule_batch_size": 1,
+      "padding_removed_before_model": true,
+      "default_mic_threshold_umol": 15.0,
+      "unknown_residue_policy": "exclude_sequence_containing_uppercase_X"
+    }
+  },
+  "evidence_boundary": {
+    "verified": "source behavior, current asset counts/hashes, candidate layout counts/hashes, no-consumer static audit",
+    "inferred": "73-row directory is the historical candidate-screen stage output",
+    "not_recovered": "producer command, row-level predicted MIC table, timestamped producer revision"
+  }
+}

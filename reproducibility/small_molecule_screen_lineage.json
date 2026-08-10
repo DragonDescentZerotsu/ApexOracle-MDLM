@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "scope": "frozen paper small-molecule screen input/output lineage",
+  "protocol": {
+    "raw_rows_scored_individually": true,
+    "csv_duplicate_rule": "last_prediction_wins_per_source_selfies",
+    "legacy_csv_row_order": "python_set_iteration_not_reproducible",
+    "canonical_csv_row_order": "lexicographic_source_selfies"
+  },
+  "strains": {
+    "BAA-3170": {
+      "input": {
+        "path": "temp_data/small_molecules/strain_BAA-3170.txt",
+        "bytes": 14323780,
+        "sha256": "56607905f2621699c13516d65c5183af05bb96bf6b30296a84ef926dd0e457ab",
+        "rows": 49331,
+        "unique_selfies": 44608
+      },
+      "legacy_output": {
+        "path": "temp_data/SMs_mic_predictions_BAA-3170.csv",
+        "bytes": 4044936,
+        "sha256": "6c6b9e99249247a58527ddfbb5416f053089308fb5eece3e6a8265d081ac2f9e",
+        "rows": 44608,
+        "columns": [
+          "SMILES_Sequence",
+          "BAA-3170"
+        ]
+      },
+      "checks": {
+        "no_empty_source_rows": true,
+        "no_empty_decoded_smiles": true,
+        "decoded_smiles_are_unique": true,
+        "no_empty_output_smiles": true,
+        "output_smiles_are_unique": true,
+        "decoded_smiles_set_equals_output": true,
+        "all_mic_values_finite_positive": true
+      }
+    },
+    "BAA-3197": {
+      "input": {
+        "path": "temp_data/small_molecules/strain_BAA-3197.txt",
+        "bytes": 14323780,
+        "sha256": "56607905f2621699c13516d65c5183af05bb96bf6b30296a84ef926dd0e457ab",
+        "rows": 49331,
+        "unique_selfies": 44608
+      },
+      "legacy_output": {
+        "path": "temp_data/SMs_mic_predictions_BAA-3197.csv",
+        "bytes": 4048618,
+        "sha256": "63850d62aa2688ef03435f2da49005da8c38ea13046669f8e7c6a5e663fcd06e",
+        "rows": 44608,
+        "columns": [
+          "SMILES_Sequence",
+          "BAA-3197"
+        ]
+      },
+      "checks": {
+        "no_empty_source_rows": true,
+        "no_empty_decoded_smiles": true,
+        "decoded_smiles_are_unique": true,
+        "no_empty_output_smiles": true,
+        "output_smiles_are_unique": true,
+        "decoded_smiles_set_equals_output": true,
+        "all_mic_values_finite_positive": true
+      }
+    }
+  },
+  "status": "passed",
+  "all_strains_share_input_sha256": true
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "source_branch": "refactor/apexoracle-mdlm",
+  "decision": "Legacy Hub exporter, wrapper, duplicated runtime, model card, images and upload scripts are snapshot-only after the clean allowlist release passed fixed-revision fresh-download validation.",
+  "canonical_replacements": {
+    "wrapper": "src/apexoracle_mdlm/hub/model.py",
+    "mask_contract": "src/apexoracle_mdlm/hub/masking.py",
+    "release_template": "huggingface/release/",
+    "builder": "scripts/release/build_huggingface_release.py",
+    "publisher": "scripts/release/publish_huggingface_release.py",
+    "attributed_runtime": [
+      "models/dit.py",
+      "noise_schedule.py"
+    ]
+  },
+  "legacy_sources": {
+    "huggingface/huggingface_config.py": "e781d344224579770da906e14d665575bc4da8c918bb0b7c0d494bebdbe96a9f",
+    "huggingface/huggingface_model/DLM_emb_model.py": "61dd186a68586ea9a7dd06523b25c8d2d9610a0a2f6e4411b0b312834ff72050",
+    "huggingface/huggingface_model/README.md": "acb072c8f70244ce00c0f63451dbadf8c91c813c5bda5a851863c5ce32c7ae4a",
+    "huggingface/huggingface_model/UPenn_logo.jpg": "eff4af5dcb7b4441dfbdaf5673f5ad2eb081b0cc77361178854e0e6685794ac6",
+    "huggingface/huggingface_model/config.json": "095682dbf2690c213fd2cb3ecf07f13f3e7ae091dd16a43b5a21f36585e3fd0d",
+    "huggingface/huggingface_model/example.py": "e10ff834b37e80f9bdfe5b63c27d6a114c43bdf418ef0b616693b8c7d14723ec",
+    "huggingface/huggingface_model/hf.png": "3ea4bbb90afa7f8934cd148240aae68eef4ad3da121a58689eb235fd10667b48",
+    "huggingface/huggingface_model/huggingface_config.py": "50e2851bd9c068504a0d4e000e2c3a34ea97e8fcfce53c13953b1ee2b07b0eb8",
+    "huggingface/huggingface_model/models/__init__.py": "102e918e884462b4ea48d9cc1e23a751bc04dcb715463882accbdbe0b71bc0c2",
+    "huggingface/huggingface_model/models/autoregressive.py": "eabc0b5e993e46e744b13d67f3df5eba17d4bdda2b106137285833d01e81a1ce",
+    "huggingface/huggingface_model/models/dimamba.py": "17f1b4e11e5dd63acebd441532f37de51e5822f2583ef7c41fdabbe0a6a34ccc",
+    "huggingface/huggingface_model/models/dit.py": "7eabdb3ec6b5f7cabaf5ad39b83e4cf1b8cbb13ba0821f6a7eb753f9ad38ad7f",
+    "huggingface/huggingface_model/models/ema.py": "f1417e66a46b2c2144e3fd47bb5c91c819f8c55f6bd18c75b72a75dc36bafb60",
+    "huggingface/huggingface_model/noise_schedule.py": "da16320cebbc727c03e8e45297593505fb41a597c7a5ef29eacd7043207a763c",
+    "huggingface/upload.py": "bd30caba06800b81cbee533c55af3b37ad01a174d42b4f6c2004490bbc470039",
+    "huggingface_push.py": "43a6e666798440e2f5a5e5868aa228dfe1378467890b98c60636ca390232b4b4"
+  },
+  "moved_tokenizer_assets": {
+    "huggingface/release/special_tokens_map.json": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a",
+    "huggingface/release/tokenizer.json": "29b3568f4721f2c8635f8c8468e3c5bacddc58e5970f7a7a323d549c296e23c8",
+    "huggingface/release/tokenizer_config.json": "889efe4908ff2a3fbff71daab928085e4bc29ba75cf86e720bdfb6e7222227fe"
+  },
+  "formal_hub_release": {
+    "repo_id": "Kiria-Nozan/ApexOracle",
+    "revision": "77694f08c1d0664fdb24c5a7bab130c8a3bc2eda",
+    "remote_file_count": 18,
+    "license": "MIT",
+    "weight_sha256": "b472f7508aaf0fdab4c935caf221415b48a5f8afd4d104a731c9d72d410c2c44",
+    "fresh_download_validated": true
+  },
+  "consumer_audit": {
+    "active_runtime_importers": [],
+    "paper_or_reviewer_consumers": [],
+    "cross_repository_local_path_consumers": [],
+    "ignored_weight_moved": false
+  }
+}

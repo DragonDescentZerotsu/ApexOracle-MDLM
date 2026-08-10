@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-08-09",
+  "status": "passed",
+  "legacy_source": {
+    "git_ref": "legacy-code-snapshot-2026-08-09",
+    "relative_path": "judge_generated_mols_MIC.py",
+    "sha256": "980a49c3044be5d956b34e3472236ffbab8423188b7964ff4409dd9eb857a2ab"
+  },
+  "canonical_components": [
+    "src/apexoracle_mdlm/models/dlm_encoder.py",
+    "src/apexoracle_mdlm/scoring/mic.py",
+    "src/apexoracle_mdlm/figures/generated_mic.py",
+    "scripts/reproduce/score_generated_molecule_mic.py",
+    "scripts/reproduce/plot_paper_fig3a.py"
+  ],
+  "formal_checkpoint": {
+    "owner": "ApexOracle-Core",
+    "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802"
+  },
+  "formal_generation_input": {
+    "owner": "ApexOracle-Generation",
+    "relative_path": "outputs/generated_mol_SELFIES-new-test/strain_BAA-3170_MIC_1_length_368_noise.txt",
+    "sha256": "079b8c43e66e877dfad852bd071fc6e0cbce6fda856748dbbd4f1fc98acff51d"
+  },
+  "scoring_parity": {
+    "strain": "BAA-3170",
+    "sample_count": 2,
+    "tokens_per_sample": 368,
+    "per_sample_logits_torch_equal": true,
+    "per_sample_logits_max_abs_difference": 0.0,
+    "per_sample_mic_torch_equal": true,
+    "per_sample_mic_max_abs_difference": 0.0,
+    "batch_logits_torch_equal": true,
+    "batch_logits_max_abs_difference": 0.0,
+    "batch_mic_torch_equal": true,
+    "batch_mic_max_abs_difference": 0.0,
+    "peak_gpu_allocated_bytes": 9170041344
+  },
+  "figure_parity": {
+    "exact_plotted_data": "reproducibility/paper_fig3a_plotted_data.csv",
+    "exact_plotted_data_sha256": "3fa3c5df038f6cc056c1320e5f59e93030a4ccb8b90da02b286c39d93da76ec2",
+    "raster_dpi": 150,
+    "raster_shape": [729, 737, 3],
+    "pixel_mean_absolute_channel_difference": 0.0,
+    "pixel_max_channel_difference": 0,
+    "exact_channel_fraction": 1.0
+  },
+  "compatibility_boundary": {
+    "legacy_body_removed": true,
+    "bridge_relative_path": "judge_generated_mols_MIC.py",
+    "bridge_consumer": "ApexOracle-Core scripts/reproduce/evaluate_remasking_schedule_reviewer.py",
+    "bridge_removal_gate": "Migrate the Core dynamic import to apexoracle_mdlm.scoring and pass the cross-repository caller test."
+  }
+}

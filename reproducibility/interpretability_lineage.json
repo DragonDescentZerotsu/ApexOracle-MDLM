@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "paper_consumer": "Attention analysis reveals possible efficacy determinants",
+  "snapshot": {
+    "tag": "legacy-code-snapshot-2026-08-09",
+    "commit": "79eed10cac8d5feb446be886eee0c5b356b23b06"
+  },
+  "active_legacy_assets_removed": true,
+  "legacy_assets": {
+    "show.ipynb": {
+      "bytes": 599782,
+      "sha256": "4377869d824ad79ce4eb30d6d6ecacc8ae87f57111330c075b7c3ec88ee38e91",
+      "outputs": 43,
+      "executed_cells": 8
+    },
+    "show_interpretability.ipynb": {
+      "bytes": 1256134,
+      "sha256": "d06a64e2d1a680f923ee4dfdb4aaf284bc1683d29063441b5e0a7fa5fef18a50",
+      "outputs": 95,
+      "executed_cells": 15
+    },
+    "visualize_attn.py": {
+      "bytes": 20880,
+      "sha256": "6365ab61b66f2805313e02e3b14bdfd2ad8173a6a9b083ef0fc3da1e9aff66af"
+    },
+    "visualize_attn_interpret.py": {
+      "bytes": 20880,
+      "sha256": "6365ab61b66f2805313e02e3b14bdfd2ad8173a6a9b083ef0fc3da1e9aff66af"
+    }
+  },
+  "duplication": {
+    "visualize_scripts_byte_identical": true,
+    "show_code_cells_repeated_in_interpretability_notebook": [0, 1, 2, 3, 4, 5]
+  },
+  "formal_assets": {
+    "checkpoint_sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
+    "apexoracle18_smiles_sha256": "8680505ec04ecb2238d306e990406843fd27a2853622ac4ce830f1d67d56dade"
+  },
+  "paper_cases": {
+    "BAA-3170": {
+      "predicted_mic_umol": 13.1875,
+      "embedding_shape": [500, 8192],
+      "selected_indices": [90, 156, 302],
+      "selected_weights": [0.5, 0.24999994039535522, 0.25],
+      "paper_locus_index": 302,
+      "paper_locus_window": [3020000, 3031000],
+      "paper_products": [
+        "glycosyltransferase",
+        "O11 family O-antigen polymerase"
+      ],
+      "exact_outputs": "reproducibility/interpretability/apexoracle18_baa3170/manifest.json"
+    },
+    "11775": {
+      "predicted_mic_umol": 62.5,
+      "embedding_shape": [491, 8192],
+      "selected_indices": [251, 385],
+      "selected_weights": [0.25, 0.75],
+      "paper_locus_index": 385,
+      "paper_locus_window": [3850000, 3861000],
+      "paper_products": [
+        "N-acetylneuraminate synthase",
+        "NeuE protein",
+        "alpha-2,8-polysialyltransferase family protein"
+      ],
+      "exact_outputs": "reproducibility/interpretability/apexoracle18_11775/manifest.json"
+    }
+  },
+  "attention_semantics": "PyTorch MultiheadAttention weights averaged over four heads",
+  "selection_rule": "weight > 0.05",
+  "gpu_parity": {
+    "path": "reproducibility/mic_attention_migration_parity.json",
+    "logit_equal": true,
+    "mic_equal": true,
+    "genome_attention_equal": true,
+    "text_attention_equal": true,
+    "max_abs_difference": 0.0
+  },
+  "canonical_replacement": {
+    "library": "apexoracle_mdlm.interpretability",
+    "cli": "scripts/reproduce/analyze_mic_attention.py",
+    "parity_audit": "scripts/audit/compare_legacy_mic_attention.py"
+  },
+  "evidence_boundary": {
+    "verified": "exact formal forward parity, saved-window coordinates, sequence/order/tensor compatibility, and overlapping GenBank CDS annotations",
+    "not_verified": "causality, single-gene attribution, orthology-defined strain uniqueness, complete multi-contig coverage",
+    "annotation_absence_check": "exact product strings only"
+  }
+}

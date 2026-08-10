@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "scope": "root debug and one-off embedding scripts",
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "legacy_sources": {
+    "debug.py": {
+      "sha256": "d94e08505cd81f5328f239934b6982f53bb5645681704611f679486cce90d0f5",
+      "role": "read one MolPort shard and print dataframe head",
+      "saved_output": false,
+      "canonical_replacement": "none_needed"
+    },
+    "debug_2.py": {
+      "sha256": "0db8993be46bdd0286ca1ecb88f5e73bf43e0731b23bdf25923b933d739972a3",
+      "role": "hard-coded non-pad DLM padded-forward smoke ending in print(0)",
+      "assertions": 0,
+      "saved_output": false,
+      "canonical_replacement": "existing model profiles and DLMHiddenStateEncoder"
+    },
+    "debug_3.py": {
+      "sha256": "582a0e091f0614d1e0aa212133bfb51f529387d726c7319278a27283ee0bf113",
+      "role": "compare vendor canonical SMILES to RDKit output for one MolPort shard",
+      "saved_output": false,
+      "canonical_replacement": "two-sided RDKit canonicalization in the formal MolPort matching protocol"
+    },
+    "temp_milk_embedding.py": {
+      "sha256": "1c1417d4e5e17f6bf4de09be344b2603e6b773f2e3d1d3c648094f3e20e20fff",
+      "role": "one-off peptide-sequence CLS embedding export",
+      "canonical_replacement": "none_required_by_current_consumers"
+    },
+    "temp_save_milk_embedding.py": {
+      "sha256": "1c1417d4e5e17f6bf4de09be344b2603e6b773f2e3d1d3c648094f3e20e20fff",
+      "byte_identical_to": "temp_milk_embedding.py",
+      "role": "duplicate one-off peptide-sequence CLS embedding export",
+      "canonical_replacement": "none_required_by_current_consumers"
+    },
+    "temp_stf_polymer.py": {
+      "sha256": "9d75c26db35b5475e87751c2714a4ec4bec90bfe0e9bc885ea01449d0dfbdd3a",
+      "role": "one-off literature-polymer monomer CLS embedding export",
+      "canonical_replacement": "none_required_by_current_consumers"
+    }
+  },
+  "historical_assets": {
+    "molport_shard": {
+      "path": "temp_data/Molport_SMILES/iis_smiles-000-000-000--000-499-999.txt",
+      "bytes": 62530199,
+      "sha256": "526efde0078e04780f0d244f286bb5e578b2e5f9e95fcfd79a4bfd8e4caea178"
+    },
+    "peptide_table_source": {
+      "path": "temp_data/pep_MICs_sorted_withsource.csv",
+      "bytes": 8533174,
+      "sha256": "9b2ba77548eec3d9c8f65451d23ef79af5dba7decad4f8efac42cad4cdeb2085",
+      "rows": 42010,
+      "unique_first_column_strings": 42010
+    },
+    "milk_embeddings": {
+      "path": "temp_data/milk_embeddings.pt",
+      "bytes": 141888186,
+      "sha256": "42ba58a98e00dd569a3501be469da08aaa4f82a5c84daed849d9e235e8d4a763",
+      "keys": 41988,
+      "value_shape": [
+        1,
+        768
+      ],
+      "value_dtype": "torch.float32",
+      "source_strings_without_output_key": 22,
+      "missing_key_sample_type": "semicolon-separated accession lists, not valid peptide sequences"
+    },
+    "polymer_source": {
+      "path": "temp_data/polymers_lit_scraped.csv",
+      "bytes": 9677,
+      "sha256": "02755c5e1470f2675d397a532d621e283ff894004ef1a76a39591026a8671c69",
+      "rows": 56,
+      "unique_monomer_smiles": 12
+    },
+    "polymer_embeddings": {
+      "path": "temp_data/stf_polymer_monomer_embeddings.npy",
+      "bytes": 37996,
+      "sha256": "b6ad2c2e9635666c2b21129868b39d717e068835ca5624cb3828e6bfc040d0dc",
+      "keys": 12,
+      "keys_equal_source_monomer_set": true,
+      "value_shape": [
+        768
+      ],
+      "value_dtype": "float32"
+    }
+  },
+  "consumer_audit": {
+    "runtime_callers_found": 0,
+    "formal_paper_or_reviewer_consumers_found": 0,
+    "embedding_output_consumers_found": 0
+  },
+  "disposition": "snapshot_only_sources_removed_assets_preserved_ignored",
+  "status": "passed"
+}

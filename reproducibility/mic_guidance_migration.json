@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "profiles": {
+    "noisy_standard": {
+      "name": "noisy_standard",
+      "legacy_sources": [
+        "guaidance_regressor_all_data.py"
+      ],
+      "backbone_variant": "dit",
+      "sampling": "random_time",
+      "preserve_padding": false,
+      "encoder_mode": "train",
+      "batch_size": 70,
+      "epochs": 100,
+      "backbone_checkpoint_label": "last_reg_v1.ckpt",
+      "historical_output_label": "guidance_regressor"
+    },
+    "noisy_padding_preserved": {
+      "name": "noisy_padding_preserved",
+      "legacy_sources": [
+        "guaidance_regressor_all_data_pad_no_mask.py"
+      ],
+      "backbone_variant": "dit",
+      "sampling": "random_time",
+      "preserve_padding": true,
+      "encoder_mode": "train",
+      "batch_size": 70,
+      "epochs": 100,
+      "backbone_checkpoint_label": "last_reg_v1.ckpt",
+      "historical_output_label": "guidance_regressor_pad_no_mask"
+    },
+    "noisy_non_pad": {
+      "name": "noisy_non_pad",
+      "legacy_sources": [
+        "guaidance_regressor_all_data_non_pad.py",
+        "guaidance_regressor_all_data_non_pad_cls.py"
+      ],
+      "backbone_variant": "dit_non_pad",
+      "sampling": "random_time",
+      "preserve_padding": false,
+      "encoder_mode": "train",
+      "batch_size": 70,
+      "epochs": 200,
+      "backbone_checkpoint_label": "1-255000-fine-tune.ckpt",
+      "historical_output_label": "guidance_regressor_non_pad"
+    },
+    "clean_non_pad": {
+      "name": "clean_non_pad",
+      "legacy_sources": [
+        "guaidance_regressor_all_data_non_pad_cls_clean.py"
+      ],
+      "backbone_variant": "dit_non_pad",
+      "sampling": "fixed_epsilon",
+      "preserve_padding": false,
+      "encoder_mode": "train",
+      "batch_size": 30,
+      "epochs": 13,
+      "backbone_checkpoint_label": "1-255000-fine-tune.ckpt",
+      "historical_output_label": "guidance_regressor_non_pad_clean"
+    },
+    "noisy_non_pad_eval": {
+      "name": "noisy_non_pad_eval",
+      "legacy_sources": [
+        "guaidance_regressor_all_data_non_pad_cls_noise.py"
+      ],
+      "backbone_variant": "dit_non_pad",
+      "sampling": "random_time",
+      "preserve_padding": false,
+      "encoder_mode": "eval",
+      "batch_size": 70,
+      "epochs": 200,
+      "backbone_checkpoint_label": "1-255000-fine-tune.ckpt",
+      "historical_output_label": "guidance_regressor_non_pad_noise"
+    }
+  },
+  "sources": {
+    "guaidance_regressor_all_data.py": {
+      "bytes": 115264,
+      "sha256": "055e87b0f7c88c2dc640c1d8d216e24c508e38d77282f5f0f0281efd0570d2e0",
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data.py"
+    },
+    "guaidance_regressor_all_data_pad_no_mask.py": {
+      "bytes": 115259,
+      "sha256": "b727a1911bda908093b95d803c5f1298d734816a78a8f8763e61fd7d76b40f02",
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data_pad_no_mask.py"
+    },
+    "guaidance_regressor_all_data_non_pad.py": {
+      "bytes": 115506,
+      "sha256": "2a01a511e9a5d6428d8bc4f1240006db120c62c35631e89f67490e1e37732948",
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data_non_pad.py"
+    },
+    "guaidance_regressor_all_data_non_pad_cls.py": {
+      "bytes": 115506,
+      "sha256": "2a01a511e9a5d6428d8bc4f1240006db120c62c35631e89f67490e1e37732948",
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data_non_pad_cls.py"
+    },
+    "guaidance_regressor_all_data_non_pad_cls_clean.py": {
+      "bytes": 115509,
+      "sha256": "1c15d5f6cb4e65b824d7381e1c7d1e037b49a2929eccb3b8aa02f314b4a5f447",
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data_non_pad_cls_clean.py"
+    },
+    "guaidance_regressor_all_data_non_pad_cls_noise.py": {
+      "bytes": 116616,
+      "sha256": "8968c53f8c552baa960429787bb8156bdcae03a3f0e6d70d4f717e9182bb7801",
+      "recovery": "git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data_non_pad_cls_noise.py"
+    }
+  },
+  "source_component_parity": {
+    "noisy_standard": [
+      {
+        "head_state_dict_keys_equal": true,
+        "head_forward_torch_equal": true,
+        "head_max_absolute_difference": 0.0,
+        "attention_state_dict_keys_equal": true,
+        "attention_forward_torch_equal": true,
+        "attention_max_absolute_difference": 0.0,
+        "legacy_attention_returns_weights": true
+      }
+    ],
+    "noisy_padding_preserved": [
+      {
+        "head_state_dict_keys_equal": true,
+        "head_forward_torch_equal": true,
+        "head_max_absolute_difference": 0.0,
+        "attention_state_dict_keys_equal": true,
+        "attention_forward_torch_equal": true,
+        "attention_max_absolute_difference": 0.0,
+        "legacy_attention_returns_weights": false
+      }
+    ],
+    "noisy_non_pad": [
+      {
+        "head_state_dict_keys_equal": true,
+        "head_forward_torch_equal": true,
+        "head_max_absolute_difference": 0.0,
+        "attention_state_dict_keys_equal": true,
+        "attention_forward_torch_equal": true,
+        "attention_max_absolute_difference": 0.0,
+        "legacy_attention_returns_weights": false
+      },
+      {
+        "head_state_dict_keys_equal": true,
+        "head_forward_torch_equal": true,
+        "head_max_absolute_difference": 0.0,
+        "attention_state_dict_keys_equal": true,
+        "attention_forward_torch_equal": true,
+        "attention_max_absolute_difference": 0.0,
+        "legacy_attention_returns_weights": false
+      }
+    ],
+    "clean_non_pad": [
+      {
+        "head_state_dict_keys_equal": true,
+        "head_forward_torch_equal": true,
+        "head_max_absolute_difference": 0.0,
+        "attention_state_dict_keys_equal": true,
+        "attention_forward_torch_equal": true,
+        "attention_max_absolute_difference": 0.0,
+        "legacy_attention_returns_weights": false
+      }
+    ],
+    "noisy_non_pad_eval": [
+      {
+        "head_state_dict_keys_equal": true,
+        "head_forward_torch_equal": true,
+        "head_max_absolute_difference": 0.0,
+        "attention_state_dict_keys_equal": true,
+        "attention_forward_torch_equal": true,
+        "attention_max_absolute_difference": 0.0,
+        "legacy_attention_returns_weights": false
+      }
+    ]
+  },
+  "byte_identical_noisy_non_pad_duplicate": true,
+  "formal_checkpoints": {
+    "noisy_standard": {
+      "relative_path": "guidance_regressor/noise_guidance_best_R2_all_peptide_epoch_100.pth",
+      "bytes": 9168011801,
+      "schema_valid": true,
+      "classification_head_strict_load": true,
+      "r2": 0.7031496189913082
+    },
+    "noisy_padding_preserved": {
+      "relative_path": "guidance_regressor_pad_no_mask/noise_guidance_best_R2_all_peptide_epoch_100.pth",
+      "bytes": 9168011801,
+      "schema_valid": true,
+      "classification_head_strict_load": true,
+      "r2": 0.8359903650344191
+    },
+    "noisy_non_pad": {
+      "relative_path": "guidance_regressor_non_pad/noise_guidance_best_R2_all_peptide_epoch_200.pth",
+      "bytes": 9168011801,
+      "schema_valid": true,
+      "classification_head_strict_load": true,
+      "r2": 0.6349100448945466
+    },
+    "clean_non_pad": {
+      "relative_path": "guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+      "bytes": 9168011488,
+      "schema_valid": true,
+      "classification_head_strict_load": true,
+      "r2": 0.7640154410890745
+    },
+    "noisy_non_pad_eval": {
+      "relative_path": "guidance_regressor_non_pad_noise/noise_guidance_best_R2_all_peptide_epoch_200.pth",
+      "bytes": 9168011801,
+      "schema_valid": true,
+      "classification_head_strict_load": true,
+      "r2": 0.7608343721288109
+    }
+  },
+  "generation_profile_gpu_parity": {
+    "profile": "noisy_padding_preserved",
+    "batch_size": 2,
+    "regression_torch_equal": true,
+    "regression_max_absolute_difference": 0.0,
+    "classification_torch_equal": false,
+    "classification_max_absolute_difference": 0.00091552734375,
+    "classification_numerically_close_atol_0_002": true,
+    "classification_role": "inactive historical head: saved by the trainers, but its batches were commented out and Generation consumes only the regression head",
+    "device": "cuda",
+    "autocast_dtype": "torch.bfloat16",
+    "fixed_seed": 20260811
+  },
+  "verified_facts": [
+    "Six legacy trainers reduce to five explicit protocol profiles.",
+    "The two noisy_non_pad trainer files are byte-identical.",
+    "Every source has checkpoint-compatible regression and attention components.",
+    "All five formal checkpoints satisfy the fixed Generation schema and strict classification-head load.",
+    "The Generation-consumed regression output is bitwise equal under the formal noisy padding-preserved profile."
+  ]
+}

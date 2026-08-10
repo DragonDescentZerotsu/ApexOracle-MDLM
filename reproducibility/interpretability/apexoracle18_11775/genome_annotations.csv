@@ -1,0 +1,27 @@
+fragment_index,attention_weight,contig_index,record_id,window_start,window_end,feature_start,feature_end,fully_contained,gene,locus_tag,product
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2509328,2510552,False,,pgap_annot_002485,hypothetical protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2510652,2511537,True,,pgap_annot_002486,YfjP family GTPase
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2511739,2512420,True,,pgap_annot_002487,WYL domain-containing protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2512570,2513248,True,,pgap_annot_002488,hypothetical protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2513253,2513487,True,,pgap_annot_002489,DUF905 family protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2513576,2514395,True,,pgap_annot_002490,DUF932 domain-containing protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2514660,2515140,True,,pgap_annot_002491,antirestriction protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2515154,2515631,True,,pgap_annot_002492,RadC family protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2515717,2515939,True,,pgap_annot_002493,DUF987 domain-containing protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2516018,2516387,True,,pgap_annot_002494,type IV toxin-antitoxin system YeeU family antitoxin
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2516475,2516853,True,cbtA,pgap_annot_002495,type IV toxin-antitoxin system cytoskeleton-binding toxin CbtA
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2516849,2517047,True,,pgap_annot_002496,DUF5983 family protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2517074,2517272,True,,pgap_annot_002497,DUF957 domain-containing protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2517356,2517917,True,,pgap_annot_002498,DUF4942 domain-containing protein
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2518751,2520290,True,cadC,pgap_annot_002499,lysine decarboxylation/transport transcriptional activator CadC
+251,0.25,0,assembly_80710acd3a7f402b_1,2510000,2521000,2520655,2521990,False,cadB,pgap_annot_002500,cadaverine/lysine antiporter
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3849600,3850224,False,,pgap_annot_003761,acetyltransferase
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3850220,3851261,True,neuB,pgap_annot_003762,N-acetylneuraminate synthase
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3851260,3852517,True,,pgap_annot_003763,GDSL-type esterase/lipase family protein
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3852513,3853689,True,neuC,pgap_annot_003764,UDP-N-acetylglucosamine 2-epimerase
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3853681,3854830,True,,pgap_annot_003765,NeuE protein
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3854819,3856049,True,,pgap_annot_003766,"alpha-2,8-polysialyltransferase family protein"
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3856198,3857404,True,,pgap_annot_003767,capsular biosynthesis protein
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3857438,3859466,True,,pgap_annot_003768,capsular polysaccharide biosynthesis protein
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3859462,3860203,True,kdsB,pgap_annot_003769,3-deoxy-manno-octulosonate cytidylyltransferase
+385,0.75,0,assembly_80710acd3a7f402b_1,3850000,3861000,3860212,3861889,False,,pgap_annot_003770,polysaccharide export protein

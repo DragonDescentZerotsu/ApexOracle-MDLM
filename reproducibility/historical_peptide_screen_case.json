@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "scope": "historical external-project peptide screening case",
+  "input_copies": [
+    {
+      "path": "temp_data/milk/strain_#002.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_11775.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_12600.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_13883.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_15697.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_15700.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_19606.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_23272.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_4356.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_47085.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_700802.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_BAA-1556.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    },
+    {
+      "path": "temp_data/milk/strain_BAA-999.txt",
+      "bytes": 41656799,
+      "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+      "rows": 41988
+    }
+  ],
+  "shared_candidate_pool": {
+    "all_input_files_identical": true,
+    "rows": 41988,
+    "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215"
+  },
+  "protocol": {
+    "mic_threshold_umol": 15.0,
+    "qualification": "MIC <= threshold, parser returned sequence, uppercase X absent",
+    "qualified_selfies": "SELFIES re-encoding of decoded source structure"
+  },
+  "strains": {
+    "BAA-999": {
+      "qualified_selfies": {
+        "path": "temp_data/milk_pred/strain_BAA-999.txt",
+        "bytes": 34641,
+        "sha256": "3a3b57c332d2313215c6899f1ef989f879b2905dc3b3f6fe199d53984cac35e3",
+        "rows": 20
+      },
+      "images": {
+        "path": "temp_data/milk_pred_img/strain_BAA-999",
+        "files": 20,
+        "bytes": 1421948,
+        "tree_sha256": "998abd456fbc958081f1fb56638c1be448180e5a5c5df032c729296220854742"
+      },
+      "row_index_range": [
+        4277,
+        38331
+      ],
+      "rounded_mic_range_umol": [
+        4.28,
+        14.94
+      ]
+    },
+    "15700": {
+      "qualified_selfies": {
+        "path": "temp_data/milk_pred/strain_15700.txt",
+        "bytes": 298045,
+        "sha256": "ca166ed993a2b4f9423b39626be5243cdf76edc4030429b1012469b1c3c81846",
+        "rows": 210
+      },
+      "images": {
+        "path": "temp_data/milk_pred_img/strain_15700",
+        "files": 210,
+        "bytes": 16320069,
+        "tree_sha256": "26abf00be6f2869ce2758e31399e9a1f77b9b8735ca63568212004596ca8cb9c"
+      },
+      "row_index_range": [
+        1,
+        40962
+      ],
+      "rounded_mic_range_umol": [
+        3.03,
+        15.0
+      ]
+    },
+    "15697": {
+      "qualified_selfies": {
+        "path": "temp_data/milk_pred/strain_15697.txt",
+        "bytes": 69059,
+        "sha256": "c43516b43310326c35a52f4d49be2937c1d0252ad4d27a9799927f8d509d0c5f",
+        "rows": 39
+      },
+      "images": {
+        "path": "temp_data/milk_pred_img/strain_15697",
+        "files": 39,
+        "bytes": 3337285,
+        "tree_sha256": "2b3a023a87dfda1529912b76b29c079b81676e77e2eec116aeb103a5c205699e"
+      },
+      "row_index_range": [
+        446,
+        41608
+      ],
+      "rounded_mic_range_umol": [
+        2.81,
+        14.44
+      ]
+    },
+    "23272": {
+      "qualified_selfies": {
+        "path": "temp_data/milk_pred/strain_23272.txt",
+        "bytes": 142974,
+        "sha256": "2c77f32bfffd47919c006bc4a4c58e2f4445ca8ca448598efde810cc75726c9e",
+        "rows": 74
+      },
+      "images": {
+        "path": "temp_data/milk_pred_img/strain_23272",
+        "files": 74,
+        "bytes": 5455490,
+        "tree_sha256": "69d782c7567fb5e8bf5b48cbbabc252705cc4f527f50d74b91eb3e91cf9d623c"
+      },
+      "row_index_range": [
+        1876,
+        38535
+      ],
+      "rounded_mic_range_umol": [
+        2.88,
+        15.0
+      ]
+    },
+    "4356": {
+      "qualified_selfies": {
+        "path": "temp_data/milk_pred/strain_4356.txt",
+        "bytes": 1230755,
+        "sha256": "a59eaf04b2e0d34cf23d90021491a61d234bf053a64dbc72c525b047c9da087f",
+        "rows": 738
+      },
+      "images": {
+        "path": "temp_data/milk_pred_img/strain_4356",
+        "files": 738,
+        "bytes": 58668306,
+        "tree_sha256": "181591b4e35165938cb3c33cfcc701e2ad71c5baa410870a4f56ff23c24c065b"
+      },
+      "row_index_range": [
+        1,
+        41944
+      ],
+      "rounded_mic_range_umol": [
+        0.8,
+        15.0
+      ]
+    }
+  },
+  "parser_parity": {
+    "legacy_source": "git:legacy-code-snapshot-2026-08-09:smiles_to_peptide.py",
+    "comparisons": 1081,
+    "all_equal": true
+  },
+  "raster_parity": {
+    "historical_path": "temp_data/milk_pred_img/strain_BAA-999/mol_4277_mic_4.28.png",
+    "shape": [
+      1500,
+      1500,
+      3
+    ],
+    "exact_pixel_fraction": 1.0,
+    "mean_absolute_channel_difference": 0.0,
+    "max_channel_difference": 0
+  },
+  "evidence_boundary": {
+    "verified": "Input copies, qualified rows, image row/MIC naming, parser outputs, and one exact raster replay.",
+    "not_verified": "No timestamped source revision or complete historical MIC table proves exact excluded-row replay."
+  },
+  "status": "passed"
+}

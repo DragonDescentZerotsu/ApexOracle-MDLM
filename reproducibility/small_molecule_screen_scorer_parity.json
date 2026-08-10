@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-08-10",
+  "status": "passed",
+  "legacy_source": {
+    "git_ref": "legacy-code-snapshot-2026-08-09",
+    "relative_path": "temp_judge_generated_mols_MIC.py",
+    "sha256": "e457921a84b0172307b5357026953cdfd6d9a158add104359daa92b9e4594aa8"
+  },
+  "canonical_components": [
+    "src/apexoracle_mdlm/scoring/mic.py",
+    "src/apexoracle_mdlm/scoring/small_molecule_screen.py",
+    "scripts/reproduce/score_small_molecule_screen.py"
+  ],
+  "formal_checkpoint": {
+    "owner": "ApexOracle-Core",
+    "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802"
+  },
+  "formal_small_molecule_input": {
+    "owner": "ApexOracle-MDLM ignored local asset",
+    "relative_path": "temp_data/small_molecules/strain_BAA-3170.txt",
+    "sha256": "56607905f2621699c13516d65c5183af05bb96bf6b30296a84ef926dd0e457ab"
+  },
+  "scoring_parity": {
+    "strain": "BAA-3170",
+    "sample_count": 2,
+    "tokens_per_sample": [
+      78,
+      59
+    ],
+    "per_sample_logits_torch_equal": true,
+    "per_sample_logits_max_abs_difference": 0.0,
+    "per_sample_mic_torch_equal": true,
+    "per_sample_mic_max_abs_difference": 0.0,
+    "batch_comparison": "not_applicable_for_different_unpadded_lengths",
+    "peak_gpu_allocated_bytes": 9170041344
+  },
+  "evidence_boundary": {
+    "verified": "Tagged snapshot and canonical scorer are exactly equal on the selected formal inputs.",
+    "not_verified": "No timestamped source revision proves that the tagged snapshot is byte-identical to the original 44,608-entry producer run."
+  }
+}

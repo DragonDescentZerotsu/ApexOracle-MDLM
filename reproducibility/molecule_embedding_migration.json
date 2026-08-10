@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "passed_with_documented_legacy_checkpoint_drift",
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "legacy_sources": {
+    "save_DBAASP_id_emb_dict.py": "4b972993e7f681b0f38f7012170647034d81c8302fd8ef041b14a992c2ea3caf",
+    "save_synergy_mol_id_emb_dict.py": "102bc902bf78391831aaa26ae305b7b10460f5613b7e2e28d5b3d92e87ec106e",
+    "save_inhouse_synergy_mol_id_emb_dict.py": "4f5a7206b0f47938ffc03c81e3610ba8b13ba62484533608ef7db02fa30accd1",
+    "DBAASP_MLM_MDLM.py": "5e167f35288d8a5275f76ecb7f486177ed9e57c9c40fed6e68bd5dcbf6e546e3"
+  },
+  "canonical_components": [
+    "src/apexoracle_mdlm/embeddings/molecule.py",
+    "src/apexoracle_mdlm/models/dlm_encoder.py",
+    "scripts/reproduce/export_molecule_embeddings.py"
+  ],
+  "actual_cache_producer_checkpoint": {
+    "relative_path": "Checkpoints_fangping/1-255000-fine-tune.ckpt",
+    "bytes": 1568403312,
+    "sha256": "77210ddd6cfba7f3f1b74f834715f1ddd3bd30a0caa42c4266565149e1115810",
+    "backbone_missing_keys": [],
+    "expected_unconsumed_mtr_keys": [
+      "regression.dense.weight",
+      "regression.dense.bias",
+      "regression.out_proj.weight",
+      "regression.out_proj.bias"
+    ]
+  },
+  "frozen_caches": {
+    "Pep_emb_dict_cls_wo_pad_eval.pt": {"entries": 18029, "sha256": "c08630860efb87e97fa9955b08db526499b16208f7be1a89e7fa0b2346a9ff7b"},
+    "SM_emb_dict_cls_wo_pad_eval.pt": {"entries": 49330, "sha256": "5d2e2f4d7b9c7287764e44f84dc7977b60cd1c0c6a7317fd91189e91bc5ede83"},
+    "Pep_emb_dict_mean_wo_pad_eval.pt": {"entries": 18029, "sha256": "3b9206e0f0b04fa3ea38c8cc9cc4ac87850a819a79f9c7a7e3e56d391c31f390"},
+    "SM_emb_dict_mean_wo_pad_eval.pt": {"entries": 49330, "sha256": "f920e3558f7303da0d5a521afc0d9efccff0919a2bb176f1aa796a4ba9b64b65"},
+    "synergy_mol_emb_dict_cls_wo_pad.pt": {"entries": 844, "sha256": "6c42d81f38d89e3ca31f5ebc49be86cd290ba3d0e87bd3ce3ceffa4e82a36484"},
+    "combine_create_synergy_inhouse_mol_emb_dict_cls_wo_pad.pt": {"entries": 3441, "sha256": "761aabf3019f2f3e8fbf28d0952d3da2cd51fd29e1e73dff2c9238b915058460"}
+  },
+  "gpu_sample_parity": {
+    "device": "NVIDIA A100 80GB PCIe",
+    "all_torch_equal": true,
+    "maximum_absolute_difference": 0.0,
+    "cases": [
+      {"profile": "peptide", "id": "3", "pooling": "cls_wo_pad_eval", "shape": [1, 768]},
+      {"profile": "peptide", "id": "3", "pooling": "mean_wo_pad_eval", "shape": [768]},
+      {"profile": "small_molecule", "id": "ce_0", "pooling": "cls_wo_pad_eval", "shape": [1, 768]},
+      {"profile": "small_molecule", "id": "ce_0", "pooling": "mean_wo_pad_eval", "shape": [768]},
+      {"profile": "historical_synergy", "id": "37", "key_type": "integer", "pooling": "cls_wo_pad", "shape": [1, 768]},
+      {"profile": "historical_synergy", "id": "AgNO3", "key_type": "string", "pooling": "cls_wo_pad", "shape": [1, 768]},
+      {"profile": "inhouse_synergy", "id": "1", "key_type": "integer", "pooling": "cls_wo_pad", "shape": [1, 768]},
+      {"profile": "inhouse_synergy", "id": "2", "key_type": "integer", "pooling": "cls_wo_pad", "shape": [1, 768]}
+    ]
+  },
+  "legacy_checkpoint_drift": {
+    "script": "save_synergy_mol_id_emb_dict.py",
+    "currently_hard_coded_checkpoint": "Checkpoints_fangping/last_reg_v1.ckpt",
+    "frozen_cache_matches_hard_coded_checkpoint": false,
+    "representative_max_absolute_differences": {"37": 43.31040573120117, "AgNO3": 267.2560119628906},
+    "frozen_cache_matches_actual_cache_producer_checkpoint": true
+  },
+  "fig2b_replacement": {
+    "legacy_file": "DBAASP_MLM_MDLM.py",
+    "classification": "19-task fivefold downstream MIC benchmark trainer; not an embedding producer",
+    "core_canonical_runners": [
+      "scripts/reproduce_fig2b_mdlm_cached_5fold.py",
+      "scripts/reproduce/run_fig2b_shared_mdlm_online.py"
+    ]
+  },
+  "credential_audit": {
+    "legacy_file_contains_commented_wandb_key_pattern": true,
+    "pattern_already_present_on_custom_master": true,
+    "active_source_removed": true,
+    "release_action": "confirm token revocation or rotation; decide history rewrite separately"
+  },
+  "active_legacy_sources_removed": true,
+  "full_cache_regeneration_performed": false
+}

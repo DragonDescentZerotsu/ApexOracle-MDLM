@@ -4,6 +4,10 @@
 /Checkpoints_fangping
 **/*checkpoints*/
 
+# Source package named ``checkpoints`` is code, not a weight directory.
+!src/apexoracle_mdlm/checkpoints/
+!src/apexoracle_mdlm/checkpoints/*.py
+
 # Molecules data folder
 molecule_data/
 
@@ -39,11 +43,20 @@ ENV/
 env/
 
 # IDE
+.codex
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# Local test and plotting caches
+.cache/
+.mplconfig/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # OS files
 .DS_Store
@@ -54,3 +67,5 @@ Thumbs.db
 
 # Large model files
 *.safetensors
+# Local, generated Hugging Face release capsules (may contain model weights).
+.hf-release.*

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "reference": "snapshot checkpoint-producer attention/head plus judge symmetric-pair forward",
+  "active_judge_direct_replay": "fails because imported MIC attention returns a tuple",
+  "checkpoint": "/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_noise_synergy/cls/synergy_noise_clsfier_best.ckpt",
+  "partner_embeddings": "/data2/tianang/projects/Synergy/DataPrepare/Data/synergy_mol_emb_dict_cls_wo_pad.pt",
+  "partner_key": "Gentamicin",
+  "generation_file": "/data2/tianang/projects/discrete-diffusion-guidance/outputs/generated_mol_SELFIES/strain_19606_MIC_1_length_238_noise.txt",
+  "strain": "19606",
+  "comparisons": [
+    {
+      "row_index": 0,
+      "input_tokens": 238,
+      "logit_equal": true,
+      "logit_max_abs_difference": 0.0,
+      "probability_equal": true,
+      "probability_max_abs_difference": 0.0
+    }
+  ],
+  "peak_gpu_memory_bytes": 7237963264
+}

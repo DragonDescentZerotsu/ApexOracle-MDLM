@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "strain": "BAA-3170",
+  "molecule_format": "smiles",
+  "tokenizer": "ibm-research/materials.selfies-ted",
+  "checkpoint": {
+    "path": "/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "bytes": 9168011488,
+    "sha256": null
+  },
+  "inputs": {
+    "molecule": {
+      "path": "/data2/tianang/projects/Synergy/DataPrepare/Data/mol_visualize/ApexOracle_18.txt",
+      "bytes": 505,
+      "sha256": "8680505ec04ecb2238d306e990406843fd27a2853622ac4ce830f1d67d56dade"
+    },
+    "genome_fasta": {
+      "path": "/data2/tianang/projects/Synergy/DataPrepare/Data/Genome/ATCC/Escherichia_coli_ATCC_BAA_3170.fasta",
+      "bytes": 5357199,
+      "sha256": "9e7f958942a1fc6ec66314db757c702a7ba8cd2fead4ba7c522befb4a0c9c02e"
+    },
+    "genome_genbank": {
+      "path": "/data2/tianang/projects/Synergy/DataPrepare/Data/Genome_annotation/ATCC/Escherichia_coli_ATCC_BAA_3170.gbk",
+      "bytes": 13136519,
+      "sha256": "347e4401e6c14b30a50a3cdfc41410cb16f3c42ae82e9654c37412d0679a65ba"
+    },
+    "genome_embedding": {
+      "path": "/data2/tianang/projects/Synergy/DataPrepare/Data/Genome_embs/Escherichia_coli_ATCC_BAA_3170.pt",
+      "bytes": 8193359,
+      "sha256": "729e62e0c6a85f7209242538ab233d630fc4192dc72d26984e83be3ed8f19e42"
+    }
+  },
+  "verified_genome_contract": {
+    "record_count": 5,
+    "embedding_shape": [
+      500,
+      8192
+    ],
+    "window_count": 500,
+    "window_length": 11000,
+    "step": 10000,
+    "saved_tensor_global_fragment_index": true
+  },
+  "prediction": {
+    "regression_logit": -0.12060546875,
+    "predicted_mic_umol": 13.1875
+  },
+  "attention": {
+    "semantics": "torch MultiheadAttention weights averaged over heads",
+    "selection": "weight > 0.05",
+    "genome_selected_indices": [
+      90,
+      156,
+      302
+    ],
+    "genome_selected_weights": [
+      0.5,
+      0.24999994039535522,
+      0.25
+    ],
+    "genome_annotation_rows": 34
+  },
+  "outputs": {
+    "genome_attention": {
+      "path": "reproducibility/interpretability/apexoracle18_baa3170/genome_attention.csv",
+      "bytes": 16358,
+      "sha256": "87144104f9b2ab002df194d2a4f525faaaedb4e8037f1a173bda4f1f7edaa69f"
+    },
+    "genome_annotations": {
+      "path": "reproducibility/interpretability/apexoracle18_baa3170/genome_annotations.csv",
+      "bytes": 4745,
+      "sha256": "5f44a6300e98d9568d72d59c142c79b70af6f7d61a65c5ade64e5cc4fa89fd6b"
+    },
+    "text_attention": {
+      "path": "reproducibility/interpretability/apexoracle18_baa3170/text_attention.csv",
+      "bytes": 8210,
+      "sha256": "25e695a5529f5cba0d1454787103abd59f2b32b3a703fb609e7539ddc6bbf683"
+    }
+  },
+  "interpretation_boundary": "Attention is descriptive and hypothesis-generating; it is not causal single-gene attribution or proof of strain uniqueness."
+}

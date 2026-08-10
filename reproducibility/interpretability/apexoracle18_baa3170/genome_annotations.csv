@@ -1,0 +1,35 @@
+fragment_index,attention_weight,contig_index,record_id,window_start,window_end,feature_start,feature_end,fully_contained,gene,locus_tag,product
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,899872,900760,False,rfbD,pgap_annot_000871,dTDP-4-dehydrorhamnose reductase
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,900840,901719,True,rfbA,pgap_annot_000872,glucose-1-phosphate thymidylyltransferase RfbA
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,901784,902336,True,rfbC,pgap_annot_000873,"dTDP-4-dehydrorhamnose 3,5-epimerase"
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,902385,904533,True,,pgap_annot_000874,capsular polysaccharide biosynthesis protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,905695,906916,True,,pgap_annot_000875,capsular biosynthesis protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,906941,907172,True,,pgap_annot_000876,hypothetical protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,907277,907454,True,,pgap_annot_000877,DUF957 domain-containing protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,907470,907901,True,,pgap_annot_000878,DUF5983 family protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,907897,908275,True,cbtA,pgap_annot_000879,type IV toxin-antitoxin system cytoskeleton-binding toxin CbtA
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,908363,908732,True,cbeA,pgap_annot_000880,type IV toxin-antitoxin system cytoskeleton bundling-enhancing antitoxin CbeA
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,908805,909027,True,yeeT,pgap_annot_000881,DUF987 domain-containing protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,909095,909572,True,,pgap_annot_000882,RadC family protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,909587,910073,True,,pgap_annot_000883,antirestriction protein
+90,0.5,0,assembly_5047e59f2cf34fc6_1,900000,911000,910164,910983,True,,pgap_annot_000884,DUF932 domain-containing protein
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1559835,1561086,False,frc,pgap_annot_001524,formyl-CoA transferase
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1561139,1562834,True,oxc,pgap_annot_001525,oxalyl-CoA decarboxylase
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1562902,1563847,True,yfdV,pgap_annot_001526,transporter YfdV
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1563920,1565066,True,yfdE,pgap_annot_001527,CoA:oxalate CoA-transferase
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1565121,1568715,True,evgS,pgap_annot_001528,acid-sensing system histidine kinase EvgS
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1568719,1569334,True,evgA,pgap_annot_001529,acid-sensing system DNA-binding response regulator EvgA
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1569749,1570913,True,emrK,pgap_annot_001530,multidrug efflux MFS transporter periplasmic adaptor subunit EmrK
+156,0.24999994039535522,0,assembly_5047e59f2cf34fc6_1,1560000,1571000,1570912,1572451,False,emrY,pgap_annot_001531,multidrug efflux MFS transporter permease subunit EmrY
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3018856,3020227,False,cpsG,pgap_annot_002926,colanic acid biosynthesis phosphomannomutase CpsG
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3020251,3020998,True,,pgap_annot_002927,glycosyltransferase family 2 protein
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3021081,3022467,True,,pgap_annot_002928,mannose-1-phosphate guanylyltransferase/mannose-6-phosphate isomerase
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3022478,3022934,True,,pgap_annot_002929,GDP-mannose mannosyl hydrolase
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3022936,3023902,True,,pgap_annot_002930,GDP-L-fucose synthase
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3023905,3025027,True,gmd,pgap_annot_002931,"GDP-mannose 4,6-dehydratase"
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3025037,3026045,True,,pgap_annot_002932,glycosyltransferase family 1 protein
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3026113,3027130,True,galE,pgap_annot_002933,UDP-glucose 4-epimerase GalE
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3027150,3028218,True,,pgap_annot_002934,glycosyltransferase
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3028219,3029455,True,wzy,pgap_annot_002935,O11 family O-antigen polymerase
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3029451,3030177,True,,pgap_annot_002936,glycosyltransferase family 2 protein
+302,0.25,0,assembly_5047e59f2cf34fc6_1,3020000,3031000,3030185,3031421,False,wzx,pgap_annot_002937,O11 family O-antigen flippase

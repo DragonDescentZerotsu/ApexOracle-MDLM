@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "scope": "legacy small-molecule debug-script behavior",
+  "protocol": {
+    "mic_cutoff_umol": 15.0,
+    "cutoff_rule": "predicted_mic <= cutoff",
+    "canonicalization": "RDKit canonical isomeric SMILES",
+    "reference_active_rule": "MIC > 0.5"
+  },
+  "legacy_sources": {
+    "debug_temp_SMs_MIC_analysis.py": {
+      "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+      "sha256": "62c4908a59132b264052a327acd214330f306f0b9bb55dd3d3ce138465181bc0",
+      "active_tree_removed": true
+    },
+    "debug_temp_SMs_MIC_analysis_2.py": {
+      "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+      "sha256": "5c2da4594d720783c47d3ba4b7615200bf6af0d0c2a5647b2d61d9efff2fe4d4",
+      "active_tree_removed": true
+    },
+    "debug_temp_SMs_MIC_analysis_3.py": {
+      "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+      "sha256": "6e65701e3b32896c9345a51cdc79ccd7bdba430a49fc470e485a64421180d295",
+      "active_tree_removed": true
+    },
+    "debug_temp_SMs_MIC_analysis_4.py": {
+      "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+      "sha256": "6e65701e3b32896c9345a51cdc79ccd7bdba430a49fc470e485a64421180d295",
+      "active_tree_removed": true
+    }
+  },
+  "strains": {
+    "BAA-3170": {
+      "prediction_file": "SMs_mic_predictions_BAA-3170.csv",
+      "prediction_sha256": "6c6b9e99249247a58527ddfbb5416f053089308fb5eece3e6a8265d081ac2f9e",
+      "prediction_rows": 44608,
+      "active_rows": 1554,
+      "active_canonical_structures": 1526,
+      "legacy_filtered": {
+        "file": "SMs_mic_predictions_BAA-3170_filtered_below_15.csv",
+        "sha256": "501cd430211395e695022c29e70250ae85ca89e093205fb8bb22354e97af973f",
+        "rows": 1554,
+        "content_and_order_match": true,
+        "ignored_extra_column": "Unnamed: 0"
+      }
+    },
+    "BAA-3197": {
+      "prediction_file": "SMs_mic_predictions_BAA-3197.csv",
+      "prediction_sha256": "63850d62aa2688ef03435f2da49005da8c38ea13046669f8e7c6a5e663fcd06e",
+      "prediction_rows": 44608,
+      "active_rows": 395,
+      "active_canonical_structures": 387,
+      "legacy_filtered": {
+        "file": "SMs_mic_predictions_BAA-3197_filtered_below_15.csv",
+        "sha256": "af1a0a628dbc57697803c281e08336fa06cdb3e92f849f3d257942cacd2e31c5",
+        "rows": 395,
+        "content_and_order_match": true,
+        "ignored_extra_column": "Unnamed: 0"
+      }
+    }
+  },
+  "reference": {
+    "file": "small_molecule_Evo_binary_data.csv",
+    "sha256": "4dabc0f8ac808d33ede3eacb47bacf7b55b2a900fcf78fd3d45a89c2037f3dc2",
+    "active_canonical_structures": 938
+  },
+  "comparisons": {
+    "BAA-3170__vs__BAA-3197": {
+      "left_count": 1526,
+      "right_count": 387,
+      "intersection_count": 378,
+      "left_only_count": 1148,
+      "right_only_count": 9,
+      "union_count": 1535
+    },
+    "BAA-3170__vs__reference": {
+      "left_count": 1526,
+      "right_count": 938,
+      "intersection_count": 65,
+      "left_only_count": 1461,
+      "right_only_count": 873,
+      "union_count": 2399
+    },
+    "BAA-3197__vs__reference": {
+      "left_count": 387,
+      "right_count": 938,
+      "intersection_count": 26,
+      "left_only_count": 361,
+      "right_only_count": 912,
+      "union_count": 1299
+    }
+  },
+  "all_prediction_union_canonical_structures": 1535,
+  "status": "passed"
+}
