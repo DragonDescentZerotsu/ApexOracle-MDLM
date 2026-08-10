@@ -1,6 +1,4 @@
 source,target,edge_type,evidence
-DBAASP_semiles_to_SELFEIS.py,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
-DBAASP_semiles_to_SELFEIS.py,models/__init__.py,local_import,models
 dataloader.py,utils.py,local_import,utils
 diffusion.py,dataloader.py,local_import,dataloader
 diffusion.py,models/__init__.py,local_import,models
@@ -16,6 +14,7 @@ reproducibility/candidate_mic_migration_parity.json,ApexOracle-Generation,extern
 reproducibility/candidate_synergy_migration_parity.json,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
 reproducibility/candidate_synergy_migration_parity.json,ApexOracle-Generation,external_repo_asset_or_path_reference,normalized static string/reference scan
 reproducibility/cross_repo_contracts.json,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
+reproducibility/hierarchical_mic_legacy_lineage.json,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
 reproducibility/interpretability/apexoracle18_11775/manifest.json,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
 reproducibility/interpretability/apexoracle18_baa3170/manifest.json,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
 reproducibility/mic_attention_migration_parity.json,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
@@ -36,6 +35,8 @@ scripts/audit/compare_legacy_mic_guidance.py,noise_schedule.py,local_import,nois
 scripts/audit/compare_legacy_peptide_classifier.py,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
 scripts/audit/compare_legacy_peptide_classifier.py,models/__init__.py,local_import,models
 scripts/audit/compare_legacy_peptide_classifier.py,noise_schedule.py,local_import,noise_schedule
+scripts/audit/verify_hierarchical_mic_legacy_lineage.py,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
+scripts/audit/verify_hierarchical_mic_legacy_lineage.py,ApexOracle-Generation,external_repo_asset_or_path_reference,normalized static string/reference scan
 scripts/audit/verify_paper_figure_lineage.py,ApexOracle-Generation,external_repo_asset_or_path_reference,normalized static string/reference scan
 scripts/reproduce/plot_paper_in_vivo_cfu.py,src/apexoracle_mdlm/figures/in_vivo_cfu.py,local_import,apexoracle_mdlm.figures.in_vivo_cfu
 src/apexoracle_mdlm/interpretability/attention.py,ApexOracle-Evo2,external_repo_asset_or_path_reference,normalized static string/reference scan

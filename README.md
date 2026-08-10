@@ -13,7 +13,7 @@ to tested libraries, parameterized command-line entries, and reproducibility rec
 Python 3.9 or newer and PyTorch are required. Install the package in editable mode from this module:
 
 ```bash
-python -m pip install -e '.[scoring,figure,peptide-table]'
+python -m pip install -e '.[scoring,figure,peptide-table,chemistry]'
 ```
 
 Formal candidate scoring additionally needs the upstream-compatible MDLM runtime dependencies from
@@ -106,6 +106,28 @@ Batch size is part of this historical protocol because the attributed DLM path r
 does not consume the tokenizer attention mask. Use `32` to reproduce the frozen camel-milk screen;
 every canonical run records it in `manifest.json`. Migration and historical-output hashes are in
 `reproducibility/peptide_table_migration_parity.json`.
+
+## Structure-table conversion and catalogue matching
+
+The chemistry API is project- and supplier-neutral. Convert any explicit SMILES column to SELFIES,
+or exact-match scored structures against tabular supplier catalogue shards:
+
+```bash
+PYTHONPATH=src python scripts/reproduce/convert_smiles_table_to_selfies.py \
+  --input /path/to/smiles.csv --output /path/to/selfies.csv \
+  --smiles-column SMILES
+
+PYTHONPATH=src python scripts/reproduce/match_screen_to_catalogue.py \
+  --prediction BAA-3170=/path/to/filtered_predictions.csv \
+  --catalogue-dir /path/to/catalogue_shards \
+  --query-smiles-column SMILES \
+  --catalogue-smiles-column SMILES --catalogue-id-column ID \
+  --workers 16 --output results/catalogue_matches.csv
+```
+
+Both query and catalogue structures are normalized with RDKit canonical isomeric SMILES. The formal
+DBAASP conversion and full 5,887,458-row MolPort historical parity are recorded in
+`docs/CHEMISTRY_LEGACY_MIGRATION.md`; supplier names remain provenance, not API names.
 
 ## Reproduce the source panel for paper Fig. 3a
 

@@ -165,6 +165,25 @@ filtered tables；同时使用 RDKit canonical isomeric SMILES 汇总 target-tar
 验证：`PYTHONPATH=src python -m unittest tests.test_small_molecule_screen -v`；正式 frozen tables 的迁移核验见
 `reproducibility/small_molecule_postprocessing_lineage.json`。
 
+## `convert_smiles_table_to_selfies.py`
+
+功能：把一个显式 CSV column 从 SMILES 转为 SELFIES，保留其余 cells，并输出可选 hash manifest。参数为
+`--input`、`--output` 和 `--smiles-column`；不加载 DLM/checkpoint，不绑定 DBAASP 文件名。正式 11,401-row
+DBAASP output byte parity 见 `reproducibility/chemistry_legacy_migration.json`。
+
+## `match_screen_to_catalogue.py`
+
+功能：读取重复的 `--prediction STRAIN=PATH` scored tables，将 query 与 supplier catalogue 两侧都用 RDKit
+canonical isomeric SMILES 归一化后 exact match。Catalogue directory/pattern、SMILES/ID columns、chunk size、
+worker 数和 output 都显式传入，其中 query/catalogue SMILES column 与 catalogue ID column 为 required；
+输出使用 supplier-neutral `Catalog_*` columns 和 manifest。正式
+5,887,458-row MolPort full-scan parity 仅作为历史 provenance，公共 API 不绑定供应商名。验证：
+
+```bash
+PYTHONPATH=src python -m pytest -q \
+  tests/test_chemistry_workflows.py tests/test_small_molecule_screen.py
+```
+
 ## `plot_paper_in_vivo_cfu.py`
 
 功能：读取 paper Fig. 5b 历史 two-row wide Day 1/Day 2 CSV，验证每组 positive finite CFU，绘制 raw points、

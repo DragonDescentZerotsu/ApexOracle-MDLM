@@ -291,11 +291,14 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 
 ### M4：Legacy driver 收口
 
-状态：**执行中；hierarchical MIC 批次已满足删除 gate。**
+状态：**执行中；hierarchical MIC 与 root chemistry 批次已满足删除 gate。**
 
 - 只从 ledger 中逐文件满足 deletion gate、经证据更新为 `delete_ready` 的条目开始清理；
 - [x] Core 已替代的 11 个 `DP_inhouse_*` hierarchical drivers 完成逐文件 source/profile mapping、跨仓库
   consumer audit、历史 output inventory 与 43 项 Core focused tests，并从活动入口撤下；
+- [x] 两个 root chemistry utilities 已迁为通用 SMILES→SELFIES table converter 和 supplier-neutral streaming
+  catalogue matcher；正式 11,401-row conversion byte-exact，5,887,458-row catalogue rescan 精确恢复
+  276-row semantic match set，旧 root copies 从活动入口撤下；
 - synergy guidance、interpretability、milk/camel case study 中独有且仍需发布的行为重构为
   `experimental/`、`examples/` 或 canonical library，不保留原始 root-level 副本；
 - debug、一次性绘图和 superseded temp scripts 在 source/consumer mapping 完成后从活动树删除；若其中
@@ -309,6 +312,10 @@ Hierarchical MIC 的完整 mapping、恢复命令与不能声称 exact historica
 `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md` 和
 `reproducibility/hierarchical_mic_legacy_lineage.json`；本批没有移动或删除 checkpoint/log。
 删除后 MDLM 全仓 107 tests 与 13 项跨仓库 contracts 均通过。
+
+Chemistry migration 见 `docs/CHEMISTRY_LEGACY_MIGRATION.md` 和
+`reproducibility/chemistry_legacy_migration.json`；ignored raw catalogue/output 不移动、不删除、不提交。
+本批删除后 MDLM 全仓 110 tests 与 13 项跨仓库 contracts 均通过。
 
 ### M5：Clean module release
 

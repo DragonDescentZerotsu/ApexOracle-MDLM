@@ -39,6 +39,13 @@
   43 passed；删除后全仓 107 tests 与 13 项跨仓库 contracts 通过。原 sources 由 snapshot tag 与
   `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md` 恢复后从 active tree 删除；checkpoint/log 不移动、不删除、
   不进 Git。此职责不得在 MDLM 新建第二份 runner。
+- **2026-08-10 chemistry root cleanup：** `DBAASP_semiles_to_SELFEIS.py` 与 `match_molecules.py` 的有效行为
+  已迁为 `apexoracle_mdlm.chemistry`、`convert_smiles_table_to_selfies.py` 和
+  `match_screen_to_catalogue.py`。正式 11,401-row conversion output byte-exact；12-shard/5,887,458-row catalogue
+  full rescan 精确恢复历史 276-row semantic set（179 IDs/structures）。旧 sources 由 snapshot 和
+  `docs/CHEMISTRY_LEGACY_MIGRATION.md` 恢复后删除；全仓 110 tests 与 13 项跨仓库 contracts 通过；ignored
+  catalogue/predictions/output 原地保留。公共 API 必须保持 supplier-neutral，不能把 MolPort 或某个项目名
+  固化进 function/CLI 名。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 
@@ -63,6 +70,14 @@
   `PYTHONPATH=src /home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm python -m unittest discover -s tests -v`。
 
 ## 当前 canonical callable contracts
+
+- 通用 chemistry tables/catalogue：`convert_smiles_table_to_selfies` 替换显式 CSV column；
+  `load_catalog_queries`/`match_catalogue_files` 对 query 与 catalogue 两侧做 RDKit canonical-isomeric exact
+  matching。公开入口为 `scripts/reproduce/convert_smiles_table_to_selfies.py` 和
+  `scripts/reproduce/match_screen_to_catalogue.py`，后者输出 supplier-neutral columns/manifest，并显式接收
+  catalogue pattern/columns/chunk/workers。Focused 验证：`PYTHONPATH=src python -m pytest -q
+  tests/test_chemistry_workflows.py tests/test_small_molecule_screen.py`；正式 full-asset parity 见
+  `reproducibility/chemistry_legacy_migration.json`。
 
 - `apexoracle_mdlm.checkpoints`：`load_torch_file(path, map_location, weights_only, mmap)`、
   `extract_state_dict(payload, key)` 与 `strip_state_dict_prefix(state_dict, prefix)`；输出为原 payload、

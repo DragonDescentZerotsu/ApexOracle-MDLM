@@ -40,7 +40,7 @@
 | Peptide classifier | snapshot 中的 `guaidance_classifier_all_data*.py` | 三个 noisy/pooling/padding/data profiles 已分开；正式 v1 head strict load 和三 profile GPU parity 已完成，exact timestamped producer revision 仍未知 | `apexoracle_mdlm.models` + `scripts/reproduce/train_peptide_classifier.py`；旧 root copies 已删除 |
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
-| Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
+| Chemistry | snapshot 中的四个 root utilities | peptide parser/builders 已在早期批次清理；最后两个 table conversion/catalog matching 已迁为通用 API 并通过正式资产验证 | `apexoracle_mdlm.chemistry` + 两个参数化 reproduce CLI；旧 root copies 已删除 |
 | Hugging Face | canonical `huggingface/release/`；旧 `huggingface_model/`/`huggingface_push.py` 由 snapshot 恢复 | 正式 18-file Hub revision 已 fresh-download 验收；旧 wrapper/runtime/exporter 无 active consumer，三份 tokenizer byte-exact 迁入 release template | clean builder/publisher + `apexoracle_mdlm.hub`；旧 tracked 副本已清除，ignored weight 原地保留 |
 | Case study/debug | notebooks 和历史 manifests | milk/camel/in-vivo plotting、诊断和一次性分析混杂；active root debug/temp sources 已完成消费者审计并迁移或 snapshot-only 清理 | 新项目特例只记 provenance；可复用行为进入通用 package/CLI |
 
@@ -96,6 +96,14 @@ lineage；43 项 runner/equivalence/comparator tests 通过。十个存在的历
 722,786,228,244 bytes，仅登记数量与体积并原地保留。旧 dynamic hash split 没有恢复 exact historical
 membership，且多个 checkpoint grids 不完整或共用目录，因此这里不声称每个旧 run 都已 bitwise replay。
 详见 `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md`。
+
+## 8. Root chemistry utilities 已完成迁移
+
+`DBAASP_semiles_to_SELFEIS.py` 的 11,401-row 正式输出由 clean table converter byte-exact 重建；无关 DLM loader
+与错误的 default invocation 不进入新实现。`match_molecules.py` 的有效行为迁为 supplier-neutral streaming
+catalogue matcher；12-shard/5,887,458-row full rescan 恢复历史 276-row semantic set，覆盖 179 IDs/structures。
+历史 order 不稳定，因此不宣称 CSV byte parity；ignored source/data/output 均原地保留。完整证据见
+`docs/CHEMISTRY_LEGACY_MIGRATION.md`。
 
 作者于 2026-08-09 确认：这里的保守 gate 用于防止误删，不表示把可疑 legacy 文件永久留在 public
 branch。重要或暂时不确定的代码应先重构独有行为，再删除原始副本；确认没有独有功能的代码完成

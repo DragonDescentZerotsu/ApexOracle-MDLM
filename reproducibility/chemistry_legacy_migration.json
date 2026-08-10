@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "legacy_sources": {
+    "DBAASP_semiles_to_SELFEIS.py": {
+      "sha256": "8ce832caf5486f8bfb2e4765cf6ac7524742cd93603f1c7a85c1e5362cef3243",
+      "bytes": 1685,
+      "lines": 51,
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DBAASP_semiles_to_SELFEIS.py"
+    },
+    "match_molecules.py": {
+      "sha256": "ca16f91df18d72675856732dff8c94241755e064a73b86beea1368619f9b856c",
+      "bytes": 5728,
+      "lines": 156,
+      "recovery": "git show legacy-code-snapshot-2026-08-09:match_molecules.py"
+    }
+  },
+  "smiles_to_selfies": {
+    "input": "ApexOracle-Core/DataPrepare/Data/DBAASP_id_SMILES_bact_MICs.csv",
+    "input_sha256": "2245484ed4f68ade14645ce0c837330ee3952f38c3472d476dcda90be53540d9",
+    "formal_output": "ApexOracle-Core/DataPrepare/Data/DBAASP_id_SELFIES_bact_MICs.csv",
+    "formal_output_sha256": "49927b52fb0774aeada1989819c8e883251fbf8144fea9b6fa1c9aef04a54058",
+    "rows": 11401,
+    "byte_equal": true,
+    "canonical_entry": "scripts/reproduce/convert_smiles_table_to_selfies.py"
+  },
+  "catalogue_matching": {
+    "predictions": {
+      "BAA-3170": {
+        "path": "temp_data/SMs_mic_predictions_BAA-3170_filtered_below_15.csv",
+        "sha256": "501cd430211395e695022c29e70250ae85ca89e093205fb8bb22354e97af973f"
+      },
+      "BAA-3197": {
+        "path": "temp_data/SMs_mic_predictions_BAA-3197_filtered_below_15.csv",
+        "sha256": "af1a0a628dbc57697803c281e08336fa06cdb3e92f849f3d257942cacd2e31c5"
+      }
+    },
+    "query_counts": {
+      "input_rows": 1949,
+      "valid_rows": 1949,
+      "invalid_rows": 0
+    },
+    "catalogue_files": [
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-000-000-000--000-499-999.txt",
+        "bytes": 62530199,
+        "sha256": "526efde0078e04780f0d244f286bb5e578b2e5f9e95fcfd79a4bfd8e4caea178"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-000-500-000--000-999-999.txt",
+        "bytes": 56744127,
+        "sha256": "a5115f98daaff92322883bb7592a90a674656d75c87697687c5f8164c0e378b4"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-001-000-000--001-499-999.txt",
+        "bytes": 61504960,
+        "sha256": "14584683a7cd4a3a6ac60209a8a664d0d2b46819329d6620d4d454af0177a8d6"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-001-500-000--001-999-999.txt",
+        "bytes": 59044903,
+        "sha256": "028d46844602d09eb4d7f101342acc9b0ff8e7eecc61ab528c5a977b168e11d5"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-002-000-000--002-499-999.txt",
+        "bytes": 62134165,
+        "sha256": "2972831876a9519bf33a87a9f40e7b5dd63f26fd27e9acf9cd318d886ecaa58f"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-002-500-000--002-999-999.txt",
+        "bytes": 60661645,
+        "sha256": "351534e589f7069d8883316cc745a86b00042572f1cbd6f662413b9e9c80b1c5"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-003-000-000--003-499-999.txt",
+        "bytes": 60176244,
+        "sha256": "0789ec6729cbeaa0b0b8bcea5630d2256b6e9dc203a81478eeaa568c962aed64"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-003-500-000--003-999-999.txt",
+        "bytes": 54311212,
+        "sha256": "ea9ae3018e91077fc9be80e5b44e7e91f713794c694ebf23b0b2124a31805f5f"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-004-000-000--004-499-999.txt",
+        "bytes": 55028841,
+        "sha256": "88b24c1d6a77ee5053c9d0d4105388d2bbc28063b2a4801ed9baec5e1897978a"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-004-500-000--004-999-999.txt",
+        "bytes": 60343247,
+        "sha256": "23fa57dc8a4a05d61829bb5d90d20a8cb02e2b67cb866e193c5756a101a025a7"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-005-000-000--005-499-999.txt",
+        "bytes": 62458543,
+        "sha256": "39fedd0d0d46653d900ac93488d630368a0d6cee03eee879dbecce7ba7b8a5ca"
+      },
+      {
+        "path": "temp_data/Molport_SMILES/iis_smiles-005-500-000--005-999-999.txt",
+        "bytes": 48511360,
+        "sha256": "e12f5fe95ccc5d7b44a3aeb2ad2957fa332d76fcddd149c45f662ac6ceef5305"
+      }
+    ],
+    "catalogue_rows": 5887458,
+    "valid_catalogue_rows": 5886941,
+    "invalid_catalogue_rows": 517,
+    "matched_catalogue_rows": 179,
+    "canonical_output_rows": 276,
+    "historical_output": "temp_data/small_molecules/purchasable_molecules_match.csv",
+    "historical_output_sha256": "03c6529e869b1c9bb017e3491782325ce427a5e5cf5dfdb4cd50e6ba6eba5ab9",
+    "semantic_row_set_equal": true,
+    "unique_catalogue_ids": 179,
+    "unique_canonical_structures": 179,
+    "ignored_producer_copy": "temp_data/small_molecules/match_molecules.py",
+    "ignored_producer_copy_sha256": "cf1f251233b2b90e02762d22eb209d0fa951ecbbe8f6772f3ccc8c5c6a81cb8d",
+    "ignored_copy_ast_equal_after_docstring_removal": true,
+    "canonical_entry": "scripts/reproduce/match_screen_to_catalogue.py"
+  },
+  "runtime_versions": {
+    "pandas": "2.3.1",
+    "rdkit": "2024.09.6",
+    "selfies": "2.1.1"
+  },
+  "runtime_or_config_consumers": [],
+  "verified_facts": [
+    "The formal 11,401-row SELFIES table is byte-identical to the canonical conversion output.",
+    "The twelve catalogue shards contain 5,887,458 rows; 517 are invalid under the current RDKit parser.",
+    "The canonical full-catalogue rescan recovers the exact 276-row historical semantic match set.",
+    "Those rows represent 179 supplier IDs and 179 canonical structures.",
+    "The ignored producer copy differs from the tagged source only by a module docstring at AST level.",
+    "No live Python, shell, or YAML caller in MDLM, Core, or Generation references either root filename."
+  ],
+  "limits": [
+    "The historical catalogue output row order depended on glob/filesystem ordering; the canonical CLI sorts input filenames.",
+    "Exact canonical matching establishes catalogue identity, not experimental activity or supplier availability today.",
+    "The tagged DBAASP script's __main__ passes its output path as its input; the reusable function is preserved, not that invocation bug."
+  ]
+}

@@ -68,6 +68,21 @@ PYTHONPATH=src python scripts/audit/verify_hierarchical_mic_legacy_lineage.py \
 
 冻结结果与 Core focused tests 见 `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md`。
 
+## `verify_legacy_chemistry.py`
+
+用途：从 snapshot 读取两个 root chemistry utilities；用正式 11,401-row DBAASP table 验证 clean
+SMILES→SELFIES conversion byte parity，并以当前 RDKit streaming 重扫 12 个 frozen catalogue shards，要求
+canonical 276-row semantic match set 与历史 output 完全相等。该审计读取约 700 MB catalogue，不改写任何
+ignored input/output；`--workers` 显式控制 CPU 并行。
+
+```bash
+PYTHONPATH=src python scripts/audit/verify_legacy_chemistry.py \
+  --workers 64 \
+  --output reproducibility/chemistry_legacy_migration.json
+```
+
+完整边界见 `docs/CHEMISTRY_LEGACY_MIGRATION.md`。
+
 ## `verify_paper_figure_lineage.py`
 
 用途：核验正式 main Fig. 3a 的 tagged historical producer、canonical producer paths、四个 Generation inputs、四个 MIC caches、

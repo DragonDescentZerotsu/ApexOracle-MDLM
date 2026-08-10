@@ -19,6 +19,7 @@ training = ["datasets", "hydra-core", "lightning", "transformers", "wandb"]
 peptide-table = ["matplotlib", "numpy", "pandas", "rdkit", "selfies"]
 small-molecule-screen = ["hydra-core", "matplotlib", "numpy", "selfies", "transformers"]
 peptide-screen = ["hydra-core", "pillow", "rdkit", "selfies", "transformers"]
+chemistry = ["pandas", "rdkit", "selfies"]
 hub = ["einops", "flash-attn", "huggingface-hub", "omegaconf", "transformers"]
 
 [tool.setuptools.packages.find]
