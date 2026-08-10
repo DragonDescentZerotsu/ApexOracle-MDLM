@@ -190,6 +190,48 @@ class CodeLineageLedgerTests(unittest.TestCase):
             "snapshot_only_internal_normalization_diagnostic",
         )
 
+    def test_synergy_candidate_drivers_are_replaced_and_recoverable(self):
+        lineage = json.loads(
+            (ROOT / "reproducibility" / "candidate_synergy_lineage.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertTrue(lineage["active_legacy_drivers_removed"])
+        for legacy_path in (
+            "judge_generated_mols_synergy.py",
+            "judge_mol_synergy_with_fig.py",
+        ):
+            self.assertNotIn(legacy_path, self.by_path)
+            legacy_source = subprocess.check_output(
+                [
+                    "git",
+                    "show",
+                    f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(
+                hashlib.sha256(legacy_source).hexdigest(),
+                lineage["legacy_sources"][legacy_path]["sha256"],
+            )
+
+        parity = json.loads(
+            (
+                ROOT / "reproducibility" / "candidate_synergy_migration_parity.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(parity["status"], "passed")
+        for comparison in parity["comparisons"]:
+            self.assertTrue(comparison["logit_equal"])
+            self.assertTrue(comparison["probability_equal"])
+
+        for path in (
+            "src/apexoracle_mdlm/scoring/synergy.py",
+            "scripts/reproduce/score_generated_molecule_synergy.py",
+            "scripts/audit/compare_legacy_candidate_synergy.py",
+        ):
+            self.assertTrue((ROOT / path).is_file(), path)
+
     def test_major_copied_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""

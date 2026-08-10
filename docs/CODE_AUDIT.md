@@ -252,3 +252,18 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   caller 的 parser bridge；Core 中内容不同的同名文件未修改。完整 hashes、事实/推断边界和恢复命令见
   `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md` 与
   `reproducibility/generation_peptide_screen_lineage.json`。
+
+### M3h Experimental synergy candidate scoring（2026-08-10）
+
+- 从两个 mixed judge/plot drivers 提取 24,576-input symmetric-pair head、LoRA genome/text conditioning、partner
+  embedding lookup 和 sigmoid probability，形成 `apexoracle_mdlm.scoring.synergy` 与参数化 CLI；
+- 冻结 Generation guidance 与 synergy-judger 两个 4.11 GB checkpoints 的不同 hashes/schema，以及 partner
+  mapping 的 844 mixed-type keys；public manifest 必须记录 partner key type；
+- active judges 误用 clean MIC checkpoint，且导入 tuple-returning MIC attention 后当 tensor `.reshape()`；
+  正确 checkpoint direct replay 仍失败。另有 probability-as-MIC label、无效 `>15` threshold 和 destructive
+  image cleanup，故不能作为 executable reference；
+- exact parity reference 改用 snapshot checkpoint producer 的 tensor-returning attention/head，加上 judge 的
+  symmetric pair forward；正式 checkpoint、真实 19606 SELFIES、Gentamicin partner 上 logit/probability
+  `torch.equal`，最大差异 `0.0`；
+- `3170-guidance-MIC.pdf` 无正式论文/reviewer consumer，只作 provenance；两个 broken mixed drivers 已删除，
+  外部 Generation outputs/images 未修改。完整边界见 `docs/SYNERGY_CANDIDATE_SCORING_LINEAGE.md`。

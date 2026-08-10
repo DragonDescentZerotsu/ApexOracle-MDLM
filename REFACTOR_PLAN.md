@@ -179,6 +179,15 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   设为 snapshot-only；
 - [x] 删除上述两个重复 scorer/plot drivers、仅供 round-trip 使用的 2,325 行 `aa_seq_to_smiles.py` 以及
   已无 caller 的 `smiles_to_peptide.py` compatibility bridge；Core 的不同同名副本保持只读未修改；
+- [x] 将 `judge_generated_mols_synergy.py`/`judge_mol_synergy_with_fig.py` 的有效 symmetric-pair behavior
+  迁为 experimental `CandidateSynergyClassifier`、参数化 CLI 和 LoRA checkpoint validator，显式区分 partner
+  string/integer key；
+- [x] 验证两个 4.11 GB synergy checkpoint schema；以正式 Generation checkpoint、真实 19606 SELFIES 和
+  Gentamicin partner 完成 snapshot producer/canonical exact GPU parity，logit/probability 均 `torch.equal`；
+- [x] 记录两个 active judge 的错误 MIC checkpoint、tuple-return mismatch、probability-as-MIC label 和无效
+  `>15` threshold；确认 violin PDF 无正式 consumer 后转为 snapshot-only，删除两个 mixed drivers；
+- [x] 本批最终验收为全仓 71 tests passed、跨仓库 source/formal-asset 16 checks passed、Fig. 3a canonical
+  raster parity exact；Core/Synergy 与 Generation checkout 全程只读；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；

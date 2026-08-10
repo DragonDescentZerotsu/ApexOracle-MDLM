@@ -198,18 +198,24 @@ drivers 的 thin compatibility bridge，最终在这些 callers 迁入 package �
 bridge 均满足 gate 并从 active tree 删除；恢复命令和机器可读证据见
 `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md`。
 
-## 11. 下一轮人工核验队列
+## 11. Synergy candidate judges 已完成迁移清理
+
+两个 root synergy judges 的有效核心是 all-data experimental symmetric-pair probability scorer，已迁为
+canonical library/CLI/checkpoint schema；Generation 正式 checkpoint 与真实 SELFIES 的 exact GPU parity 已
+通过。Active judges 本身存在 checkpoint schema、attention return、label/threshold 四类已复现错误，不能作为
+reference；历史 PDF 无正式 consumer。因此两个 mixed drivers 由 snapshot/lineage 恢复后从 active tree 删除，
+而 checkpoint producer trainers 留待后续独立合并 clean/noise profiles。
+
+## 12. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
 1. `show.ipynb`、`show_interpretability.ipynb`、`visualize_attn*.py`：输出多、可能包含独有
    interpretability/case-study 图；
-2. 剩余 `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`：可能同时承担 scorer 和 plot
-   producer，不能先删 UI/plot 部分而破坏 scoring 行为；
-3. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`：逐项搜索论文图、caption、
+2. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`：逐项搜索论文图、caption、
    reviewer 文档和外部输出 hash；
-4. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
+3. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
    自动放行。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为

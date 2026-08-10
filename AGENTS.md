@@ -74,6 +74,14 @@
   `PYTHONPATH=src python -m unittest tests.test_candidate_mic_scoring -v`。正式 parity 为两条真实 BAA-3170
   inputs 的逐条和 batch=2 logits/MIC `torch.equal`、最大差异 `0.0`，记录在
   `reproducibility/candidate_mic_migration_parity.json`。
+- Experimental synergy candidate scorer：`CandidateSynergyClassifier`、
+  `load_candidate_synergy_classifier`、`load_partner_embedding` 与 `score_selfies_synergy`；公开 CLI 为
+  `scripts/reproduce/score_generated_molecule_synergy.py`，输入显式 checkpoint、mixed-key partner mapping、
+  partner key type、condition embeddings、Generation SELFIES 与 strain，输出逐行 sigmoid probability/manifest。
+  该 profile 是历史 all-data Generation guidance，不是 Core paper synergy CV model，不进默认 quickstart。
+  Focused 验证：`PYTHONPATH=src python -m unittest tests.test_candidate_synergy_scoring
+  tests.test_checkpoint_schemas -v`；正式单条 GPU parity 见
+  `reproducibility/candidate_synergy_migration_parity.json`。
 - `apexoracle_mdlm.scoring` 另提供 `parse_generated_molecule_filename`、
   `format_generated_molecule_filename` 与 `find_generated_molecule_file`；canonical 输入 schema 为
   `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt`，输出 parsed dataclass、filename

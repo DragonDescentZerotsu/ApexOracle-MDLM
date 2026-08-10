@@ -6,11 +6,15 @@ from apexoracle_mdlm.checkpoints import (
     validate_generation_dlm_checkpoint,
     validate_generation_mic_guidance_checkpoint,
     validate_generation_peptide_classifier_checkpoint,
+    validate_generation_synergy_guidance_checkpoint,
 )
 from apexoracle_mdlm.checkpoints.schemas import (
     GENOME_ATTENTION_SHAPES,
     PEPTIDE_CLASSIFIER_HEAD_SHAPES,
     REGRESSION_HEAD_SHAPES,
+    SYNERGY_GENOME_ATTENTION_SHAPES,
+    SYNERGY_HEAD_SHAPES,
+    SYNERGY_TEXT_ATTENTION_SHAPES,
     TEXT_ATTENTION_SHAPES,
 )
 
@@ -61,7 +65,7 @@ class CheckpointSchemaTests(unittest.TestCase):
             "co_cross_attn_text": meta_state(TEXT_ATTENTION_SHAPES),
             "learnable_embedding_weight": torch.empty((1, 8192), device="meta"),
         }
-        with self.assertRaisesRegex(ValueError, "expected \(1, 128\)"):
+        with self.assertRaisesRegex(ValueError, r"expected \(1, 128\)"):
             validate_generation_mic_guidance_checkpoint(payload)
 
     def test_peptide_classifier_accepts_double_backbone_prefix(self):
@@ -79,6 +83,31 @@ class CheckpointSchemaTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "incompatible keys"):
             validate_generation_peptide_classifier_checkpoint({"state_dict": state})
+
+    def test_synergy_guidance_accepts_lora_pair_profile(self):
+        payload = {
+            "mdlm_model_state_dict": {
+                "backbone.blocks.0.attn_qkv.weight": torch.empty(1, device="meta")
+            },
+            "re_head_state_dict": meta_state(SYNERGY_HEAD_SHAPES),
+            "co_cross_attn_genome": meta_state(SYNERGY_GENOME_ATTENTION_SHAPES),
+            "co_cross_attn_text": meta_state(SYNERGY_TEXT_ATTENTION_SHAPES),
+            "learnable_embedding_weight": torch.empty((1, 8192), device="meta"),
+        }
+        validate_generation_synergy_guidance_checkpoint(payload)
+
+    def test_synergy_guidance_rejects_mic_head(self):
+        payload = {
+            "mdlm_model_state_dict": {
+                "backbone.blocks.0.attn_qkv.weight": torch.empty(1, device="meta")
+            },
+            "re_head_state_dict": meta_state(REGRESSION_HEAD_SHAPES),
+            "co_cross_attn_genome": meta_state(SYNERGY_GENOME_ATTENTION_SHAPES),
+            "co_cross_attn_text": meta_state(SYNERGY_TEXT_ATTENTION_SHAPES),
+            "learnable_embedding_weight": torch.empty((1, 8192), device="meta"),
+        }
+        with self.assertRaisesRegex(ValueError, "dense_1.weight"):
+            validate_generation_synergy_guidance_checkpoint(payload)
 
 
 if __name__ == "__main__":

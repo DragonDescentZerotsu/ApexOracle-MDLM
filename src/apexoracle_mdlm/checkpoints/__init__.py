@@ -5,6 +5,7 @@ from .schemas import (
     validate_generation_dlm_checkpoint,
     validate_generation_mic_guidance_checkpoint,
     validate_generation_peptide_classifier_checkpoint,
+    validate_generation_synergy_guidance_checkpoint,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "validate_generation_dlm_checkpoint",
     "validate_generation_mic_guidance_checkpoint",
     "validate_generation_peptide_classifier_checkpoint",
+    "validate_generation_synergy_guidance_checkpoint",
 ]

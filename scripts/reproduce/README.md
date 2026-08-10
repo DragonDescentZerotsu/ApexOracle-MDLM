@@ -14,7 +14,7 @@
 PYTHONPATH=src python -m unittest tests.test_dlm_encoder tests.test_candidate_mic_scoring -v
 ```
 
-正式旧/新 GPU parity 入口：
+正式 MIC 旧/新 GPU parity 入口：
 
 ```bash
 CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
@@ -24,6 +24,24 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
   --generation-file /path/to/generated_selfies.txt \
   --strain BAA-3170 --limit 2
 ```
+
+## `score_generated_molecule_synergy.py`
+
+功能：使用 experimental all-data symmetric-pair classifier，对 Generation SELFIES 与一个显式 partner
+embedding 在指定 strain condition 下输出逐行 sigmoid synergy probability。该 profile 服务于历史 Generation
+guidance/candidate audit，不是 Core 论文 synergy CV model，也不进入默认 quickstart。
+
+主要参数除 checkpoint、condition embeddings 和 Generation file 外，还必须给出 `--partner-embeddings`、
+`--partner-key` 与 `--partner-key-type {string,integer}`；历史 dictionary 同时包含 string/integer keys，二者
+不得自动互换。输出 CSV 记录 partner key/type；可选 manifest 另记录对称 pair order 和输入 hashes。验证：
+
+```bash
+PYTHONPATH=src python -m unittest tests.test_candidate_synergy_scoring \
+  tests.test_checkpoint_schemas -v
+```
+
+真实 checkpoint/input GPU parity 和 legacy failure 边界见
+`docs/SYNERGY_CANDIDATE_SCORING_LINEAGE.md`。
 
 ## `score_peptide_table_mic.py`
 

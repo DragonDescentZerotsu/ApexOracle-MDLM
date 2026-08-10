@@ -48,6 +48,22 @@
       "schema": "generation MIC-guidance 768/8192/4096 profile"
     },
     {
+      "id": "generation_synergy_guidance",
+      "owner": "synergy",
+      "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_noise_synergy/cls/synergy_noise_clsfier_best.ckpt",
+      "consumer": "generation,mdlm",
+      "sha256": "c1e40581c88e3b32c86d775e739320d15f111580fb55e9319adc8c3549273bc8",
+      "schema": "experimental symmetric-pair synergy profile with LoRA genome/text attention"
+    },
+    {
+      "id": "synergy_partner_embeddings",
+      "owner": "synergy",
+      "relative_path": "DataPrepare/Data/synergy_mol_emb_dict_cls_wo_pad.pt",
+      "consumer": "generation,mdlm",
+      "sha256": "6c42d81f38d89e3ca31f5ebc49be86cd290ba3d0e87bd3ce3ceffa4e82a36484",
+      "schema": "mixed string/integer keys mapped to one 768-dimensional partner embedding"
+    },
+    {
       "id": "genome_embeddings",
       "owner": "synergy",
       "relative_path": "DataPrepare/Data/Genome_embs",
@@ -89,6 +105,37 @@
         "checkpoint_reg['co_cross_attn_text']",
         "checkpoint_cls['state_dict']",
         "backbone.backbone."
+      ]
+    },
+    {
+      "id": "generation_synergy_guidance_loader",
+      "repository": "generation",
+      "path": "models/dit.py",
+      "required_substrings": [
+        "syn_classifier_checkpoint_path",
+        "FICI_input_1 = torch.cat((mol_cls_embedding_1, mol_cls_embedding_2)",
+        "FICI_input_2 = torch.cat((mol_cls_embedding_2, mol_cls_embedding_1)",
+        "logits = (logits_1 + logits_2) / 2"
+      ]
+    },
+    {
+      "id": "generation_synergy_output_writer",
+      "repository": "generation",
+      "path": "eval_utils.py",
+      "required_substrings": [
+        "synoguide_{config.sampling.synergy_mol_name}_length_",
+        "syn_{config.sampling.synergy_mol_name}_length_"
+      ]
+    },
+    {
+      "id": "mdlm_candidate_synergy_scorer",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/scoring/synergy.py",
+      "required_substrings": [
+        "class CandidateSynergyClassifier",
+        "def symmetric_pair_logits",
+        "def load_candidate_synergy_classifier",
+        "def score_selfies_synergy"
       ]
     },
     {

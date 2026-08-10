@@ -76,6 +76,7 @@ def check_formal_assets(
         validate_generation_dlm_checkpoint,
         validate_generation_mic_guidance_checkpoint,
         validate_generation_peptide_classifier_checkpoint,
+        validate_generation_synergy_guidance_checkpoint,
     )
     from apexoracle_mdlm.models import FirstTokenCrossAttention, RegressionHead
 
@@ -140,6 +141,21 @@ def check_formal_assets(
         )
         results.append({"id": f"{asset_id}_strict_heads", "status": "passed"})
         del payload, regression_head, genome_attention, text_attention
+
+    path, payload = load("generation_synergy_guidance")
+    validate_generation_synergy_guidance_checkpoint(payload)
+    results.append({"id": "generation_synergy_guidance_schema", "status": "passed"})
+    del payload
+
+    path, payload = load("synergy_partner_embeddings")
+    required_partners = ("Gentamicin", 447, 37)
+    for key in required_partners:
+        if key not in payload or tuple(payload[key].shape) != (1, 768):
+            raise ValueError(
+                f"Partner embedding {key!r} is missing or has an incompatible shape."
+            )
+    results.append({"id": "synergy_partner_embedding_keys", "status": "passed"})
+    del payload
 
     return results
 

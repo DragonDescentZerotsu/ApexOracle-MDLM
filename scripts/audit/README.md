@@ -56,6 +56,25 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
 
 正式冻结结果见 `reproducibility/candidate_mic_migration_parity.json`。
 
+## `compare_legacy_candidate_synergy.py`
+
+用途：从 snapshot 临时提取已冻结 judge 与其 checkpoint producer，使用 producer 的 tensor-returning
+LoRA attention/head 修复 active judge 的错误 import，仅比较其 symmetric-pair core forward 与 canonical
+experimental scorer。输入为正式 synergy checkpoint、partner embedding mapping、真实 Generation SELFIES 和
+strain；逐条比较 logits 与 sigmoid probabilities。这个 audit 不复现已确认错误的旧 violin label/threshold。
+
+```bash
+CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src python \
+  scripts/audit/compare_legacy_candidate_synergy.py \
+  --core-root /path/to/ApexOracle-Core \
+  --checkpoint /path/to/synergy_noise_clsfier_best.ckpt \
+  --partner-embeddings /path/to/synergy_mol_emb_dict_cls_wo_pad.pt \
+  --partner-key Gentamicin --generation-file /path/to/generated_selfies.txt \
+  --strain 19606 --limit 1
+```
+
+冻结结果见 `reproducibility/candidate_synergy_migration_parity.json`。
+
 ## `verify_small_molecule_screen_lineage.py`
 
 用途：不重跑 44,608-entry GPU screen，逐个核验正式 source SELFIES 与历史 prediction CSV 的 rows、unique

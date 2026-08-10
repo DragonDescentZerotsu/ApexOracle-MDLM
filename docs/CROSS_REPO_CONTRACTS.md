@@ -12,6 +12,7 @@
 | Sampler runtime | Generation | Core reviewer runner | Core 将 Generation root 加入 `sys.path`，随后动态 import `classifier`、`diffusion`、`models` |
 | DLM 与 peptide-classifier assets | MDLM | Generation | Generation 读取 MDLM checkpoint；不 import MDLM package |
 | Genome/text embeddings 与 MIC guidance | Core/Synergy | Generation、MDLM scoring | 两个仓库直接读取 Core 本地 tensor/checkpoint 路径 |
+| Synergy guidance、partner embeddings | Core/Synergy | Generation、MDLM scoring | 两个 consumer 读取 all-data synergy checkpoint 和 partner dictionary；不是 Core 论文 CV predictor |
 | Candidate files | Generation | MDLM scoring、Core audit | 以 `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt` 传递 SELFIES |
 | Guidance module implementation | MDLM legacy trainer | Generation | `RegressionHead` 是 AST 完全相同的复制；cross-attention 参数结构相同，但返回 contract 有差异 |
 
@@ -24,6 +25,12 @@
   `co_cross_attn_genome`、`co_cross_attn_text` 和 `(1, 8192)` learnable genome embedding；
 - 两个 MIC checkpoint 的 regression head 与 genome/text attention keys、shapes 完全一致；作用和训练
   protocol 不同，不能因此互换。
+- formal synergy guidance 和 `synergy_judger` checkpoint 是两个不同文件；二者都使用 24,576-input
+  classification head、两组带 LoRA 的 condition attention，并对 `(partner, candidate)` 两个顺序的 logits
+  取均值。它们不能与 12,288-input clean MIC checkpoint 互换；canonical candidate scorer 只接受显式传入的
+  checkpoint，不将这些 profiles 静默合并。
+- partner embedding dictionary 的 844 个 key 同时包含 603 个 integer key 与 241 个 string key；CLI 必须
+  显式给出 key type，禁止把 `447` 和 `"447"` 自动视为同一个 partner。
 
 Canonical regression/genome/text heads 已用两个真实 MIC state dict 完成 `meta` module `strict=True` load；
 v1 `ClsHead` 也完成同样检查。这证明参数名和 shape 可严格装载，不等于已经运行了 GPU forward。
@@ -61,6 +68,16 @@ Peptide-table screening 仍消费 Core 的同一个 clean MIC checkpoint 和 con
 会影响预测；复现 2026-03-27 camel-milk output 时 batch size 固定为 32。该边界已记录在
 `reproducibility/peptide_table_migration_parity.json`，不能在跨仓库路径整理时顺手改变。
 
+历史 synergy candidate drivers 还存在三个不能继续继承的错误边界：它们 hard-code clean MIC checkpoint，
+却构造 synergy head；导入 tuple-returning attention 后又直接调用 `.reshape()`；并把 sigmoid probability
+误标为 MIC，随后应用不可达的 `>15` 阈值。Canonical `score_generated_molecule_synergy.py` 已改为显式
+checkpoint/partner/condition contract，输出列名固定为 `synergy_probability`，并保留 partner key type。
+正式 Generation synergy checkpoint、真实 SELFIES 与 Gentamicin partner 的单 candidate、双 pair-order
+bfloat16 GPU parity 已与 checkpoint producer 的 tensor-returning implementation 比较：logits/probabilities
+均逐 bit 相等；记录见
+`reproducibility/candidate_synergy_migration_parity.json`。这只验证 experimental all-data candidate scorer，
+不等于 Core 论文 cross-validation synergy predictor 或 full sampler 已验收。
+
 ## 4. 当前允许与禁止的重构
 
 允许：
@@ -75,6 +92,8 @@ Peptide-table screening 仍消费 Core 的同一个 clean MIC checkpoint 和 con
 - 虽然 formal head-level 与 clean candidate scorer GPU parity 已通过，但在 DLM/full sampler parity 前让
   Generation 直接改 import 新 package；
 - 将 noisy generation MIC checkpoint 与 clean candidate-scoring checkpoint 合并为一个 profile；
+- 将 experimental all-data synergy candidate probability 标成 MIC，或冒充 Core 论文 CV synergy prediction；
+- 自动转换 mixed-type partner embedding keys，或默认选择某一个 partner；
 - 把 Generation 的 dirty checkout 当作 MDLM 重构的一部分修改或提交。
 
 ## 5. Super-repo 的最终连接方式
@@ -102,11 +121,12 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
   --generation-root /path/to/ApexOracle-Generation
 ```
 
-该审计只读源码，检查 output writer、动态 imports、checkpoint key usage、embedding config、MDLM consumer，
-并验证 Generation 的 `RegressionHead` 仍与 MDLM frozen producer AST 一致。
+该审计只读源码，检查 MIC/synergy output writer、动态 imports、checkpoint key usage、embedding config、MDLM
+consumer，并验证 Generation 的 `RegressionHead` 仍与 MDLM frozen producer AST 一致。
 
 在作者机器上核验 trusted formal checkpoints 时追加 `--check-assets`。该模式以 CPU `mmap` 读取 manifest
-中的四个 checkpoint，执行 schema 与 canonical head `strict=True` load；它不运行 GPU forward，也不会
+中的 DLM、classifier、MIC、synergy checkpoint 与 synergy partner dictionary，执行 schema、partner-key
+contract 与 canonical head `strict=True` load；它不运行 GPU forward，也不会
 验证 manifest SHA-256（完整 hash 应在发布资产审计中单独执行）。不要对不可信 pickle checkpoint 使用该
 选项。
 
@@ -117,6 +137,8 @@ output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
 
 当前 formal bfloat16 GPU head parity 已通过：genome/text attention 与 regression output 均
 `torch.equal`，最大差异 `0.0`。clean candidate scorer 也已用正式 checkpoint、真实 BAA-3170 inputs 完成
-逐条和 batch=2 端到端 parity，logits/MIC 均 `torch.equal`，最大差异 `0.0`。仍待完成 full sampler、Core
+逐条和 batch=2 端到端 parity，logits/MIC 均 `torch.equal`，最大差异 `0.0`。experimental synergy
+candidate scorer 已用正式 Generation checkpoint、真实 input 和 partner 完成单 candidate、双 pair-order parity，
+logits/probabilities 同样 `torch.equal`、最大差异 `0.0`。仍待完成 full sampler、Core
 compatibility-bridge caller 迁移、Generation clean branch/自有 remote、顶层 asset resolver 与 fresh-clone
 smoke。因此可以分别声明 head 与 candidate-scoring parity，不能声明三仓库整体 release 已端到端验收。

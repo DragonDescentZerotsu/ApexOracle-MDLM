@@ -41,10 +41,20 @@ from .small_molecule_screen import (
     parse_strain_input,
     score_small_molecule_inputs,
 )
+from .synergy import (
+    CandidateSynergyClassifier,
+    build_candidate_synergy_classifier,
+    build_lora_condition_attention,
+    load_candidate_synergy_classifier,
+    load_partner_embedding,
+    score_selfies_synergy,
+    symmetric_pair_logits,
+)
 
 __all__ = [
     "GeneratedMoleculeFile",
     "CandidateMICRegressor",
+    "CandidateSynergyClassifier",
     "ConditionEmbeddingBanks",
     "PeptideCandidateResult",
     "PeptideScreenJob",
@@ -53,14 +63,18 @@ __all__ = [
     "StrainScreen",
     "add_mic_predictions",
     "build_candidate_mic_regressor",
+    "build_candidate_synergy_classifier",
+    "build_lora_condition_attention",
     "conversion_summary",
     "convert_peptides_to_structures",
     "decoded_wide_rows",
     "find_generated_molecule_file",
     "format_generated_molecule_filename",
     "load_candidate_mic_regressor",
+    "load_candidate_synergy_classifier",
     "load_condition_embedding_banks",
     "load_peptide_table",
+    "load_partner_embedding",
     "load_peptide_screen_jobs",
     "load_strain_inputs",
     "last_mic_by_selfies",
@@ -73,5 +87,7 @@ __all__ = [
     "regression_logit_to_mic",
     "score_selfies_across_strains",
     "score_selfies_strings",
+    "score_selfies_synergy",
     "score_small_molecule_inputs",
+    "symmetric_pair_logits",
 ]

@@ -28,6 +28,11 @@ REGRESSION_HEAD_SHAPES = {
     "out_proj.bias": (1,),
 }
 
+SYNERGY_HEAD_SHAPES = {
+    **REGRESSION_HEAD_SHAPES,
+    "dense_1.weight": (3072, 24576),
+}
+
 
 def _attention_shapes(condition_dim: int) -> dict[str, tuple[int, ...]]:
     return {
@@ -54,6 +59,42 @@ def _attention_shapes(condition_dim: int) -> dict[str, tuple[int, ...]]:
 
 GENOME_ATTENTION_SHAPES = _attention_shapes(8192)
 TEXT_ATTENTION_SHAPES = _attention_shapes(4096)
+
+
+def _lora_attention_shapes(
+    condition_dim: int,
+    *,
+    molecule_dim: int = 768,
+    rank: int = 64,
+) -> dict[str, tuple[int, ...]]:
+    prefix = "base_model.model."
+    shapes = {
+        f"{prefix}mha.in_proj_weight": (condition_dim * 3, condition_dim),
+        f"{prefix}mha.in_proj_bias": (condition_dim * 3,),
+        f"{prefix}attn_norm.weight": (condition_dim,),
+        f"{prefix}attn_norm.bias": (condition_dim,),
+        f"{prefix}norm1.weight": (condition_dim,),
+        f"{prefix}norm1.bias": (condition_dim,),
+        f"{prefix}norm2.weight": (condition_dim,),
+        f"{prefix}norm2.bias": (condition_dim,),
+    }
+    targets = {
+        "mol_to_genome_dim": (condition_dim, molecule_dim),
+        "key_value_projection": (condition_dim * 2, condition_dim),
+        "mha.out_proj": (condition_dim, condition_dim),
+        "ffn.0": (condition_dim, condition_dim),
+        "ffn.2": (condition_dim, condition_dim),
+    }
+    for name, (output_dim, input_dim) in targets.items():
+        shapes[f"{prefix}{name}.base_layer.weight"] = (output_dim, input_dim)
+        shapes[f"{prefix}{name}.base_layer.bias"] = (output_dim,)
+        shapes[f"{prefix}{name}.lora_A.default.weight"] = (rank, input_dim)
+        shapes[f"{prefix}{name}.lora_B.default.weight"] = (output_dim, rank)
+    return shapes
+
+
+SYNERGY_GENOME_ATTENTION_SHAPES = _lora_attention_shapes(8192)
+SYNERGY_TEXT_ATTENTION_SHAPES = _lora_attention_shapes(4096)
 
 PEPTIDE_CLASSIFIER_HEAD_SHAPES = {
     "ClsHead.dense_1.weight": (384, 768),
@@ -153,6 +194,43 @@ def validate_generation_mic_guidance_checkpoint(
     _validate_shapes(
         _require_mapping(payload, "co_cross_attn_text"),
         TEXT_ATTENTION_SHAPES,
+        field="co_cross_attn_text",
+    )
+    learnable = payload["learnable_embedding_weight"]
+    if not isinstance(learnable, torch.Tensor) or tuple(learnable.shape) != (1, 8192):
+        actual = tuple(learnable.shape) if isinstance(learnable, torch.Tensor) else None
+        raise ValueError(
+            "learnable_embedding_weight must be a tensor with shape (1, 8192); "
+            f"got {actual}."
+        )
+
+
+def validate_generation_synergy_guidance_checkpoint(
+    payload: Mapping[str, Any],
+) -> None:
+    """Validate the experimental symmetric-pair synergy checkpoint profile."""
+
+    missing = [key for key in GENERATION_GUIDANCE_REQUIRED_KEYS if key not in payload]
+    if missing:
+        raise KeyError(f"Synergy-guidance checkpoint is missing fields: {missing}.")
+    mdlm_state = _require_mapping(payload, "mdlm_model_state_dict")
+    if not any(key.startswith("backbone.blocks.0.") for key in mdlm_state):
+        raise ValueError(
+            "Synergy-guidance checkpoint lacks backbone.blocks.0 parameters."
+        )
+    _validate_shapes(
+        _require_mapping(payload, "re_head_state_dict"),
+        SYNERGY_HEAD_SHAPES,
+        field="re_head_state_dict",
+    )
+    _validate_shapes(
+        _require_mapping(payload, "co_cross_attn_genome"),
+        SYNERGY_GENOME_ATTENTION_SHAPES,
+        field="co_cross_attn_genome",
+    )
+    _validate_shapes(
+        _require_mapping(payload, "co_cross_attn_text"),
+        SYNERGY_TEXT_ATTENTION_SHAPES,
         field="co_cross_attn_text",
     )
     learnable = payload["learnable_embedding_weight"]
