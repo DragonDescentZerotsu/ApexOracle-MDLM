@@ -19,6 +19,12 @@ guidance support。重构目标是消除 root-level 复制脚本和机器路径�
 - guided sampling/remasking loop 位于 `ApexOracle-Generation`，本仓库不复制 sampler；
 - checkpoint、数据、embedding、W&B、cache 和 outputs 永远不进入 Git。
 
+作者于 2026-08-09 进一步确认最终 active-tree 形态：重要或暂时不确定的作者 legacy 代码也不长期原样
+保留，而是先提取独有功能、建立 characterization/parity evidence、迁入简洁 canonical implementation，
+随后删除原始重复脚本；确认没有独有行为的文件由 ledger、provenance 和 snapshot tag 恢复。最终 public
+branch 不建立第二份 `legacy/` 源码堆，也不把“不确定”当作永久保留旧文件的理由。upstream 和
+mixed-origin runtime 不属于这一批作者 legacy 清理对象。
+
 ## 2. 恢复边界
 
 - 重构前 source-only commit：`79eed10`；
@@ -155,11 +161,14 @@ Cross-repository contract 实现 commit：`4521c53`。
 
 - 只从 ledger 中逐文件满足 deletion gate、经证据更新为 `delete_ready` 的条目开始清理；
 - Core 已替代的 `DP_inhouse_*` hierarchical drivers 从活动入口撤下；
-- synergy guidance、interpretability、milk/camel case study 分为 experimental/examples；
-- debug、一次性绘图和 superseded temp scripts 在 source mapping 完成后从活动树删除；
+- synergy guidance、interpretability、milk/camel case study 中独有且仍需发布的行为重构为
+  `experimental/`、`examples/` 或 canonical library，不保留原始 root-level 副本；
+- debug、一次性绘图和 superseded temp scripts 在 source/consumer mapping 完成后从活动树删除；若其中
+  存在独有重要行为，先迁移并通过 parity，再删除原文件；
 - 不建立第二份 `legacy/` 目录，统一由 tag 恢复。
 
-验收：README 不再列出复制脚本作为公共入口；每个移除文件都有 tag、新入口和验证证据。
+验收：README 不再列出复制脚本作为公共入口；active tree 不再保留已迁移的 root legacy 副本；每个移除
+文件都有 tag、ledger 决策，以及必要时的新入口和验证证据。
 
 ### M5：Clean module release
 

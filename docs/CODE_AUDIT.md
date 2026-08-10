@@ -78,6 +78,10 @@
 只有 deletion gate 全部满足且人工更新为 `delete_ready` 的文件才允许进入删除 commit。自动分类出的
 `snapshot-only candidate` 不等于可删除。
 
+作者于 2026-08-09 确认：这里的保守 gate 用于防止误删，不表示把可疑 legacy 文件永久留在 public
+branch。重要或暂时不确定的代码应先重构独有行为，再删除原始副本；确认没有独有功能的代码完成
+consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第二个 `legacy/` 源码目录。
+
 完整规则、保护等级和人工 plotting/notebook 核验队列见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
 
 ## 7. 已完成迁移批次

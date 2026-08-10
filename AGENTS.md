@@ -13,6 +13,11 @@
   `docs/CODE_AUDIT.md`；legacy 恢复方法记录在 `docs/LEGACY_SNAPSHOT.md`。执行过程中必须同步更新。
 - `legacy-code-snapshot-2026-08-09` 是重构前 source-only 恢复点。删除或迁移 legacy 文件前，必须先
   有等价的 canonical 入口、行为保持测试和 source mapping；不得 reset、clean 或改写该 tag。
+- **2026-08-09 作者确认的最终清理原则：** 对重要或暂时不能确定是否可删除的作者 legacy 代码，默认
+  先提取独有行为并重构为简洁 canonical implementation，补 characterization/parity test 后删除原始混乱
+  副本；对确认没有独有 runtime/论文/跨仓库角色的文件，由 ledger/provenance 和 snapshot tag 保存后从
+  active tree 删除。最终 public branch 不建立第二个长期 `legacy/` 垃圾目录，也不因“不确定”而无限期
+  保留 root-level 复制脚本。upstream 与 mixed-origin 代码仍按 attribution/runtime adapter 边界单独处理。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 

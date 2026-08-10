@@ -20,6 +20,11 @@ canonical package。后续清理不能按文件名中的 `temp`、`debug`、`fix
 建立 ledger 不代表允许删除。任何一行只有在自身 `deletion_gate` 全部满足并把状态更新为明确的
 `delete_ready` 后，才进入删除批次。
 
+作者已确认最终目标不是“保守地把所有可疑文件继续放在 public branch”，而是“保守地保存行为，积极地
+清理旧实现”：重要或暂时不确定的文件先迁移独有行为和补 parity evidence，然后删除原文件；没有独有
+行为的文件完成 consumer/provenance 核验后由 snapshot tag 保存并删除。最终 active tree 不建立新的
+`legacy/` 源码堆。
+
 ## 2. Canonical 记录
 
 | 文件 | 内容 | 维护方式 |
@@ -91,7 +96,8 @@ Fig. 3a 的本机完整小资产核验与 CSV stale check：
 | Protected | upstream、mixed-origin、post-snapshot canonical | 不属于 legacy 批量清理；按 upstream attribution 或正常 deprecation 管理 |
 
 一个文件只要存在更高等级的未决条件，就按最高等级保护。`snapshot-only candidate` 也不等于
-`delete_ready`。
+`delete_ready`。但保护等级只决定“删除前先保住什么”，不决定“原始混乱文件永久保留”。P0--P3 的最终
+落点都必须是 canonical clean implementation 或 snapshot-only recovery，而不是继续暴露旧副本。
 
 ## 6. Fig. 3a 已冻结的血缘
 
@@ -128,9 +134,9 @@ flowchart LR
 仍待确认：没有找到最终四 panel 组图所用软件/命令；也没有找到精确 timestamp 到 2026-04-03 运行时刻的
 producer commit/log。因此 ledger 明确记录了证据强度，没有伪造不存在的 revision provenance。
 
-结论：`judge_generated_mols_MIC.py` 当前为 P0，绝不是可直接删除的普通 legacy plot。后续要先把它拆成
-canonical scoring library、parameterized CLI 和 figure capsule，并在正式资产上通过 predictions、CSV、
-statistics 和 panel output parity。
+结论：`judge_generated_mols_MIC.py` 当前为 P0，绝不是可直接删除的普通 legacy plot，但也不会永久留在
+最终 public tree。后续先把它拆成 canonical scoring library、parameterized CLI 和 figure capsule，
+并在正式资产上通过 predictions、CSV、statistics 和 panel output parity，然后删除原脚本。
 
 ## 7. 下一轮人工核验队列
 
@@ -146,5 +152,6 @@ Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优�
 4. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
    自动放行。
 
-人工核验完成后，只更新对应 ledger annotation/处置规则和证据文档；仍按小批次迁移与删除，不做一次性
-filesystem 大扫除。
+人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为
+snapshot-only；两类都在 gate 满足后删除原始 root 文件。仍按小批次迁移与删除，不做一次性 filesystem
+大扫除。

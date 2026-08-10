@@ -70,7 +70,7 @@ FAMILY_POLICIES: dict[str, dict[str, str]] = {
     },
     "synergy_guidance": {
         "summary": "Evo-conditioned synergy guidance/all-data experimental trainer；不等于 Core 的论文 CV runner。",
-        "disposition": "retain_as_experimental_until_decision",
+        "disposition": "migrate_if_release_relevant_else_snapshot_only",
         "replacement": "examples/experimental 或明确取消发布",
         "gate": "作者确认发布角色、formal checkpoint consumer 和与 Generation 的接口后才可移除。",
         "evidence": "verified_family_role_author_decision_pending",
@@ -84,35 +84,35 @@ FAMILY_POLICIES: dict[str, dict[str, str]] = {
     },
     "chemistry_legacy": {
         "summary": "历史 peptide/SMILES/SELFIES 转换或 catalog matching helper。",
-        "disposition": "retain_for_frozen_reproduction_then_review",
+        "disposition": "freeze_behavior_then_migrate_or_snapshot_only",
         "replacement": "PepLink==0.1.2 或小型兼容 adapter",
         "gate": "先冻结历史 parser 行为、失败样例和结构映射 parity；确认无论文资产依赖后才可移除。",
         "evidence": "verified_family_role_behavior_parity_pending",
     },
     "huggingface_export": {
         "summary": "历史 Hugging Face model/tokenizer wrapper、config 或上传脚本。",
-        "disposition": "hold_until_revision_audit",
+        "disposition": "audit_then_canonicalize_or_snapshot_only",
         "replacement": "M2 canonical exporter/model card（若最终需要发布）",
         "gate": "public revision、权重 SHA、tokenizer、license 和正式 DLM checkpoint 对应关系确认后才可清理。",
         "evidence": "verified_family_role_revision_lineage_pending",
     },
     "interpretability": {
         "summary": "attention extraction/visualization 或 interpretability notebook。",
-        "disposition": "hold_until_paper_and_example_audit",
+        "disposition": "migrate_unique_behavior_then_remove_original",
         "replacement": "可复现 interpretability example/figure capsule 或 snapshot-only",
         "gate": "逐图核对论文/补充材料 consumer，导出 exact plotted data，并由作者确认保留角色后才可移除。",
         "evidence": "verified_plotting_role_exact_consumers_pending",
     },
     "debug_case_study": {
         "summary": "debug、临时分析、milk/camel/case-study 或一次性统计/绘图代码。",
-        "disposition": "snapshot_only_candidate_pending_review",
+        "disposition": "migrate_unique_behavior_else_snapshot_only",
         "replacement": "必要内容迁入 examples/reproduce；其余由 legacy tag 恢复",
         "gate": "先核对论文图表、reviewer 产物、外部调用和独有算法；只有四项均为否或已有 replacement 才可移除。",
         "evidence": "static_classification_manual_review_pending",
     },
     "historical_config": {
         "summary": "历史 resolved/unresolved configuration 或 metadata。",
-        "disposition": "retain_as_provenance_until_profile_mapping",
+        "disposition": "compact_manifest_then_remove_legacy_config",
         "replacement": "configs/legacy 与 configs/release 的显式 profile",
         "gate": "关联 producer/checkpoint/profile 并去除秘密和绝对路径后，决定保留 compact manifest 或由 tag 恢复。",
         "evidence": "verified_file_role_asset_mapping_pending",
@@ -445,7 +445,7 @@ def main() -> None:
         gate = policy["gate"]
         evidence = policy["evidence"]
         if relative == "judge_generated_mols_MIC.py":
-            disposition = "release_critical_hold_then_migrate"
+            disposition = "release_critical_migrate_then_remove_original"
             gate = (
                 "Fig. 3a scoring/plot capsule、exact plotted data、input/checkpoint manifest "
                 "和 legacy/new parity 完成且论文 consumer 改指 canonical producer 后才可移除。"
@@ -541,7 +541,11 @@ def main() -> None:
         "definition_clone_occurrence_count": sum(
             int(row["occurrence_count"]) for row in clone_rows
         ),
-        "deletion_policy": "No file is delete-ready merely because it is listed. Apply each row's deletion_gate and docs/LEGACY_CODE_LINEAGE_LEDGER.md.",
+        "deletion_policy": (
+            "No file is delete-ready merely because it is listed. Preserve unique behavior by "
+            "migration or preserve provenance as snapshot-only, satisfy each deletion_gate, then "
+            "remove the original legacy file from the active tree."
+        ),
     }
 
     write_or_check(

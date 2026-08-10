@@ -3,7 +3,7 @@
   "recorded_at": "2026-08-09",
   "figure_id": "ApexOracle_main_Fig3a",
   "role": "Predicted MIC distributions for unconditional and predictor-guided generation",
-  "status": "release_critical_hold",
+  "status": "release_critical_migrate_then_remove_original",
   "consumer": {
     "owner": "manuscript",
     "relative_path": "sn-article.tex",

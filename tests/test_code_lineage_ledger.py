@@ -56,7 +56,8 @@ class CodeLineageLedgerTests(unittest.TestCase):
             row["paper_role"], "main_figure_3a_mic_distribution_source_panel"
         )
         self.assertEqual(
-            row["target_disposition"], "release_critical_hold_then_migrate"
+            row["target_disposition"],
+            "release_critical_migrate_then_remove_original",
         )
         self.assertEqual(row["evidence_status"], "verified_formal_figure_lineage")
 
