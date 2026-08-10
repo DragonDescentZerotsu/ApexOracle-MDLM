@@ -196,22 +196,21 @@
       ]
     }
   ],
-  "ast_equivalence_checks": [
-    {
-      "id": "regression_head_copy",
-      "left": {
-        "repository": "mdlm",
-        "path": "guaidance_regressor_all_data_pad_no_mask.py",
-        "class": "RegressionHead"
-      },
-      "right": {
-        "repository": "generation",
-        "path": "models/antibiotic_classifier.py",
-        "class": "RegressionHead"
-      }
-    }
-  ],
+  "ast_equivalence_checks": [],
   "class_module_checks": [
+    {
+      "id": "mdlm_canonical_regression_head_state_modules",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/models/heads.py",
+      "class": "RegressionHead",
+      "required_self_attributes": [
+        "dense_1",
+        "dense_2",
+        "activation_fn",
+        "dropout",
+        "out_proj"
+      ]
+    },
     {
       "id": "generation_cross_attention_state_modules",
       "repository": "generation",

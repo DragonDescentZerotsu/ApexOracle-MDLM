@@ -14,7 +14,7 @@
 | Genome/text embeddings 与 MIC guidance | Core/Synergy | Generation、MDLM scoring | 两个仓库直接读取 Core 本地 tensor/checkpoint 路径 |
 | Synergy guidance、partner embeddings | Core/Synergy | Generation、MDLM scoring | 两个 consumer 读取 all-data synergy checkpoint 和 partner dictionary；不是 Core 论文 CV predictor |
 | Candidate files | Generation | MDLM scoring、Core audit | 以 `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt` 传递 SELFIES |
-| Guidance module implementation | MDLM legacy trainer | Generation | `RegressionHead` 是 AST 完全相同的复制；cross-attention 参数结构相同，但返回 contract 有差异 |
+| Guidance module implementation | MDLM canonical package（snapshot 保存原 trainer） | Generation | canonical/Generation 保持相同 state modules；正式权重 GPU parity 验证实际数值，cross-attention 返回 contract 仍显式区分 |
 
 正式 generation 资产的 metadata 已使用 CPU `mmap` 只读核验：
 
@@ -128,8 +128,9 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
 ```
 
 该审计只读源码，检查 MIC/synergy output writer、动态 imports、checkpoint key usage、embedding config、MDLM
-consumer、Core/MDLM saved-window coordinates，并验证 Generation 的 `RegressionHead` 仍与 MDLM frozen
-producer AST 一致。
+consumer、Core/MDLM saved-window coordinates，并分别验证 MDLM canonical `RegressionHead` 与 Generation
+cross-attention 所需 state modules。旧 trainer 已由 snapshot/migration manifest 保存，不再要求 active root
+copy 与 Generation 做 AST equality；实际参数/数值兼容由 strict load 和下述正式 GPU parity 负责。
 
 在作者机器上核验 trusted formal checkpoints 时追加 `--check-assets`。该模式以 CPU `mmap` 读取 manifest
 中的 DLM、classifier、MIC、synergy checkpoint 与 synergy partner dictionary，执行 schema、partner-key

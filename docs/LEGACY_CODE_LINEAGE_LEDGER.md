@@ -254,8 +254,10 @@ parity 均为 `torch.equal`/最大差异 `0.0`；正式 v1 checkpoint 也完成 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
-1. 下一批转向六个 `guaidance_regressor_all_data*.py`，按 clean/noisy、padding、CLS/mean profiles 提取正式
-   MIC guidance producer contract；随后核验 Core 唯一历史 source-path consumer。
+1. 六个 `guaidance_regressor_all_data*.py` 已归并为五个 MIC guidance profiles；正式 checkpoint schema、
+   Generation regression GPU exact parity 和 Core 唯一 source-path consumer migration 均完成，root copies 已由
+   snapshot 接管后删除。下一批转向 Core 已替代的 `DP_inhouse_*` hierarchical drivers，逐文件核对 source
+   mapping 后再清理。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为
 snapshot-only；两类都在 gate 满足后删除原始 root 文件。仍按小批次迁移与删除，不做一次性 filesystem

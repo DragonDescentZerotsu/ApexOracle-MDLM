@@ -13,6 +13,12 @@ from .heads import (
     extract_peptide_classifier_head_state_dict,
     load_peptide_classifier_head,
 )
+from .mic_guidance import (
+    MIC_GUIDANCE_PROFILES,
+    MICGuidanceProfile,
+    MICGuidanceRegressor,
+    get_mic_guidance_profile,
+)
 from .peptide_classifier import (
     PEPTIDE_CLASSIFIER_PROFILES,
     FrozenEncoderPeptideClassifier,
@@ -26,6 +32,9 @@ __all__ = [
     "FirstTokenCrossAttention",
     "FrozenEncoderPeptideClassifier",
     "NoisyDLMHiddenStateEncoder",
+    "MIC_GUIDANCE_PROFILES",
+    "MICGuidanceProfile",
+    "MICGuidanceRegressor",
     "PEPTIDE_CLASSIFIER_PROFILES",
     "PeptideClassificationHead",
     "PeptideClassifierProfile",
@@ -34,6 +43,7 @@ __all__ = [
     "build_upstream_noisy_dlm_hidden_state_encoder",
     "extract_peptide_classifier_head_state_dict",
     "get_peptide_classifier_profile",
+    "get_mic_guidance_profile",
     "load_peptide_classifier_head",
     "masked_mean_pool",
 ]

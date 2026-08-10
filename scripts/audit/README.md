@@ -37,6 +37,23 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
 
 冻结结果与 exact-producer 不确定性见 `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`。
 
+## `compare_legacy_mic_guidance.py`
+
+用途：从 snapshot 读取六个 root MIC-guidance trainers，验证 source hashes、五个 protocol profiles、重复文件、
+canonical regression/attention components 和五个正式 checkpoint schemas。加 `--run-generation-parity` 后，
+使用 padding-preserved 正式权重在一张显式 GPU 上比较 legacy/canonical bfloat16 outputs；Generation 消费的
+regression 必须 bitwise equal。
+
+```bash
+CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src conda run --no-capture-output -n mdlm \
+  python scripts/audit/compare_legacy_mic_guidance.py \
+  --run-generation-parity \
+  --backbone-checkpoint Checkpoints_fangping/last_reg_v1.ckpt \
+  --output reproducibility/mic_guidance_migration.json
+```
+
+完整边界与恢复命令见 `docs/MIC_GUIDANCE_MIGRATION.md`。
+
 ## `verify_paper_figure_lineage.py`
 
 用途：核验正式 main Fig. 3a 的 tagged historical producer、canonical producer paths、四个 Generation inputs、四个 MIC caches、

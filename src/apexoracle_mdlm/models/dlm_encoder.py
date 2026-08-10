@@ -206,6 +206,7 @@ class NoisyDLMHiddenStateEncoder(DLMHiddenStateEncoder):
         preserve_padding: bool = False,
         pad_token_id: int | None = None,
         use_attention_mask: bool = False,
+        fixed_t: float | None = None,
     ) -> None:
         super().__init__(
             config,
@@ -219,6 +220,9 @@ class NoisyDLMHiddenStateEncoder(DLMHiddenStateEncoder):
         self.preserve_padding = preserve_padding
         self.pad_token_id = pad_token_id
         self.use_attention_mask = use_attention_mask
+        if fixed_t is not None and not 0 <= fixed_t <= 1:
+            raise ValueError("fixed_t must be between zero and one.")
+        self.fixed_t = fixed_t
 
     @staticmethod
     def _sample_t(n: int, device: torch.device) -> torch.Tensor:
@@ -258,7 +262,14 @@ class NoisyDLMHiddenStateEncoder(DLMHiddenStateEncoder):
         input_ids: torch.Tensor,
         attention_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        t = self._sample_t(input_ids.shape[0], input_ids.device)
+        if self.fixed_t is None:
+            t = self._sample_t(input_ids.shape[0], input_ids.device)
+        else:
+            t = torch.full(
+                (input_ids.shape[0],),
+                self.fixed_t,
+                device=input_ids.device,
+            )
         sigma, _ = self.noise(t)
         move_chance = 1 - torch.exp(-sigma[:, None])
         move_indices = (
@@ -287,6 +298,7 @@ def build_upstream_noisy_dlm_hidden_state_encoder(
     mask_index: int | None = None,
     preserve_padding: bool = False,
     pad_token_id: int | None = None,
+    fixed_t: float | None = None,
 ) -> NoisyDLMHiddenStateEncoder:
     """Build one of the two attributed noisy guidance-training encoders."""
 
@@ -335,4 +347,5 @@ def build_upstream_noisy_dlm_hidden_state_encoder(
         preserve_padding=preserve_padding,
         pad_token_id=pad_token_id,
         use_attention_mask=backbone_variant == "dit_non_pad",
+        fixed_t=fixed_t,
     )

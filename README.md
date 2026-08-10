@@ -39,6 +39,26 @@ This command does not pretrain the DLM backbone. The deployed v1 head strictly l
 `apexoracle_mdlm.models.load_peptide_classifier_head`; exact source/profile boundaries and GPU parity
 are recorded in `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`.
 
+## MIC-guidance training
+
+The six historical genome/text MIC trainers are represented by five explicit profiles and one
+prepared-table pipeline. Train the downstream guidance model without editing machine paths:
+
+```bash
+PYTHONPATH=src python scripts/reproduce/train_mic_guidance.py \
+  --profile noisy_padding_preserved \
+  --input /path/to/prepared_mic.csv \
+  --genome-embeddings /path/to/Genome_embs \
+  --text-embeddings-atcc /path/to/ATCC/embeddings \
+  --text-only-embeddings /path/to/wo_ATCC/embeddings \
+  --backbone-checkpoint /path/to/last_reg_v1.ckpt \
+  --output-dir results/mic_guidance
+```
+
+This also does not pretrain DLM. The output checkpoint fields remain compatible with
+ApexOracle-Generation. Source hashes, all five formal checkpoint schemas, and exact Generation MIC
+regression parity are recorded in `docs/MIC_GUIDANCE_MIGRATION.md`.
+
 ## Candidate MIC scoring
 
 `apexoracle_mdlm.scoring` owns the canonical clean candidate scorer. The CLI takes every repository

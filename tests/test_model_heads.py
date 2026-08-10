@@ -1,3 +1,6 @@
+import ast
+from pathlib import Path
+import subprocess
 import unittest
 from types import SimpleNamespace
 
@@ -54,9 +57,31 @@ class _TinyBackbone(nn.Module):
 class ModelHeadTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        import guaidance_regressor_all_data as legacy
-
-        cls.legacy = legacy
+        repo = Path(__file__).resolve().parents[1]
+        source = subprocess.check_output(
+            [
+                "git",
+                "show",
+                "legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data.py",
+            ],
+            cwd=repo,
+            text=True,
+        )
+        tree = ast.parse(source)
+        nodes = [
+            item
+            for item in tree.body
+            if isinstance(item, ast.ClassDef)
+            and item.name in {"RegressionHead", "FirstTokenAttention_genome"}
+        ]
+        module = ast.Module(body=nodes, type_ignores=[])
+        ast.fix_missing_locations(module)
+        namespace = {"nn": nn, "torch": torch}
+        exec(compile(module, "<legacy-snapshot>", "exec"), namespace)
+        cls.legacy = SimpleNamespace(
+            RegressionHead=namespace["RegressionHead"],
+            FirstTokenAttention_genome=namespace["FirstTokenAttention_genome"],
+        )
 
     def test_regression_head_state_dict_and_forward_match_legacy(self):
         torch.manual_seed(7)

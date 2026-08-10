@@ -1,8 +1,8 @@
 # Downstream MDLM 代码与文件系统审计
 
 > 审计日期：2026-08-09
-> 状态：全量逐文件 ledger 和复制血缘已建立；Fig. 3a/candidate MIC 第一批已完成 canonical 迁移，
-> 其余文件后续持续追加证据
+> 状态：全量逐文件 ledger 和复制血缘已建立；candidate scoring、论文图、classifier 与 MIC guidance
+> producer 已分批迁移；剩余 hierarchical/synergy/upstream families 继续逐项追加证据
 
 ## 1. 已由 Git/文件系统/AST 验证的事实
 
@@ -35,7 +35,7 @@
 | Molecule embedding | snapshot 中的 `save_DBAASP_id_emb_dict.py`、`save_*synergy*_emb_dict.py` | 多次复制 DLM wrapper、tokenization 和 pooling；已迁移并从 active tree 删除 | `apexoracle_mdlm.embeddings.molecule` + `scripts/reproduce/export_molecule_embeddings.py` |
 | Fig. 2b DLM benchmark | snapshot 中的 `DBAASP_MLM_MDLM.py` | 19-task fivefold downstream MIC trainer，不是 embedding producer；已从 active tree 删除 | Core 的 `reproduce_fig2b_mdlm_cached_5fold.py` 与 `run_fig2b_shared_mdlm_online.py` |
 | Hierarchical MIC | `DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_*` | 大量 strain/species/phylum 复制 driver；Core 已有 canonical replacements | 不再作为本 repo 公共 API；验证 source mapping 后在 M4 从活动树移除 |
-| MIC guidance | `guaidance_regressor_all_data*.py` | clean/noisy、padding、CLS/mean 等不同历史协议 | M3 通过 profiles 统一代码，协议差异保留为 config，不改 checkpoint schema |
+| MIC guidance | snapshot 中的 `guaidance_regressor_all_data*.py` | 六份 sources 已归并为五个 clean/noisy/padding/non-pad/eval profiles；五个正式 checkpoint schema 与 Generation regression exact parity 已验证 | `apexoracle_mdlm.models` + `apexoracle_mdlm.training` + `scripts/reproduce/train_mic_guidance.py`；旧 root copies 已删除 |
 | Peptide classifier | snapshot 中的 `guaidance_classifier_all_data*.py` | 三个 noisy/pooling/padding/data profiles 已分开；正式 v1 head strict load 和三 profile GPU parity 已完成，exact timestamped producer revision 仍未知 | `apexoracle_mdlm.models` + `scripts/reproduce/train_peptide_classifier.py`；旧 root copies 已删除 |
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
@@ -67,7 +67,8 @@
 
 - 哪个 timestamped 历史 trainer revision 精确产生 reviewer generation 使用的 v1 peptide classifier
   checkpoint；现有证据已确认 v1 family 与推理兼容，但不足以收紧到逐字节 producer；
-- 每个 clean/noisy/padding guidance checkpoint 的唯一 producer、resolved config 和正式角色；
+- 五个 clean/noisy/padding guidance checkpoints 的 snapshot producer family 与 profile 已冻结；当年每次运行的
+  resolved config/command 没有独立 timestamped manifest，不能声称已逐次重建；
 - public Hugging Face model card 的最终 license/weight rights 需作者确认；当前 source repo 为 Apache-2.0、
   IBM tokenizer 为 Apache-2.0，但 public ApexOracle model card 没有 license metadata；
 - milk/camel、attention 和 synergy guidance 哪些需要进入最终 public examples；
@@ -106,6 +107,19 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   outputs 的 hashes/keys/shapes 后确认无消费者，不创建项目特定 API。
 - 六个 source 均由 snapshot 恢复后删除；ignored data/embedding assets 保持原地。详见
   `docs/DEBUG_FILE_CLEANUP.md` 和 `reproducibility/debug_file_cleanup_lineage.json`。
+
+### MIC guidance producer cleanup（2026-08-10）
+
+- 六个 115--117 KB root trainers 的差异已提取为五个 profile；两份 noisy non-pad source byte-identical，
+  `clean_non_pad` 实际固定 `t=1e-3`，不是文件名暗示的精确 `t=0`。
+- Canonical package 保留 checkpoint names/state keys、padding/non-pad encoder 行为、MIC transform、condition
+  padding 和 genome-missing learnable embedding；CLI 只接受 prepared canonical table 和显式资产路径。
+- 六份 source 的 head/attention fixed-input parity 全部 exact；五个正式约 9.17 GB checkpoints 完成 schema 与
+  inactive cls-head strict load；Generation 使用的 padding-preserved regression 在 GPU/bfloat16 下
+  `torch.equal`、最大差异 `0.0`。
+- Core 唯一 live source-path audit 改读 snapshot/hash migration manifest；Generation 无 trainer import。
+  deletion gate 关闭后六份 root copies 删除，完整恢复和 inactive cls 数值边界见
+  `docs/MIC_GUIDANCE_MIGRATION.md` 与 `reproducibility/mic_guidance_migration.json`。
 
 ### Legacy Hugging Face exporter/runtime cleanup（2026-08-10）
 

@@ -2,8 +2,8 @@
 
 > 建立日期：2026-08-09
 > 当前 branch：`refactor/apexoracle-mdlm`
-> 状态：M0/M1/M1.5 已完成；首个 DLM clean hidden-state adapter、candidate MIC scorer 与 Fig. 3a capsule
-> 已完成正式迁移和 GPU parity；其余 embedding/guidance/scoring families 仍按 ledger 分批处理
+> 状态：M0/M1/M1.5 已完成；DLM adapters、candidate scoring、Fig. 3a、peptide classifier 和五个 MIC
+> guidance producer profiles 已完成迁移与正式资产验证；其余 legacy families 继续按 ledger 分批处理
 
 ## 1. 目标与不变量
 
@@ -243,8 +243,16 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
   v1 padding-preserved producer path/protocol，但 exact source 当前不可访问，MDLM Git tree 不伪造 blob/hash；
 - [x] 建立无绝对路径 `train_peptide_classifier.py`，修复 legacy non-pad validation 漏传 attention mask；确认
   Core/Generation 无 runtime import 后删除三个 root copies，本地 datasets/checkpoints/outputs 不动；
+- [x] 将六个 `guaidance_regressor_all_data*.py` 提取为五个 explicit profiles、一个 checkpoint-compatible
+  `MICGuidanceRegressor`、prepared-table data contract 和无绝对路径 `train_mic_guidance.py`；确认两份
+  non-pad source byte-identical，并按源码保留所谓 clean profile 的固定 `t=1e-3`；
+- [x] 对六份 tagged source 完成 regression/attention exact component parity，对五个正式约 9.17 GB
+  checkpoints 完成 schema 与 inactive cls-head strict load；Generation padding-preserved profile 的正式
+  GPU/bfloat16 regression output 为 `torch.equal`、最大差异 `0.0`；
+- [x] 将 Core 唯一 source-path audit 切换为 snapshot migration manifest；Generation consumer scan 为 0；
+  六份 root trainer 由 tag 恢复后从 active tree 删除，本地 checkpoints/data/outputs 不动；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
-- 将 clean/noisy MIC guidance 和 synergy experimental profiles 分开；
+- [x] 将 clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。
 
@@ -270,6 +278,10 @@ Peptide candidate screen 迁移证据见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md
 Peptide classifier 三 profile、正式 checkpoint strict load、noisy encoder GPU parity 和 exact-producer
 不确定性见 `docs/PEPTIDE_CLASSIFIER_MIGRATION.md` 与
 `reproducibility/peptide_classifier_migration.json`。三个旧 root trainers 已由 tag 接管并从 active tree 删除。
+
+MIC guidance producer 的 source hashes、五 profiles、正式 checkpoint schemas、Generation regression exact
+parity、inactive cls 数值边界和恢复命令见 `docs/MIC_GUIDANCE_MIGRATION.md` 与
+`reproducibility/mic_guidance_migration.json`。
 
 Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 `docs/LEGACY_ANALYSIS_MIGRATION.md`、`reproducibility/small_molecule_postprocessing_lineage.json` 与

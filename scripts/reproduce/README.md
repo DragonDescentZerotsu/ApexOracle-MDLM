@@ -44,6 +44,28 @@ PYTHONPATH=src python scripts/reproduce/train_peptide_classifier.py \
 `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`。Focused 验证：
 `PYTHONPATH=src python -m unittest tests.test_model_heads -v`。
 
+## `train_mic_guidance.py`
+
+功能：从已标准化的 `SMILES,strain_name,MIC` CSV 训练 downstream genome/text-conditioned MIC guidance，
+不预训练 DLM。`--profile` 显式区分 standard DIT、padding-preserved DIT、noisy/固定 epsilon non-pad 和
+encoder-eval variants；genome/text embeddings、backbone、runtime/config 和 output 均由参数提供。Genome
+embeddings 默认保持历史 `1e14` scaling，MIC target 保持 `-log10(MIC/10)`，输出 checkpoint keys 与
+Generation loader 兼容，并写入 resolved `training_manifest.json`。
+
+```bash
+PYTHONPATH=src python scripts/reproduce/train_mic_guidance.py \
+  --profile noisy_padding_preserved --input /path/to/prepared_mic.csv \
+  --genome-embeddings /path/to/Genome_embs \
+  --text-embeddings-atcc /path/to/Text_Description/ATCC/embeddings \
+  --text-only-embeddings /path/to/Text_Description/wo_ATCC/embeddings \
+  --backbone-checkpoint /path/to/last_reg_v1.ckpt \
+  --output-dir /path/to/guidance_output
+```
+
+五个正式 checkpoint schema、tagged source component parity 和 Generation profile GPU regression exact parity
+见 `docs/MIC_GUIDANCE_MIGRATION.md`。Focused 验证：
+`PYTHONPATH=src python -m pytest -q tests/test_mic_guidance.py`。
+
 ## `score_generated_molecule_mic.py`
 
 功能：加载正式 clean candidate MIC checkpoint、Core genome/text embedding banks 和 Generation SELFIES

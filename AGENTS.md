@@ -24,6 +24,14 @@
   由 snapshot tag/`docs/DEBUG_FILE_CLEANUP.md` 恢复后从 active tree 删除，ignored inputs/outputs 原地保留。
   通用 embedding exporter 仍属于 M2，未来只能基于 canonical encoder 和 failure manifest 新建，不能恢复这些
   hard-coded scripts 充当 release implementation。
+- **2026-08-10 MIC guidance producer 清理：** 六个 `guaidance_regressor_all_data*.py` 已归并为五个
+  named profiles；两个 non-pad sources byte-identical。Canonical model/data/CLI 分别位于
+  `apexoracle_mdlm.models.MICGuidanceRegressor`、`apexoracle_mdlm.training` 和
+  `scripts/reproduce/train_mic_guidance.py`。五个正式约 9.17 GB checkpoints 均通过 schema 与 inactive
+  classification-head strict load；Generation 使用的 padding-preserved profile 在 GPU/bfloat16 下 regression
+  output `torch.equal`、最大差异 `0.0`。原 sources 由 snapshot tag 和
+  `docs/MIC_GUIDANCE_MIGRATION.md` 恢复后从 active tree 删除，Core audit 改读 migration manifest；不得再让
+  外部 caller 依赖 root trainer path。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 
@@ -82,6 +90,13 @@
   接收 dataset/backbone/output 等显式路径并输出 checkpoints 与 `training_manifest.json`。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_model_heads -v`；三 profile 正式 GPU parity 入口见
   `scripts/audit/compare_legacy_peptide_classifier.py`。
+- MIC guidance producer contract：`MIC_GUIDANCE_PROFILES` 明确五种 historical protocols；
+  `MICGuidanceRegressor` 保持 Generation checkpoint keys，`apexoracle_mdlm.training` 接受 prepared
+  `SMILES,strain_name,MIC` rows 并保持 `-log10(MIC/10)` target。公开入口为
+  `scripts/reproduce/train_mic_guidance.py --profile <name>`，输入 table、backbone、三个 condition directories
+  和 output 都必须显式提供，输出历史兼容 checkpoints 与 `training_manifest.json`。Focused 验证：
+  `PYTHONPATH=src python -m pytest -q tests/test_mic_guidance.py`；正式 source/checkpoint/GPU parity 见
+  `scripts/audit/compare_legacy_mic_guidance.py` 和 `reproducibility/mic_guidance_migration.json`。
 - `apexoracle_mdlm.scoring`：`CandidateMICRegressor`、`load_candidate_mic_regressor`、
   `load_condition_embedding_banks` 与 `score_selfies_strings`；输入为显式 checkpoint/embedding/tokenizer/
   strain/device，输出 MIC tensor。公开 CLI 为 `scripts/reproduce/score_generated_molecule_mic.py`，输出逐行
