@@ -1,10 +1,10 @@
 # ApexOracle downstream MDLM 重构计划
 
 > 建立日期：2026-08-09
-> 当前 branch：`refactor/apexoracle-mdlm`
-> 状态：M0/M1/M1.5 已完成；DLM adapters、candidate scoring、Fig. 3a、peptide classifier 和五个 MIC
-> guidance producer profiles 已完成迁移与正式资产验证；11 个 Core-replaced hierarchical MIC drivers
-> 已完成 handoff 审计，正在从 active tree 收口；其余 legacy families 继续按 ledger 分批处理
+> 历史重构 branch：`refactor/apexoracle-mdlm`
+> 状态：**重构与公开发布已完成。** M0--M5、Generation full-sampler integration、Core direct-caller
+> 切换和 legacy active-tree cleanup 均已关闭；初始 clean implementation candidate 为 `c9d17c7`，并已由
+> ApexOracle `v0.2.0` source release 固定。后续变更只按维护版本处理。
 
 ## 1. 目标与不变量
 
@@ -291,7 +291,8 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 
 ### M4：Legacy driver 收口
 
-状态：**执行中；hierarchical MIC、root chemistry 与 synergy-guidance producer 已满足删除 gate。**
+状态：**完成。** 所有保留功能已迁入 canonical package/CLI/figure entry；重复、debug、一次性和项目专用
+root copies 已在 ledger gate 通过后移除，并继续由 recovery tag 恢复。
 
 - 只从 ledger 中逐文件满足 deletion gate、经证据更新为 `delete_ready` 的条目开始清理；
 - [x] Core 已替代的 11 个 `DP_inhouse_*` hierarchical drivers 完成逐文件 source/profile mapping、跨仓库
@@ -302,10 +303,10 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 - [x] 三个 synergy-guidance root producers 归并为两个 explicit profiles、prepared-table contract 与参数化
   training CLI；两 profile DLM encoder GPU outputs 和 Generation candidate inference 均 exact parity，正式两个
   checkpoint schema 与 no-live-source-consumer 已验证，旧 root copies 由 snapshot 接管；
-- interpretability、milk/camel case study 中独有且仍需发布的行为重构为 `experimental/`、`examples/` 或
-  canonical library，不保留原始 root-level 副本；
-- debug、一次性绘图和 superseded temp scripts 在 source/consumer mapping 完成后从活动树删除；若其中
-  存在独有重要行为，先迁移并通过 parity，再删除原文件；
+- [x] interpretability、历史 peptide case study 中的通用行为已重构为 canonical library/CLI/figure entry；
+  项目名称只保留在 provenance 文档，不进入公共 API；
+- [x] debug、一次性绘图和 superseded temp scripts 已完成 source/consumer mapping；独有行为先迁移，
+  无 caller/独有行为的副本再从 active tree 删除；
 - 不建立第二份 `legacy/` 目录，统一由 tag 恢复。
 
 验收：README 不再列出复制脚本作为公共入口；active tree 不再保留已迁移的 root legacy 副本；每个移除
@@ -326,7 +327,8 @@ Synergy-guidance producer migration 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATIO
 
 ### M5：Clean module release
 
-状态：**module-level source/asset smoke 已完成；只剩跨模块 full Generation parity 与 Core bridge 切换。**
+状态：**完成。** module-level source/asset smoke、跨模块 Generation full sampler、Core direct caller、
+公开默认分支和 super-repo 固定均已关闭。
 
 - [x] 公共 canonical package/CLI 不使用作者机器默认资产路径；legacy upstream runtime 与 bridge 边界已登记；
 - [x] 完成 license/NOTICE、secret、大文件和 dependency 审计；
@@ -336,14 +338,16 @@ Synergy-guidance producer migration 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATIO
 - [x] annotated recovery tag 已推送 `custom`，并在 fresh shallow clone 中单独 fetch 后完成所有
   snapshot-dependent tests；
 - [x] 只显式推送 `custom`，未 push `origin`；
-- 由 ApexOracle super-repo 固定 clean commit。
+- [x] Generation canonical integration/full-sampler completion gate 已记录；Core compatibility bridge 已删除；
+- [x] ApexOracle super-repo `v0.2.0` 固定 clean implementation commit `c9d17c7f6f091234aaaebf5f08dbe23542f980c1`。
 
 验收：fresh clone 可安装；smoke 不依赖作者 cache；资产全部通过 manifest 解析。
 
-2026-08-10 验收的 source commit 为 `c774bd77ed84d97decbc4d4cffbd75ecea213200`；远端 tag peeled commit 为
+2026-08-10 中间 source gate commit 为 `c774bd77ed84d97decbc4d4cffbd75ecea213200`；最终 clean implementation
+candidate 为 `c9d17c7f6f091234aaaebf5f08dbe23542f980c1`；远端 recovery tag peeled commit 为
 `79eed10cac8d5feb446be886eee0c5b356b23b06`。Fresh clone 本身不携带 ignored checkpoints，asset smoke 通过
-显式路径挂载受信本地权重完成；这正是未来 super-repo asset resolver 需要提供的边界。未完成的 full sampler
-属于 Generation 模块验收，不再以保留 MDLM root trainer 为代价阻塞 source cleanup。
+显式路径挂载受信本地权重完成。Generation full sampler 与 Core direct-caller gates 后续均已关闭；本计划
+不再保留未完成的发布 gate。
 
 ## 5. 变更控制
 

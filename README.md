@@ -5,8 +5,9 @@ This repository is one module of the ApexOracle super-repository; it is not the 
 DLM+MTR pretraining codebase and it does not vendor ApexOracle-Core or ApexOracle-Generation.
 
 The active public API lives under `src/apexoracle_mdlm/`. Historical experiments remain recoverable
-from the annotated Git tag `legacy-code-snapshot-2026-08-09` while the active branch is being reduced
-to tested libraries, parameterized command-line entries, and reproducibility records.
+from the annotated Git tag `legacy-code-snapshot-2026-08-09`; the clean migration is complete and the
+default public branch contains the tested libraries, parameterized command-line entries, and
+reproducibility records used by the ApexOracle super-repository.
 
 ## Install
 
