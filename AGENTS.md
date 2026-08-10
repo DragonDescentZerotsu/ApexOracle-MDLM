@@ -111,6 +111,20 @@
   `PYTHONPATH=src python -m unittest tests.test_small_molecule_screen -v`；44,608-entry frozen lineage 与 tagged
   legacy GPU parity 分别见 `reproducibility/small_molecule_screen_lineage.json` 和
   `small_molecule_screen_scorer_parity.json`。
+- Small-molecule postprocessing：同一模块的 `load_screen_predictions`、
+  `filter_screen_predictions`、`canonical_prediction_set`、`load_active_reference_structures` 与
+  `compare_structure_sets` 提供通用 validation/cutoff/canonicalization/set comparison；公开入口
+  `scripts/reproduce/analyze_small_molecule_screen.py` 接收重复 `--prediction STRAIN=PATH`、显式
+  `--mic-cutoff`、可选 reference columns/threshold 和 `--output-dir`，输出无 index 的 filtered CSV 与
+  `summary.json`。不得将 reference overlap 写成独立 activity validation。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_small_molecule_screen -v`；历史 44,608-row tables、filtered
+  content 和 exploratory overlap 见 `reproducibility/small_molecule_postprocessing_lineage.json`。
+- Paper Fig. 5b CFU display：`apexoracle_mdlm.figures.in_vivo_cfu` 验证历史 two-row wide CSV 并绘制 raw
+  points/violin/median；公开入口 `scripts/reproduce/plot_paper_in_vivo_cfu.py --day-1 <csv> --day-2 <csv>
+  --output-dir <dir>` 输出 PDF/PNG/manifest。四个 p-value 字符串只是 reported annotations，该入口不执行
+  statistical test；本机尚未找到 raw CSV，正式 parity 不得声称完成。Focused 验证：
+  `MPLBACKEND=Agg PYTHONPATH=src python -m unittest tests.test_in_vivo_cfu_figure -v`；边界见
+  `docs/LEGACY_ANALYSIS_MIGRATION.md` 与 `reproducibility/in_vivo_cfu_lineage.json`。
 - 通用 peptide candidate screen：`apexoracle_mdlm.chemistry.smiles_to_peptide_sequence` 识别支持的 linear/
   head-to-tail cyclic L/D peptide；`apexoracle_mdlm.scoring.qualify_peptide_candidates` 按显式 MIC threshold、
   parser result 和 uppercase `X` policy 保留 row alignment；`apexoracle_mdlm.figures.render_annotated_candidate`

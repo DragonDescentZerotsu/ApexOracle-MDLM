@@ -91,6 +91,27 @@ averaged attention；在写 annotation 前强制验证 FASTA/GenBank sequence/or
 和 `--output-dir`。Attention 是 PyTorch 默认的跨 heads 平均值，只能作 descriptive/hypothesis-generating
 解释。正式 ApexOracle-18 lineage 与两套 exact outputs 见 `docs/INTERPRETABILITY_LINEAGE.md`。
 
+## `analyze_small_molecule_screen.py`
+
+功能：对一个或多个 decoded screening CSV 应用显式 `predicted_mic <= cutoff`，输出无 pandas index 的
+filtered tables；同时使用 RDKit canonical isomeric SMILES 汇总 target-target 及可选 reference overlap。
+主要参数为重复 `--prediction STRAIN=PATH`、`--mic-cutoff`、`--output-dir`，reference 模式另需
+`--reference` 及可选 smiles/label columns/threshold。Overlap 是 set membership，不是 activity validation。
+
+验证：`PYTHONPATH=src python -m unittest tests.test_small_molecule_screen -v`；正式 frozen tables 的迁移核验见
+`reproducibility/small_molecule_postprocessing_lineage.json`。
+
+## `plot_paper_in_vivo_cfu.py`
+
+功能：读取 paper Fig. 5b 历史 two-row wide Day 1/Day 2 CSV，验证每组 positive finite CFU，绘制 raw points、
+violin、median 和四个论文已报告的 p-value labels，输出 PDF/PNG/manifest。主要参数为 `--day-1`、`--day-2`、
+`--output-dir` 和可选 `--legend-position`。
+
+该入口只重建 display，不执行 statistical test。目前 raw CSV 和 test definition 均未找到，因此不得声称正式
+Fig. 5b statistical parity 已完成。验证：
+`MPLBACKEND=Agg PYTHONPATH=src python -m unittest tests.test_in_vivo_cfu_figure -v`；见
+`docs/LEGACY_ANALYSIS_MIGRATION.md`。
+
 ## `plot_paper_fig3a.py`
 
 功能：消费 `reproducibility/paper_fig3a_plotted_data.csv` 的 377 个 frozen exact rows，生成论文 Fig. 3a

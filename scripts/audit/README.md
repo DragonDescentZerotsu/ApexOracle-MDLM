@@ -109,6 +109,23 @@ PYTHONPATH=src python scripts/audit/verify_small_molecule_screen_lineage.py \
 `--legacy-path-in-ref temp_judge_generated_mols_MIC.py` 在两条真实 BAA-3170 molecules 上完成正式 checkpoint
 GPU parity，见 `reproducibility/small_molecule_screen_scorer_parity.json`。
 
+## `verify_legacy_small_molecule_postprocessing.py`
+
+用途：验证四个 legacy debug scripts 中实际需要保留的 `<= cutoff`、filtered table contents、RDKit canonical
+structure counts 和 reference overlap；忽略旧 pandas `Unnamed: 0` index，但要求结构/MIC/行序精确一致。
+
+```bash
+PYTHONPATH=src python scripts/audit/verify_legacy_small_molecule_postprocessing.py \
+  --prediction BAA-3170=/path/to/SMs_mic_predictions_BAA-3170.csv \
+  --prediction BAA-3197=/path/to/SMs_mic_predictions_BAA-3197.csv \
+  --legacy-filtered BAA-3170=/path/to/filtered_3170.csv \
+  --legacy-filtered BAA-3197=/path/to/filtered_3197.csv \
+  --reference /path/to/small_molecule_Evo_binary_data.csv
+```
+
+冻结结果见 `reproducibility/small_molecule_postprocessing_lineage.json`；reference overlap 只表示同一上游
+benchmark collection 的 set membership。
+
 ## `verify_historical_peptide_screen_case.py`
 
 用途：只读核验一次历史 external-project peptide screen 的重复 input copies、qualified SELFIES、image

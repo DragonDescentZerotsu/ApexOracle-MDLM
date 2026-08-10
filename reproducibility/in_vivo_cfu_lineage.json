@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "scope": "paper Fig. 5b murine CFU display producer",
+  "legacy_script": {
+    "path": "p_value_reference.py",
+    "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+    "sha256": "e94f348800cbdb9e110462c391f25755622f0dcfd5d6f97876037894dec02314",
+    "role": "plot raw points, violins, medians and reported p-value text",
+    "computes_statistical_test": false
+  },
+  "reported_p_value_labels": {
+    "Day 1": {
+      "Control_vs_ApexOracle-23": "p = 0.1032",
+      "Control_vs_Polymyxin B": "p = 0.0002"
+    },
+    "Day 2": {
+      "Control_vs_ApexOracle-23": "p = 0.0463",
+      "Control_vs_Polymyxin B": "p = 0.0007"
+    }
+  },
+  "formal_consumer": {
+    "figure_file": "ApexOracle_cleaned/docs/ApexOracle_Nat_Biotech/Fig5.pdf",
+    "figure_sha256": "3fe1872ee91c8ed66cc8432ca4c2e0832bb9c6196be29029d19a1a28f2c0733f",
+    "figure_pdf_creation_date": "2026-04-03T16:40:34-04:00",
+    "manuscript_file": "ApexOracle_cleaned/docs/ApexOracle_Nat_Biotech/sn-article.tex",
+    "manuscript_sha256_at_audit": "d7feae6764b436b84ba73d51b603a2c4ee9b2bf4f40eb53d0dd97e725f6815bf",
+    "caption_reports_day_2_p_values": [
+      0.0463,
+      0.0007
+    ]
+  },
+  "source_data": {
+    "expected_files": [
+      "CFU - Skin Scarification - A. baumannii ATCC19606 - Day 1.csv",
+      "CFU - Skin Scarification - A. baumannii ATCC19606 - Day 2.csv"
+    ],
+    "searched_roots": [
+      "/data1/tianang",
+      "/data2/tianang",
+      "/home/tianang"
+    ],
+    "status": "not_found_by_exact_or_normalized_filename_search"
+  },
+  "statistical_method": {
+    "legacy_script": "not_present",
+    "current_manuscript_methods": "not_present",
+    "status": "author_or_collaborator_confirmation_required"
+  },
+  "canonical_replacement": {
+    "library": "src/apexoracle_mdlm/figures/in_vivo_cfu.py",
+    "cli": "scripts/reproduce/plot_paper_in_vivo_cfu.py",
+    "validated_with_synthetic_schema_test": true,
+    "formal_output_parity": "not_claimed_without_source_csvs"
+  },
+  "status": "display_code_migrated_statistical_reproducibility_incomplete"
+}

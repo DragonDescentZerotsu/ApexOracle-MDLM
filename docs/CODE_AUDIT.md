@@ -40,7 +40,7 @@
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
 | Hugging Face | `huggingface/`、`huggingface_push.py` | model/tokenizer wrapper 与发布副本 | 核验现有 HF revision、权重 SHA 和 license 后决定 canonical exporter |
-| Case study/debug | `temp_milk*`、`p_value_reference.py`、`debug*.py`、notebooks | milk/camel/in-vivo plotting、诊断和一次性分析混杂 | 先由 tag 保存；必要者迁入 `examples/`，其余在 M4 归档移除 |
+| Case study/debug | `temp_milk*`、`debug*.py`、notebooks | milk/camel/in-vivo plotting、诊断和一次性分析混杂；paper attention、small-molecule debug、CFU display 已迁移清理 | 先由 tag 保存；必要者迁入通用 package/CLI，其余在 M4 归档移除 |
 
 ## 3. 已确认不能直接合并的差异
 
@@ -86,6 +86,14 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 完整规则、保护等级和人工 plotting/notebook 核验队列见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
 
 ## 7. 已完成迁移批次
+
+### Legacy analysis plotting/postprocessing（2026-08-10）
+
+- 四个 small-molecule debug scripts 已由通用 cutoff/canonicalization/set-comparison API 与 CLI 替代；两个
+  44,608-row frozen tables 和历史 filtered contents 已验证，重复/无 consumer root code 已删除。
+- `p_value_reference.py` 的 Fig. 5b display 行为已迁为参数化 CFU plotting library/CLI；由于 raw CSV 和
+  statistical test definition 均未找到，只保留 reported p-value annotation contract，不声称正式统计 parity。
+- 完整事实、推断和待作者确认事项见 `docs/LEGACY_ANALYSIS_MIGRATION.md`。
 
 ### M1 checkpoint/embedding I/O（2026-08-09）
 

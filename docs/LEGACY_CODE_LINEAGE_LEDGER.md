@@ -213,14 +213,26 @@ reference；历史 PDF 无正式 consumer。因此两个 mixed drivers 由 snaps
 notebook；四项均由 snapshot hashes 恢复后从 active tree 删除。Attention 已明确为四 heads 平均且只能作
 hypothesis-generating association；完整证据边界见 `docs/INTERPRETABILITY_LINEAGE.md`。
 
-## 13. 下一轮人工核验队列
+## 13. Legacy small-molecule debug 与 Fig. 5b CFU producer 已完成迁移
+
+四个 `debug_temp_SMs_MIC_analysis*.py` 已逐项核验。正式可复用行为只包括 `<=15` cutoff、canonical
+structure set 与 overlap summary，现由 `apexoracle_mdlm.scoring.small_molecule_screen` 和
+`analyze_small_molecule_screen.py` 承担；历史 filtered tables content/order exact match。`_3/_4` 完全重复，
+`5×IQR` 没有 saved output 或正式 consumer，同一 benchmark reference overlap 也不是独立 validation。四个 root
+scripts 已满足 gate 并由 snapshot 恢复。
+
+`p_value_reference.py` 有正式 Fig. 5b consumer，不能作为普通 debug 丢弃。其绘图行为已迁为 validated library/
+CLI；原脚本只显示四个 hard-coded p-value strings，不计算 statistics。本机没有找到两份 raw CSV，manuscript
+也未写 test definition，因此机器可读记录明确标记 statistical reproducibility incomplete。clean replacement
+与 snapshot recovery 允许删除 root script，但不能据此声称正式 p 值已重算。完整证据见
+`docs/LEGACY_ANALYSIS_MIGRATION.md`。
+
+## 14. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
-1. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`：逐项搜索论文图、caption、
-   reviewer 文档和外部输出 hash；
-2. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
+1. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因前几轮队列聚焦画图而
    自动放行。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为

@@ -6,10 +6,16 @@ import torch
 from torch import nn
 
 from apexoracle_mdlm.scoring import (
+    ScreenPrediction,
     StrainInput,
     StrainScreen,
+    canonical_prediction_set,
+    compare_structure_sets,
     decoded_wide_rows,
+    filter_screen_predictions,
     last_mic_by_selfies,
+    load_active_reference_structures,
+    load_screen_predictions,
     load_strain_inputs,
     parse_strain_input,
     score_small_molecule_inputs,
@@ -102,6 +108,49 @@ class SmallMoleculeScreenTests(unittest.TestCase):
                 {"SMILES_Sequence": "SMILES:[C]", "A": 1.0, "B": None},
                 {"SMILES_Sequence": "SMILES:[N]", "A": 2.0, "B": 4.0},
             ],
+        )
+
+    def test_load_filter_and_canonicalize_decoded_predictions(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = Path(temp_dir) / "predictions.csv"
+            source.write_text(
+                "SMILES_Sequence,A\nC(C)O,12\nCCO,16\nN,2\n", encoding="utf-8"
+            )
+            predictions = load_screen_predictions(source, strain="A")
+        self.assertEqual(
+            predictions,
+            [
+                ScreenPrediction("C(C)O", 12.0),
+                ScreenPrediction("CCO", 16.0),
+                ScreenPrediction("N", 2.0),
+            ],
+        )
+        active = filter_screen_predictions(predictions, cutoff=15)
+        self.assertEqual(active, [predictions[0], predictions[2]])
+        self.assertEqual(canonical_prediction_set(predictions), {"CCO", "N"})
+
+    def test_reference_set_and_comparison(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = Path(temp_dir) / "reference.csv"
+            source.write_text("SMILES,label\nC(C)O,1\nN,0\nO,0.7\n", encoding="utf-8")
+            reference = load_active_reference_structures(
+                source,
+                smiles_column="SMILES",
+                label_column="label",
+                threshold=0.5,
+            )
+        self.assertEqual(reference, {"CCO", "O"})
+        comparison = compare_structure_sets({"CCO", "N"}, reference)
+        self.assertEqual(
+            comparison.to_dict(),
+            {
+                "left_count": 2,
+                "right_count": 2,
+                "intersection_count": 1,
+                "left_only_count": 1,
+                "right_only_count": 1,
+                "union_count": 3,
+            },
         )
 
 

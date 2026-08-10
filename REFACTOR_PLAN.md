@@ -196,6 +196,15 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   将 causal/single-gene/strain-unique 保持为未验证边界后，删除两个重复 scripts 与两个 output-heavy notebooks；
 - [x] 本批最终验收为全仓 76 tests passed、跨仓库 source/formal-asset 19 checks passed、Fig. 3a canonical
   raster parity exact；两套 interpretability CSV/manifest 使用 LF 且 hash 自洽；Core/Generation 全程只读；
+- [x] 将四个 `debug_temp_SMs_MIC_analysis*.py` 的通用 cutoff/canonicalization/set comparison 迁入
+  small-molecule screen package 与参数化 CLI；确认 `_3/_4` byte-identical、`5×IQR` 无正式 consumer；
+- [x] 在两个 44,608-row frozen predictions 上验证 `<=15` 精确恢复历史 filtered contents：BAA-3170
+  1,554 rows/1,526 canonical structures，BAA-3197 395/387，union 1,535；将同一上游 benchmark label overlap
+  限定为 exploratory debug 后删除四个 root scripts；
+- [x] 确认 `p_value_reference.py` 是正式 Fig. 5b CFU display producer family；迁为 validated plotting library、
+  显式 Day 1/2 CLI 和 manifest，并明确四个 hard-coded p-value labels 不等于重新计算 statistical test；
+- [x] 全机搜索未找到 Fig. 5b 两份 raw CFU CSV，manuscript 也未给 test definition；将这两项列为正式统计
+  reproducibility 待补资产，而不是保留 hard-coded root script 掩盖缺口；旧文件由 snapshot tag 恢复；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
@@ -219,6 +228,11 @@ Small-molecule screen 迁移证据见 `reproducibility/small_molecule_screen_lin
 Peptide candidate screen 迁移证据见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`、
 `reproducibility/historical_peptide_screen_case.json` 与
 `reproducibility/peptide_candidate_screen_parity.json`。
+
+Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
+`docs/LEGACY_ANALYSIS_MIGRATION.md`、`reproducibility/small_molecule_postprocessing_lineage.json` 与
+`reproducibility/in_vivo_cfu_lineage.json`。CFU clean plotting code 已迁移，但 raw CSV/test definition 未补齐前，
+统计复现仍未完成。
 
 ### M4：Legacy driver 收口
 

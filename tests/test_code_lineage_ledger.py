@@ -125,6 +125,65 @@ class CodeLineageLedgerTests(unittest.TestCase):
             )
             self.assertEqual(lineage["strains"][strain]["legacy_output"]["rows"], 44608)
 
+    def test_legacy_analysis_scripts_are_replaced_and_recoverable(self):
+        small_molecule = json.loads(
+            (
+                ROOT / "reproducibility" / "small_molecule_postprocessing_lineage.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(small_molecule["status"], "passed")
+        for legacy_path, metadata in small_molecule["legacy_sources"].items():
+            self.assertNotIn(legacy_path, self.by_path)
+            legacy_source = subprocess.check_output(
+                [
+                    "git",
+                    "show",
+                    f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(
+                hashlib.sha256(legacy_source).hexdigest(), metadata["sha256"]
+            )
+            self.assertTrue(metadata["active_tree_removed"])
+        self.assertEqual(
+            small_molecule["all_prediction_union_canonical_structures"], 1535
+        )
+        self.assertEqual(small_molecule["strains"]["BAA-3170"]["active_rows"], 1554)
+        self.assertEqual(small_molecule["strains"]["BAA-3197"]["active_rows"], 395)
+
+        cfu = json.loads(
+            (ROOT / "reproducibility" / "in_vivo_cfu_lineage.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        legacy_path = cfu["legacy_script"]["path"]
+        self.assertNotIn(legacy_path, self.by_path)
+        legacy_source = subprocess.check_output(
+            [
+                "git",
+                "show",
+                f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+            ],
+            cwd=ROOT,
+        )
+        self.assertEqual(
+            hashlib.sha256(legacy_source).hexdigest(),
+            cfu["legacy_script"]["sha256"],
+        )
+        self.assertFalse(cfu["legacy_script"]["computes_statistical_test"])
+        self.assertEqual(
+            cfu["source_data"]["status"],
+            "not_found_by_exact_or_normalized_filename_search",
+        )
+        for path in (
+            "src/apexoracle_mdlm/scoring/small_molecule_screen.py",
+            "scripts/reproduce/analyze_small_molecule_screen.py",
+            "src/apexoracle_mdlm/figures/in_vivo_cfu.py",
+            "scripts/reproduce/plot_paper_in_vivo_cfu.py",
+        ):
+            self.assertTrue((ROOT / path).is_file(), path)
+
     def test_peptide_candidate_driver_is_replaced_and_recoverable(self):
         legacy_path = "temp_judge_mol_mic_with_fig.py"
         self.assertNotIn(legacy_path, self.by_path)

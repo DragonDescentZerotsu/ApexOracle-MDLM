@@ -48,8 +48,6 @@ DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_mean_cuseql
 dataloader.py,utils.py,local_import,utils
 debug_2.py,models/__init__.py,local_import,models
 debug_2.py,noise_schedule.py,local_import,noise_schedule
-debug_temp_SMs_MIC_analysis_3.py,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
-debug_temp_SMs_MIC_analysis_4.py,ApexOracle-Core,external_repo_asset_or_path_reference,normalized static string/reference scan
 diffusion.py,dataloader.py,local_import,dataloader
 diffusion.py,models/__init__.py,local_import,models
 diffusion.py,noise_schedule.py,local_import,noise_schedule
@@ -138,6 +136,7 @@ scripts/audit/build_code_lineage_ledger.py,ApexOracle-Evo2,external_repo_asset_o
 scripts/audit/build_code_lineage_ledger.py,ApexOracle-Generation,external_repo_asset_or_path_reference,normalized static string/reference scan
 scripts/audit/build_code_lineage_ledger.py,PepLink==0.1.2,external_repo_asset_or_path_reference,normalized static string/reference scan
 scripts/audit/verify_paper_figure_lineage.py,ApexOracle-Generation,external_repo_asset_or_path_reference,normalized static string/reference scan
+scripts/reproduce/plot_paper_in_vivo_cfu.py,src/apexoracle_mdlm/figures/in_vivo_cfu.py,local_import,apexoracle_mdlm.figures.in_vivo_cfu
 src/apexoracle_mdlm/interpretability/attention.py,ApexOracle-Evo2,external_repo_asset_or_path_reference,normalized static string/reference scan
 src/apexoracle_mdlm/interpretability/attention.py,src/apexoracle_mdlm/scoring/mic.py,local_import,apexoracle_mdlm.scoring.mic
 src/apexoracle_mdlm/scoring/generated_files.py,ApexOracle-Generation,external_repo_asset_or_path_reference,normalized static string/reference scan
