@@ -3,7 +3,7 @@
   "recorded_at": "2026-08-09",
   "figure_id": "ApexOracle_main_Fig3a",
   "role": "Predicted MIC distributions for unconditional and predictor-guided generation",
-  "status": "canonicalized_legacy_body_removed_compatibility_bridge_retained",
+  "status": "canonicalized_legacy_body_and_compatibility_bridge_removed",
   "consumer": {
     "owner": "manuscript",
     "relative_path": "sn-article.tex",
@@ -24,8 +24,9 @@
       "scripts/reproduce/score_generated_molecule_mic.py",
       "scripts/reproduce/plot_paper_fig3a.py"
     ],
-    "compatibility_bridge": "judge_generated_mols_MIC.py",
-    "current_difference": "The historical 642-line mixed scoring/statistics/plotting body was removed. Canonical package modules and parameterized CLIs now own those behaviors. The root filename remains only as a thin MIC_regressor compatibility bridge for an audited ApexOracle-Core dynamic import.",
+    "former_compatibility_bridge": "judge_generated_mols_MIC.py",
+    "active_tree_removed": true,
+    "current_difference": "The historical 642-line mixed scoring/statistics/plotting body and its temporary MIC_regressor compatibility bridge were removed from the active tree. Canonical package modules and parameterized CLIs own those behaviors; ApexOracle-Core imports apexoracle_mdlm.scoring directly.",
     "historical_invocation": "Direct script execution; device and all formal paths are hard-coded in the legacy entrypoint.",
     "source_revision_confidence": "high_but_not_timestamp_proven",
     "source_revision_note": "The snapshot script reproduces the exact labels, groups and displayed p-values and names the source-panel output. No commit or execution log timestamped exactly to the 2026-04-03 PDF creation was found."
@@ -184,7 +185,8 @@
     "The four ignored caches identify the same source filenames and checkpoint and reproduce the plotted sample counts, medians and displayed two-sided Mann-Whitney p-values.",
     "The audited manuscript includes Fig4.pdf and describes its panel a as the same unconditional-versus-guided predicted MIC comparison.",
     "The canonical scorer produced torch.equal logits and inverse-transformed MIC values for two real BAA-3170 Generation outputs, both one-at-a-time and in a two-sample batch, against the tagged legacy implementation.",
-    "The canonical Fig. 3a producer consumes 377 frozen exact plotted rows and reproduces the legacy source-panel raster with the recorded parity metrics."
+    "The canonical Fig. 3a producer consumes 377 frozen exact plotted rows and reproduces the legacy source-panel raster with the recorded parity metrics.",
+    "ApexOracle-Core PR 32 (main merge 0025c8b6ff64250708ff73486f2959b4bb08de8a) replaced the only audited runtime bridge consumer with direct apexoracle_mdlm.scoring calls and exact four-logit formal-checkpoint parity."
   ],
   "inferences": [
     "Visual layout, labels and p-values establish that the MDLM source PDF is the panel-a source used in the assembled figure with high confidence."
@@ -193,5 +195,5 @@
     "The external application or exact command used to assemble the four-panel Fig4.pdf was not found in tracked source.",
     "A timestamped commit or execution log proving the exact judge_generated_mols_MIC.py revision used on 2026-04-03 was not found."
   ],
-  "deletion_gate": "The historical implementation body has satisfied its migration gate and was removed. Keep only the thin judge_generated_mols_MIC.py bridge until ApexOracle-Core stops dynamically importing that filename and a cross-repository caller test passes; all historical code remains recoverable from legacy-code-snapshot-2026-08-09."
+  "deletion_gate": "satisfied: the historical implementation body was canonicalized, ApexOracle-Core stopped dynamically importing the filename, formal-checkpoint caller parity and cross-repository source checks passed, and the root bridge was removed. All historical code remains recoverable from legacy-code-snapshot-2026-08-09."
 }

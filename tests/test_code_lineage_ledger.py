@@ -9,6 +9,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SUFFIXES = {".py", ".ipynb", ".sh", ".yaml", ".yml", ".json"}
+GENERATED_LEDGER_OUTPUTS = {
+    "reproducibility/code_asset_ledger.csv",
+    "reproducibility/code_dependency_edges.csv",
+    "reproducibility/definition_clone_groups.csv",
+    "reproducibility/code_lineage_summary.json",
+}
 
 
 class CodeLineageLedgerTests(unittest.TestCase):
@@ -27,7 +33,9 @@ class CodeLineageLedgerTests(unittest.TestCase):
         expected = {
             path
             for path in tracked
-            if Path(path).suffix in SUFFIXES and (ROOT / path).is_file()
+            if Path(path).suffix in SUFFIXES
+            and (ROOT / path).is_file()
+            and path not in GENERATED_LEDGER_OUTPUTS
         }
         self.assertEqual(set(self.by_path), expected)
         self.assertEqual(len(self.by_path), len(self.rows))
@@ -54,20 +62,31 @@ class CodeLineageLedgerTests(unittest.TestCase):
             if row["origin_class"] == "post_snapshot_canonical":
                 self.assertEqual(row["target_disposition"], "retain_canonical")
 
-    def test_figure_3a_legacy_path_is_only_a_compatibility_bridge(self):
-        row = self.by_path["judge_generated_mols_MIC.py"]
-        self.assertEqual(
-            row["paper_role"],
-            "compatibility_bridge_for_canonical_fig3a_and_core_mic_scorer",
+    def test_figure_3a_legacy_path_is_removed_and_recoverable(self):
+        legacy_path = "judge_generated_mols_MIC.py"
+        self.assertNotIn(legacy_path, self.by_path)
+        self.assertFalse((ROOT / legacy_path).exists())
+        legacy_source = subprocess.check_output(
+            [
+                "git",
+                "show",
+                f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+            ],
+            cwd=ROOT,
+        )
+        migration = json.loads(
+            (
+                ROOT / "reproducibility" / "candidate_mic_migration_parity.json"
+            ).read_text(encoding="utf-8")
         )
         self.assertEqual(
-            row["target_disposition"],
-            "remove_bridge_after_core_caller_migration",
+            hashlib.sha256(legacy_source).hexdigest(),
+            migration["legacy_source"]["sha256"],
         )
-        self.assertEqual(
-            row["evidence_status"],
-            "verified_canonical_migration_and_formal_parity",
+        self.assertTrue(
+            migration["compatibility_boundary"]["bridge_active_tree_removed"]
         )
+        self.assertEqual(migration["compatibility_boundary"]["core_pull_request"], 32)
 
     def test_peptide_table_legacy_driver_is_replaced_and_recoverable(self):
         self.assertNotIn("temp_predict_mic_from_peptide_csv.py", self.by_path)

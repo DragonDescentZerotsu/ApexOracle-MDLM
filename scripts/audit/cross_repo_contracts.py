@@ -7,7 +7,9 @@ import argparse
 import ast
 import hashlib
 import json
+import subprocess
 import sys
+import types
 from pathlib import Path
 from typing import Any
 
@@ -199,8 +201,6 @@ def check_saved_tensor_window_contract(roots: dict[str, Path]) -> dict[str, Any]
 def check_gpu_head_parity(
     manifest: dict[str, Any], roots: dict[str, Path]
 ) -> dict[str, Any]:
-    import importlib.util
-
     import torch
 
     from apexoracle_mdlm.models import FirstTokenCrossAttention, RegressionHead
@@ -210,14 +210,19 @@ def check_gpu_head_parity(
             "Expose exactly one GPU with CUDA_VISIBLE_DEVICES for head parity."
         )
 
-    source = roots["generation"] / "models" / "antibiotic_classifier.py"
-    spec = importlib.util.spec_from_file_location(
-        "generation_antibiotic_classifier", source
+    source_path = "models/antibiotic_classifier.py"
+    source = subprocess.check_output(
+        [
+            "git",
+            "show",
+            f"legacy-code-snapshot-2026-08-10:{source_path}",
+        ],
+        cwd=roots["generation"],
+        text=True,
     )
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Could not load Generation head module from {source}.")
-    legacy_module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(legacy_module)
+    legacy_module = types.ModuleType("generation_antibiotic_classifier_snapshot")
+    legacy_module.__file__ = f"legacy-code-snapshot-2026-08-10:{source_path}"
+    exec(compile(source, legacy_module.__file__, "exec"), legacy_module.__dict__)
 
     contracts = {item["id"]: item for item in manifest["artifact_contracts"]}
     contract = contracts["generation_noisy_mic_guidance"]

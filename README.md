@@ -163,9 +163,9 @@ in `reproducibility/paper_figure_lineage.json` and `docs/LEGACY_CODE_LINEAGE_LED
 - ApexOracle-MDLM (this repository) owns downstream DLM inference adapters, guidance components, and
   candidate scoring.
 
-The root `judge_generated_mols_MIC.py` is currently only a thin compatibility bridge for one audited
-ApexOracle-Core dynamic import. New code must use `apexoracle_mdlm.scoring`; the bridge will disappear
-after the Core caller migrates and its cross-repository test passes.
+The former root `judge_generated_mols_MIC.py` implementation and temporary compatibility bridge are
+absent from the active tree. ApexOracle-Core imports `apexoracle_mdlm.scoring` directly; the complete
+historical source remains recoverable from `legacy-code-snapshot-2026-08-09`.
 
 The paper small-molecule MIC screen is available through
 `scripts/reproduce/score_small_molecule_screen.py`. Pass each target explicitly as repeated

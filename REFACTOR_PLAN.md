@@ -153,8 +153,8 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
 
 ### M3：Guidance heads 与 candidate scoring
 
-状态：共享 heads、generation checkpoint/file contracts、clean candidate MIC scorer 与 Fig. 3a producer
-已迁移。旧 642 行 `judge_generated_mols_MIC.py` 实现已删除；因 Core 有真实动态 import，暂留薄兼容桥。
+状态：**完成。** 共享 heads、generation checkpoint/file contracts、clean candidate MIC scorer 与 Fig. 3a
+producer 已迁移。旧 642 行 `judge_generated_mols_MIC.py` 实现及其临时 Core compatibility bridge 均已删除。
 
 共享 heads 实现 commit：`136905c`。
 
@@ -173,7 +173,7 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
 - [x] 将 Fig. 3a 拆为 frozen 377-row plotted data、无副作用 figure library 与参数化 CLI；canonical/legacy
   150 dpi raster 逐 channel 完全一致；
 - [x] 移除 `judge_generated_mols_MIC.py` 的模型复制、绝对路径、scoring/statistics/plotting 混合主体；
-  仅保留委托到 canonical scorer 的 Core compatibility bridge；
+  Core PR #32 直接调用 canonical scorer 并通过正式 checkpoint parity 后，临时 bridge 也已删除；
 - [x] 将 `temp_predict_mic_from_peptide_csv.py` 的 peptide conversion、多 strain padded-batch scoring、CSV
   assembly 和 violin plot 迁入 canonical package/CLI；正式 32-sample batch 的 conversion、CLS、两个
   strain logits 和 predictions 均与 tagged legacy 精确一致，并精确复核历史 CSV rows；
@@ -252,7 +252,9 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
   GPU/bfloat16 regression output 为 `torch.equal`、最大差异 `0.0`；
 - [x] 将 Core 唯一 source-path audit 切换为 snapshot migration manifest；Generation consumer scan 为 0；
   六份 root trainer 由 tag 恢复后从 active tree 删除，本地 checkpoints/data/outputs 不动；
-- [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
+- [x] Generation commit `03c1ee0` 改用 canonical MDLM heads/loaders；固定输入 forward/gradient exact，正式
+  256-step sampler 完成。legacy full sampler 自身同 seed 不 bitwise deterministic，因此不伪称跨进程 token
+  exact，完成性/shape/range/config/asset hashes 记录于 Generation 的 parity manifest；
 - [x] 将 clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。
@@ -263,7 +265,8 @@ Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit �
 `reproducibility/peptide_table_migration_parity.json`。跨仓库 source contract 记录于
 `docs/CROSS_REPO_CONTRACTS.md`；机器可读资产/源码检查为
 `reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前 14 项
-source/AST 检查通过；candidate scorer 已完成正式 GPU replay，但 full sampler 仍未完成。
+source/AST 检查覆盖 Core 直接 scorer caller 和 Generation canonical heads；candidate scorer 已完成正式 GPU
+replay，Generation sampler 的可验证边界也已冻结。
 
 Cross-repository contract 实现 commit：`4521c53`。
 
@@ -326,7 +329,7 @@ Synergy-guidance producer migration 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATIO
 
 ### M5：Clean module release
 
-状态：**module-level source/asset smoke 已完成；只剩跨模块 full Generation parity 与 Core bridge 切换。**
+状态：**完成；等待 super-repo 固定最终 merge commit。**
 
 - [x] 公共 canonical package/CLI 不使用作者机器默认资产路径；legacy upstream runtime 与 bridge 边界已登记；
 - [x] 完成 license/NOTICE、secret、大文件和 dependency 审计；
@@ -336,14 +339,16 @@ Synergy-guidance producer migration 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATIO
 - [x] annotated recovery tag 已推送 `custom`，并在 fresh shallow clone 中单独 fetch 后完成所有
   snapshot-dependent tests；
 - [x] 只显式推送 `custom`，未 push `origin`；
+- [x] Generation canonical integration/full-sampler completion gate 已记录；Core PR #32 已直接调用 package，
+  exact caller parity 通过，最后一个 MDLM root compatibility bridge 已删除；
 - 由 ApexOracle super-repo 固定 clean commit。
 
 验收：fresh clone 可安装；smoke 不依赖作者 cache；资产全部通过 manifest 解析。
 
 2026-08-10 验收的 source commit 为 `c774bd77ed84d97decbc4d4cffbd75ecea213200`；远端 tag peeled commit 为
 `79eed10cac8d5feb446be886eee0c5b356b23b06`。Fresh clone 本身不携带 ignored checkpoints，asset smoke 通过
-显式路径挂载受信本地权重完成；这正是未来 super-repo asset resolver 需要提供的边界。未完成的 full sampler
-属于 Generation 模块验收，不再以保留 MDLM root trainer 为代价阻塞 source cleanup。
+显式路径挂载受信本地权重完成；这正是未来 super-repo asset resolver 需要提供的边界。Generation full
+sampler 与 Core direct-caller gate 后续均已关闭；最终由 super-repo 锁定本次 follow-up merge commit。
 
 ## 5. 变更控制
 

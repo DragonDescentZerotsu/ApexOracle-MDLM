@@ -102,9 +102,11 @@ def main() -> None:
     for relative_path in producer["canonical_paths"]:
         if not (roots["mdlm"] / relative_path).is_file():
             raise FileNotFoundError(roots["mdlm"] / relative_path)
-    compatibility_bridge = roots["mdlm"] / producer["compatibility_bridge"]
-    if not compatibility_bridge.is_file():
-        raise FileNotFoundError(compatibility_bridge)
+    former_bridge = roots["mdlm"] / producer["former_compatibility_bridge"]
+    if producer["active_tree_removed"] and former_bridge.exists():
+        raise AssertionError(
+            f"Removed compatibility bridge is still active: {former_bridge}"
+        )
     results.append(
         {
             "check": "legacy_snapshot_and_canonical_producer_paths",

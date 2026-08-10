@@ -57,14 +57,15 @@ git restore --source legacy-code-snapshot-2026-08-09 -- path/to/file.py
 新入口、验证命令和恢复位置。
 
 2026-08-09 首批 migration 已移除 active tree 中 `judge_generated_mols_MIC.py` 原有的 642 行 mixed
-implementation，仅保留一个 Core caller compatibility bridge。历史完整文件仍可只读查看：
+implementation。2026-08-10 Core PR #32 直接调用 canonical package 并通过跨仓库 parity/source gate 后，
+临时 compatibility bridge 也已删除。历史完整文件仍可只读查看：
 
 ```bash
 git show legacy-code-snapshot-2026-08-09:judge_generated_mols_MIC.py
 ```
 
 正式旧/新 scorer 与 Fig. 3a parity 记录见
-`reproducibility/candidate_mic_migration_parity.json`；本次迁移没有改写或移动 tag 下的任何内容。
+`reproducibility/candidate_mic_migration_parity.json`；两次迁移均没有改写或移动 tag 下的任何内容。
 
 同日第二批已将 `temp_predict_mic_from_peptide_csv.py` 的通用 peptide-table scoring 行为迁入 canonical
 package/CLI，并从 active tree 删除该 748 行 legacy 文件。恢复命令：
