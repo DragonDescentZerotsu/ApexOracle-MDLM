@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
 import torch
 
-from apexoracle_mdlm.hub.masking import normalize_attention_mask
+from apexoracle_mdlm.hub.masking import normalize_attention_mask, resolve_runtime_root
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,20 @@ RELEASE = ROOT / "huggingface/release"
 
 
 class HuggingFaceReleaseTests(unittest.TestCase):
+    def test_runtime_root_preserves_hub_snapshot_symlink_location(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temporary_root = Path(directory)
+            blob = temporary_root / "blobs/model.py"
+            blob.parent.mkdir()
+            blob.write_text("# blob\n", encoding="utf-8")
+            snapshot = temporary_root / "snapshots/revision"
+            (snapshot / "models").mkdir(parents=True)
+            (snapshot / "models/dit.py").write_text("# runtime\n", encoding="utf-8")
+            (snapshot / "noise_schedule.py").write_text("# runtime\n", encoding="utf-8")
+            module_link = snapshot / "DLM_emb_model.py"
+            module_link.symlink_to(blob)
+            self.assertEqual(resolve_runtime_root(module_link), snapshot)
+
     def test_integer_attention_mask_is_normalized_to_boolean(self) -> None:
         input_ids = torch.tensor([[1, 2, 0], [3, 4, 5]])
         integer_mask = torch.tensor([[1, 1, 0], [1, 1, 1]])

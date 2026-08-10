@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from os import PathLike
+from pathlib import Path
+
 import torch
 
 
@@ -34,3 +37,17 @@ def normalize_attention_mask(
     if not torch.all(mask.any(dim=1)):
         raise ValueError("Every input row must contain at least one unmasked token.")
     return mask
+
+
+def resolve_runtime_root(
+    module_file: str | PathLike[str],
+    runtime_root: str | PathLike[str] | None = None,
+) -> Path:
+    """Locate sibling runtime files without dereferencing Hub-cache symlinks."""
+
+    if runtime_root is not None:
+        return Path(runtime_root).resolve()
+    module_parent = Path(module_file).absolute().parent
+    if (module_parent / "models" / "dit.py").is_file():
+        return module_parent
+    return Path(module_file).resolve().parents[3]

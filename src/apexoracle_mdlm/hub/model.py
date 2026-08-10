@@ -22,18 +22,13 @@ from torch import nn
 from torch.nn import functional as F
 
 try:
-    from .masking import normalize_attention_mask
+    from .masking import normalize_attention_mask, resolve_runtime_root
 except ImportError:  # Standalone copy in the Hugging Face model repository.
-    from masking import normalize_attention_mask
+    from masking import normalize_attention_mask, resolve_runtime_root
 
 
 def _runtime_root(runtime_root: str | PathLike[str] | None) -> Path:
-    if runtime_root is not None:
-        return Path(runtime_root).resolve()
-    module_parent = Path(__file__).resolve().parent
-    if (module_parent / "models" / "dit.py").is_file():
-        return module_parent
-    return Path(__file__).resolve().parents[3]
+    return resolve_runtime_root(__file__, runtime_root)
 
 
 def _load_runtime(runtime_root: str | PathLike[str] | None) -> tuple[Any, Any]:

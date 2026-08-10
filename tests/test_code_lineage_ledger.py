@@ -153,13 +153,15 @@ class CodeLineageLedgerTests(unittest.TestCase):
         self.assertTrue(drift["frozen_cache_matches_actual_cache_producer_checkpoint"])
         self.assertTrue(migration["credential_audit"]["active_source_removed"])
 
-    def test_huggingface_release_audit_freezes_current_blockers(self):
+    def test_huggingface_release_audit_freezes_legacy_bug_and_clean_candidate(self):
         audit = json.loads(
             (ROOT / "reproducibility" / "huggingface_release_audit.json").read_text(
                 encoding="utf-8"
             )
         )
-        self.assertEqual(audit["status"], "audited_not_release_ready")
+        self.assertEqual(
+            audit["status"], "local_release_candidate_validated_remote_pending"
+        )
         self.assertEqual(
             audit["public_model"]["revision"],
             "bb93daedb867488b1a009ce9522e037a530a2ab3",
@@ -173,6 +175,15 @@ class CodeLineageLedgerTests(unittest.TestCase):
         self.assertTrue(behavior["integer_padded_mask_fails_assertion"])
         self.assertTrue(behavior["bool_single_mask_torch_equal_to_canonical"])
         self.assertTrue(audit["release_gate"]["clean_wrapper_required"])
+        self.assertTrue(
+            audit["release_gate"][
+                "weight_rights_and_model_card_license_author_confirmed"
+            ]
+        )
+        candidate = audit["local_release_candidate"]
+        self.assertTrue(candidate["strict_safetensors_load"])
+        self.assertTrue(candidate["integer_mask_padded_batch"])
+        self.assertTrue(candidate["single_input_legacy_boolean_mask_torch_equal"])
         self.assertFalse(audit["release_gate"]["remote_modified_in_this_audit"])
 
     def test_legacy_analysis_scripts_are_replaced_and_recoverable(self):
