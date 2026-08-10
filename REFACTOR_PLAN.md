@@ -115,17 +115,25 @@ Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable reco
 
 ### M2：DLM inference 与 molecule embedding
 
-状态：**已迁移 clean candidate-scoring 所需的 DLM hidden-state adapter；通用 embedding producer 待执行。**
+状态：**clean DLM hidden-state adapter 与通用 molecule embedding producer 已完成；Hugging Face
+发布边界仍待审计。**
 
 - [x] 提取 clean `t=0`、non-padding candidate-scoring 所需的 DLM hidden-state adapter，保持
   `backbone`/`noise` state keys、legacy RNG consumption 与 bfloat16 block execution；
-- [ ] 提取其余 clean/noisy、padding、pooling 和 model-size profiles；
-- 合并 `save_*_emb_dict.py` 为参数化 CLI，同时保留 dataset adapter；
-- 对固定 token tensors和正式 checkpoint 做 legacy/new embedding 逐值比较；
+- [x] 提取六个历史 clean padding/pooling aliases，并用显式 `model_mode` 区分 eval/train；noisy
+  profiles 属于 M3 guidance producer，不混入静态 embedding dictionary；
+- [x] 合并三个 `save_*_emb_dict.py` 为参数化 CLI，同时保留 token-id CSV 与 pair-SMILES streaming
+  adapters、mixed key type 和旧输出 shape；
+- [x] 对固定 token tensors、正式 checkpoint 和六个 frozen cache samples 做 legacy/new embedding
+  逐值比较，全部 `torch.equal`、最大差异 `0.0`；
 - 审计 Hugging Face wrapper、tokenizer/model revision 和权重发布边界。
 
 验收：固定 SELFIES 的 hidden states 与选定 legacy producer 在容差内一致；输出 manifest 记录输入、
 checkpoint、pooling、dtype、shape 和 SHA-256。
+
+M2 embedding producer 迁移详情见 `docs/MOLECULE_EMBEDDING_MIGRATION.md` 和
+`reproducibility/molecule_embedding_migration.json`。旧 Fig. 2b trainer 已映射到 Core canonical runners；
+三个重复 exporter 与该 trainer 均从 active tree 删除，可由 snapshot tag 恢复。
 
 ### M3：Guidance heads 与 candidate scoring
 

@@ -152,6 +152,14 @@
   `reproducibility/code_asset_ledger.csv`、dependency edges、definition clone groups 与 summary JSON。
   删除 legacy 文件前必须满足对应行的 `deletion_gate`；自动分类不得直接产生 `delete_ready`。完整规则见
   `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
+- Molecule embedding producer：`apexoracle_mdlm.embeddings.molecule` 提供 token-id CSV 与 pair-SMILES
+  streaming adapters、六个 legacy pooling aliases 和显式 eval/train export；公开入口为
+  `scripts/reproduce/export_molecule_embeddings.py`，输出 `.pt` dictionary 与 JSON manifest。正式默认
+  `model_mode=eval`，pair adapter 必须显式固定两个 ID columns 的 string/integer contract。三个旧
+  `save_*emb_dict.py` 和误归类的 Fig. 2b trainer 已从 active tree 删除，可由
+  `legacy-code-snapshot-2026-08-09` 恢复。Focused 验证：`PYTHONPATH=src python -m unittest
+  tests.test_molecule_embeddings tests.test_dlm_encoder -v`；正式 cache/checkpoint parity 见
+  `reproducibility/molecule_embedding_migration.json`。
 - 正式 main Fig. 3a 血缘核验入口：`/home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm
   python scripts/audit/verify_paper_figure_lineage.py`；默认只读验证 small assets、condition directory counts、
   cache statistics、p-values、manuscript consumer 和 frozen 377-row plotted-data CSV。只有显式

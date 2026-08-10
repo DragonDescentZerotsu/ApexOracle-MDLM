@@ -13,6 +13,12 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from apexoracle_mdlm.checkpoints import (
+    extract_state_dict,
+    load_torch_file,
+    strip_state_dict_prefix,
+)
+
 
 BackboneFactory = Callable[[Any, int], nn.Module]
 NoiseFactory = Callable[[Any], nn.Module]
@@ -34,10 +40,12 @@ class DLMHiddenStateEncoder(nn.Module):
         *,
         backbone_factory: BackboneFactory,
         noise_factory: NoiseFactory,
+        mask_index: int | None = None,
     ) -> None:
         super().__init__()
         self.config = config
         self.vocab_size = vocab_size
+        self.mask_index = vocab_size - 1 if mask_index is None else mask_index
         self.parameterization = config.parameterization
         self.time_conditioning = config.time_conditioning
         self.backbone = backbone_factory(config, vocab_size)
@@ -93,7 +101,41 @@ class DLMHiddenStateEncoder(nn.Module):
         del attention_mask
         t = self._sample_t(input_ids.shape[0], input_ids.device)
         sigma, _ = self.noise(t)
-        return self._forward(input_ids, sigma[:, None])
+        move_chance = 1 - torch.exp(-sigma[:, None])
+        # Preserve the historical clean-input path exactly: even at t=0 the
+        # old wrappers sampled this mask (which is all false).  The random
+        # draw matters when a caller deliberately keeps the backbone in train
+        # mode and therefore uses dropout after this point.
+        move_indices = (
+            torch.rand(*input_ids.shape, device=input_ids.device) < move_chance
+        )
+        clean_or_masked = torch.where(
+            move_indices,
+            torch.as_tensor(self.mask_index, device=input_ids.device),
+            input_ids,
+        )
+        return self._forward(clean_or_masked, sigma[:, None])
+
+    def load_backbone_checkpoint(
+        self,
+        checkpoint_path: str | PathLike[str],
+    ) -> tuple[list[str], list[str]]:
+        """Load the historical Lightning ``backbone.*`` state into the DiT.
+
+        Historical DLM+MTR checkpoints also carry output/regression modules
+        that the hidden-state adapter intentionally does not instantiate.
+        Their keys are reported as unexpected instead of silently changing
+        the encoder architecture.
+        """
+
+        payload = load_torch_file(
+            checkpoint_path,
+            map_location="cpu",
+            weights_only=False,
+        )
+        state_dict = strip_state_dict_prefix(extract_state_dict(payload))
+        incompatible = self.backbone.load_state_dict(state_dict, strict=False)
+        return list(incompatible.missing_keys), list(incompatible.unexpected_keys)
 
 
 def build_upstream_dlm_hidden_state_encoder(

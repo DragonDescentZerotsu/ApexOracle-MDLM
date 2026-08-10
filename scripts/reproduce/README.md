@@ -2,6 +2,29 @@
 
 本目录只放参数化、无作者机器绝对路径的公开复现入口。大型数据、checkpoint、embedding 和输出不进入 Git。
 
+## `export_molecule_embeddings.py`
+
+功能：加载一个显式 DLM checkpoint，对 deduplicated molecule IDs 导出六种历史 clean pooling contract
+之一。`token-csv` adapter 消费已冻结 token-id lists；`pair-smiles-csv` adapter 流式读取大型 synergy pair
+table、执行 `SMILES → SELFIES → token IDs`，并要求显式指定两列 ID 的 string/integer 类型。输出 `.pt`
+dictionary 与包含输入/checkpoint/pooling/model mode、过滤计数和 output SHA-256 的 JSON manifest。
+
+正式发布默认 `--model-mode eval`；只有复现历史 dropout 实验时才使用 `train`。`*_eval` alias 禁止与
+train mode 混用。示例：
+
+```bash
+CUDA_VISIBLE_DEVICES=0 PYTHONPATH=src python scripts/reproduce/export_molecule_embeddings.py \
+  --checkpoint /path/to/1-255000-fine-tune.ckpt \
+  --pooling-method cls_wo_pad_eval --model-mode eval \
+  --input /path/to/token_ids.csv --output /path/to/embeddings.pt \
+  --manifest /path/to/manifest.json \
+  token-csv --id-column DBAASP_id --token-column SMILES --id-type string
+```
+
+Frozen cache parity、synergy checkpoint drift 和 legacy 恢复信息见
+`docs/MOLECULE_EMBEDDING_MIGRATION.md`。Focused 验证：
+`PYTHONPATH=src python -m unittest tests.test_molecule_embeddings tests.test_dlm_encoder -v`。
+
 ## `score_generated_molecule_mic.py`
 
 功能：加载正式 clean candidate MIC checkpoint、Core genome/text embedding banks 和 Generation SELFIES

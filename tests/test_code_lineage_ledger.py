@@ -125,6 +125,34 @@ class CodeLineageLedgerTests(unittest.TestCase):
             )
             self.assertEqual(lineage["strains"][strain]["legacy_output"]["rows"], 44608)
 
+    def test_molecule_embedding_producers_are_replaced_and_recoverable(self):
+        migration = json.loads(
+            (ROOT / "reproducibility" / "molecule_embedding_migration.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(
+            migration["status"],
+            "passed_with_documented_legacy_checkpoint_drift",
+        )
+        for legacy_path, expected_sha in migration["legacy_sources"].items():
+            self.assertNotIn(legacy_path, self.by_path)
+            source = subprocess.check_output(
+                ["git", "show", f"legacy-code-snapshot-2026-08-09:{legacy_path}"],
+                cwd=ROOT,
+            )
+            self.assertEqual(hashlib.sha256(source).hexdigest(), expected_sha)
+        for path in migration["canonical_components"]:
+            self.assertTrue((ROOT / path).is_file(), path)
+        parity = migration["gpu_sample_parity"]
+        self.assertTrue(parity["all_torch_equal"])
+        self.assertEqual(parity["maximum_absolute_difference"], 0.0)
+        self.assertEqual(len(parity["cases"]), 8)
+        drift = migration["legacy_checkpoint_drift"]
+        self.assertFalse(drift["frozen_cache_matches_hard_coded_checkpoint"])
+        self.assertTrue(drift["frozen_cache_matches_actual_cache_producer_checkpoint"])
+        self.assertTrue(migration["credential_audit"]["active_source_removed"])
+
     def test_legacy_analysis_scripts_are_replaced_and_recoverable(self):
         small_molecule = json.loads(
             (
@@ -186,9 +214,9 @@ class CodeLineageLedgerTests(unittest.TestCase):
 
     def test_root_debug_sources_are_snapshot_only_and_recoverable(self):
         lineage = json.loads(
-            (
-                ROOT / "reproducibility" / "debug_file_cleanup_lineage.json"
-            ).read_text(encoding="utf-8")
+            (ROOT / "reproducibility" / "debug_file_cleanup_lineage.json").read_text(
+                encoding="utf-8"
+            )
         )
         self.assertEqual(lineage["status"], "passed")
         self.assertEqual(
@@ -210,12 +238,8 @@ class CodeLineageLedgerTests(unittest.TestCase):
             ],
             "temp_milk_embedding.py",
         )
-        self.assertEqual(
-            lineage["historical_assets"]["milk_embeddings"]["keys"], 41988
-        )
-        self.assertEqual(
-            lineage["historical_assets"]["polymer_embeddings"]["keys"], 12
-        )
+        self.assertEqual(lineage["historical_assets"]["milk_embeddings"]["keys"], 41988)
+        self.assertEqual(lineage["historical_assets"]["polymer_embeddings"]["keys"], 12)
         self.assertEqual(
             lineage["consumer_audit"],
             {
@@ -416,7 +440,10 @@ class CodeLineageLedgerTests(unittest.TestCase):
             clones = list(csv.DictReader(handle))
         regression = [row for row in clones if row["symbol_names"] == "RegressionHead"]
         self.assertTrue(regression)
-        self.assertGreaterEqual(max(int(row["file_count"]) for row in regression), 22)
+        # M2 removed the extra copy embedded in the obsolete Fig. 2b driver;
+        # the remaining clone group stays visible until the M3 trainer pass.
+        self.assertGreaterEqual(max(int(row["file_count"]) for row in regression), 21)
+        self.assertTrue((ROOT / "src/apexoracle_mdlm/models/heads.py").is_file())
 
     def test_fig3a_exact_plotted_rows_match_manifest(self):
         manifest = json.loads(

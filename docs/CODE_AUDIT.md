@@ -32,7 +32,8 @@
 | 家族 | 主要路径/模式 | 当前判断 | 目标 |
 | --- | --- | --- | --- |
 | Upstream runtime | `main.py`、`diffusion.py`、`dataloader.py`、`noise_schedule.py`、`models/`、`configs/` | DLM inference 的基础，但混有上游 train/eval 和本地 SELFIES config | M2 前原地保留；最终只暴露 downstream 所需 runtime adapter，并记录 upstream attribution |
-| Molecule embedding | `save_DBAASP_id_emb_dict.py`、`save_*synergy*_emb_dict.py`、`DBAASP_MLM_MDLM.py` | 多次复制 DLM wrapper、tokenization 和 pooling | M2 合为一个 library + CLI；Fig. 2b benchmark runner 保持在 Core |
+| Molecule embedding | snapshot 中的 `save_DBAASP_id_emb_dict.py`、`save_*synergy*_emb_dict.py` | 多次复制 DLM wrapper、tokenization 和 pooling；已迁移并从 active tree 删除 | `apexoracle_mdlm.embeddings.molecule` + `scripts/reproduce/export_molecule_embeddings.py` |
+| Fig. 2b DLM benchmark | snapshot 中的 `DBAASP_MLM_MDLM.py` | 19-task fivefold downstream MIC trainer，不是 embedding producer；已从 active tree 删除 | Core 的 `reproduce_fig2b_mdlm_cached_5fold.py` 与 `run_fig2b_shared_mdlm_online.py` |
 | Hierarchical MIC | `DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_*` | 大量 strain/species/phylum 复制 driver；Core 已有 canonical replacements | 不再作为本 repo 公共 API；验证 source mapping 后在 M4 从活动树移除 |
 | MIC guidance | `guaidance_regressor_all_data*.py` | clean/noisy、padding、CLS/mean 等不同历史协议 | M3 通过 profiles 统一代码，协议差异保留为 config，不改 checkpoint schema |
 | Peptide classifier | `guaidance_classifier_all_data*.py` | generation guidance head；v1 checkpoint 与 v2 label data 不可混写 | M3 分开 v1 provenance 与 v2 experimental trainer |
