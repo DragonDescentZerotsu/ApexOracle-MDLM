@@ -15,6 +15,7 @@ dependencies = ["torch"]
 figure = ["matplotlib", "numpy", "scipy"]
 scoring = ["hydra-core", "transformers"]
 peptide-table = ["matplotlib", "numpy", "pandas", "rdkit", "selfies"]
+small-molecule-screen = ["hydra-core", "matplotlib", "numpy", "selfies", "transformers"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -190,3 +190,26 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   attention mask 属于未来 versioned scientific protocol，不能在清理中静默改变；
 - 清理结果：canonical replacement、正式 parity、historical lineage 和 consumer audit 均完成，旧 root
   script 已从 active tree 删除；完整源码由 snapshot tag 恢复，不保留第二份 legacy copy。
+
+### M3e 44,608-entry small-molecule screen（2026-08-10）
+
+- legacy 来源：`legacy-code-snapshot-2026-08-09:temp_judge_generated_mols_MIC.py`，SHA-256
+  `e457921a...aa8`；旧 488 行脚本复制 DLM/head/embedding loader，并混合 filename guessing、hard-coded
+  paths、逐分子 scoring、deduplication、SELFIES decoding、wide CSV 和 violin plotting；
+- 正式 consumer/血缘：Synergy 的 MolPort selection audit 与 manuscript 明确记录 44,608-entry screen，但
+  没有外部代码 runtime import 此文件；shell history 只能确认脚本执行顺序，没有 timestamped original
+  producer revision；
+- canonical 新入口：`apexoracle_mdlm.scoring.small_molecule_screen` 与
+  `scripts/reproduce/score_small_molecule_screen.py`。所有 strain/input、checkpoint、embedding directories、
+  tokenizer、device 和 outputs 均显式传入；输出 manifest 记录协议和 hashes；
+- 保持的科学协议：49,331 个 raw rows 均按 batch size 1 推理，并在进模型前移除 padding；同 strain 的
+  duplicate SELFIES 保持 legacy `dict` assignment 的 last-prediction-wins。唯一有意修复是 wide CSV 从
+  Python `set` 非确定行序改为按 source SELFIES lexicographic sort，rows/values 不变；
+- 正式 input/output closure：BAA-3170/3197 两份输入 hash 相同，各 49,331 rows、44,608 unique SELFIES；
+  两份历史输出各 44,608 rows，decoded SMILES 均 unique 且与输入 decode set 完全一致，MIC 全部 finite
+  positive；精确 sizes/hashes 在 `small_molecule_screen_lineage.json`；
+- scorer parity：正式 9.17 GB clean checkpoint 与 BAA-3170 输入前两条真实 molecules 上，tagged
+  `temp_judge_generated_mols_MIC.py` 和 canonical scorer 的 logits/MIC 均 `torch.equal`，最大差异 `0.0`，
+  单卡峰值 allocated 9,170,041,344 bytes；两条长度不同，因此不建立不适用的 padded batch parity claim；
+- 清理结果：library/CLI/tests、frozen lineage、真实 GPU parity 与 consumer audit 已满足 deletion gate，旧
+  root script 从 active tree 删除；完整源码仍可由 annotated snapshot tag 精确恢复。

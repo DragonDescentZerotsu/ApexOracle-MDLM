@@ -29,6 +29,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mdlm-root", type=Path, default=repo_root)
     parser.add_argument("--legacy-source", type=Path)
     parser.add_argument("--legacy-ref", default="legacy-code-snapshot-2026-08-09")
+    parser.add_argument(
+        "--legacy-path-in-ref",
+        default="judge_generated_mols_MIC.py",
+        help="Tracked scorer source to extract from --legacy-ref.",
+    )
     parser.add_argument("--core-root", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--generation-file", type=Path, required=True)
@@ -196,7 +201,7 @@ def main() -> None:
                 [
                     "git",
                     "show",
-                    f"{args.legacy_ref}:judge_generated_mols_MIC.py",
+                    f"{args.legacy_ref}:{args.legacy_path_in_ref}",
                 ],
                 cwd=args.mdlm_root,
             )
@@ -205,12 +210,12 @@ def main() -> None:
                 args.mdlm_root.resolve() / "configs",
                 target_is_directory=True,
             )
-            legacy_path = temp_root / "judge_generated_mols_MIC.py"
+            legacy_path = temp_root / Path(args.legacy_path_in_ref).name
             legacy_path.write_bytes(source)
             result = compare(
                 args,
                 legacy_path,
-                f"git:{args.legacy_ref}:judge_generated_mols_MIC.py",
+                f"git:{args.legacy_ref}:{args.legacy_path_in_ref}",
             )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

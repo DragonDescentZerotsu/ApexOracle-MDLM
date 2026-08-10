@@ -156,6 +156,13 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 - [x] 冻结 peptide-table batch-size sensitivity：历史 batch size 为 32，DLM 当前忽略 attention mask，
   因此 batch size/composition 是 prediction protocol，不是单纯性能参数；
 - [x] 确认该 temp script 无外部 runtime caller 和正式论文/reviewer consumer 后从 active tree 删除；
+- [x] 将正式 44,608-entry small-molecule screen 从 `temp_judge_generated_mols_MIC.py` 迁为 collection-level
+  library、参数化 CLI、deterministic wide CSV、manifest 与可选 per-strain violin figures；
+- [x] 冻结两个 49,331-row inputs、两个 44,608-row prediction CSV 的 SHA-256 与 decoded SMILES set
+  equivalence；以正式 checkpoint 和 BAA-3170 真实 small-molecule SELFIES 验证 tagged legacy/canonical
+  logits 与 MIC `torch.equal`、最大差异 `0.0`；
+- [x] 确认无外部 runtime import 后删除 488 行 `temp_judge_generated_mols_MIC.py` active-tree 副本；正式
+  Synergy selection 文档继续引用 snapshot provenance，不依赖该 root script 运行；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
@@ -170,6 +177,11 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 source/AST 检查通过；candidate scorer 已完成正式 GPU replay，但 full sampler 仍未完成。
 
 Cross-repository contract 实现 commit：`4521c53`。
+
+Small-molecule screen 迁移证据见 `reproducibility/small_molecule_screen_lineage.json` 与
+`reproducibility/small_molecule_screen_scorer_parity.json`。没有 timestamped original producer revision，
+因此 evidence 只支持 frozen input/output closure 和 2026-08-09 tagged snapshot 的 scorer parity，不把后者
+误称为当时运行脚本的逐字节版本。
 
 ### M4：Legacy driver 收口
 

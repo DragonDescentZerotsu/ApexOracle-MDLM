@@ -95,6 +95,12 @@ The root `judge_generated_mols_MIC.py` is currently only a thin compatibility br
 ApexOracle-Core dynamic import. New code must use `apexoracle_mdlm.scoring`; the bridge will disappear
 after the Core caller migrates and its cross-repository test passes.
 
+The paper small-molecule MIC screen is available through
+`scripts/reproduce/score_small_molecule_screen.py`. Pass each target explicitly as repeated
+`--input STRAIN=/path/to/selfies.txt`; the command writes a deterministic `SMILES_Sequence` wide CSV,
+a provenance manifest, and optional per-strain distribution figures. The former root-level temp driver
+is retained only in `legacy-code-snapshot-2026-08-09`.
+
 ## Verification and recovery
 
 ```bash

@@ -155,14 +155,32 @@ composition 改变。历史 73,520-row 输出使用 batch size 32；canonical ma
 root script 的 migration gate 已满足并从 active tree 删除，hash、counts、parity 和恢复命令见
 `reproducibility/peptide_table_migration_parity.json`。
 
-## 8. 下一轮人工核验队列
+## 8. Small-molecule screen 已冻结并迁移的血缘
+
+正式 44,608-entry screen 的 active producer 已迁入
+`scripts/reproduce/score_small_molecule_screen.py` 与
+`apexoracle_mdlm.scoring.small_molecule_screen`。旧 `temp_judge_generated_mols_MIC.py` 的独有 collection
+行为——逐 raw row batch=1、去 padding、duplicate SELFIES last-write-wins、SELFIES decode、wide CSV 与逐
+strain violin——均已有 canonical replacement。
+
+已由 frozen assets 和真实 checkpoint 验证：两个 target inputs 各 49,331 rows/44,608 unique SELFIES，
+两份历史 CSV 各 44,608 rows；decoded SMILES set 精确相等，全部 MIC finite positive；tagged legacy 与
+canonical 在两条真实 BAA-3170 molecule 上 logits/MIC 逐值相等。canonical 输出只修复旧 `set` iteration
+造成的不确定行序。机器可读记录为 `small_molecule_screen_lineage.json` 和
+`small_molecule_screen_scorer_parity.json`。
+
+根据现有证据只能确认 shell-history execution order、closed input/output artifacts 和 snapshot scorer
+parity；没有 timestamped original producer revision。因此不声称 snapshot source 与最初 44,608-entry run
+逐字节相同。该边界已清楚记录后，旧 root file 满足 deletion gate，由 tag 恢复。
+
+## 9. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
 1. `show.ipynb`、`show_interpretability.ipynb`、`visualize_attn*.py`：输出多、可能包含独有
    interpretability/case-study 图；
-2. `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`、`temp_judge_*`：可能同时承担 scorer 和 plot
+2. `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`、剩余 `temp_judge_mol_mic_with_fig.py`：可能同时承担 scorer 和 plot
    producer，不能先删 UI/plot 部分而破坏 scoring 行为；
 3. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`、`aa_seq_to_smiles.py`：逐项搜索论文图、caption、
    reviewer 文档和外部输出 hash；

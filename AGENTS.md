@@ -88,6 +88,15 @@
   历史 protocol 的 batch size 固定为 32，因为 DLM 不消费 attention mask；改变 batch size 必须作为新
   protocol 并重新验证。Focused 验证：`PYTHONPATH=src python -m unittest tests.test_peptide_table -v`；正式
   parity 见 `reproducibility/peptide_table_migration_parity.json`。
+- `apexoracle_mdlm.scoring.small_molecule_screen`：`parse_strain_input`、
+  `score_small_molecule_inputs` 与 `decoded_wide_rows`；公开入口为
+  `scripts/reproduce/score_small_molecule_screen.py`，重复传入 `--input STRAIN=PATH`，输出
+  `SMILES_Sequence + strain columns` 的 deterministic wide CSV、manifest 和可选逐 strain violin PDF。
+  正式协议保持每个 raw SELFIES 单独去 padding 推理、同 strain duplicate SELFIES 的最后一次预测覆盖；
+  canonical CSV 仅将旧 Python `set` 的随机行序改为按 source SELFIES 排序。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_small_molecule_screen -v`；44,608-entry frozen lineage 与 tagged
+  legacy GPU parity 分别见 `reproducibility/small_molecule_screen_lineage.json` 和
+  `small_molecule_screen_scorer_parity.json`。
 - 跨仓库只读审计入口：`PYTHONPATH=src python scripts/audit/cross_repo_contracts.py
   --synergy-root <core> --generation-root <generation>`；主要参数为三个 repo roots 和可选 manifest，输出
   stdout JSON，不写文件；`--check-assets` 仅用于 trusted formal checkpoints，以 CPU `mmap` 追加 schema

@@ -85,6 +85,42 @@ class CodeLineageLedgerTests(unittest.TestCase):
         for path in manifest["canonical_components"]:
             self.assertTrue((ROOT / path).is_file(), path)
 
+    def test_small_molecule_screen_driver_is_replaced_and_recoverable(self):
+        legacy_path = "temp_judge_generated_mols_MIC.py"
+        self.assertNotIn(legacy_path, self.by_path)
+        legacy_source = subprocess.check_output(
+            [
+                "git",
+                "show",
+                f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+            ],
+            cwd=ROOT,
+        )
+        parity = json.loads(
+            (
+                ROOT / "reproducibility" / "small_molecule_screen_scorer_parity.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(parity["status"], "passed")
+        self.assertEqual(
+            hashlib.sha256(legacy_source).hexdigest(),
+            parity["legacy_source"]["sha256"],
+        )
+        self.assertTrue(parity["scoring_parity"]["per_sample_logits_torch_equal"])
+        self.assertTrue(parity["scoring_parity"]["per_sample_mic_torch_equal"])
+        lineage = json.loads(
+            (ROOT / "reproducibility" / "small_molecule_screen_lineage.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(lineage["status"], "passed")
+        for strain in ("BAA-3170", "BAA-3197"):
+            self.assertEqual(lineage["strains"][strain]["input"]["rows"], 49331)
+            self.assertEqual(
+                lineage["strains"][strain]["input"]["unique_selfies"], 44608
+            )
+            self.assertEqual(lineage["strains"][strain]["legacy_output"]["rows"], 44608)
+
     def test_major_copied_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""

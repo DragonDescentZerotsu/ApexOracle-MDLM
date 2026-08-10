@@ -41,7 +41,8 @@ CSV。`--check-canonical-plot` 还会临时渲染 canonical PDF，并在 150 dpi
 
 用途：从 `legacy-code-snapshot-2026-08-09` 临时提取旧 scorer（不恢复到 active tree），加载正式 Core clean
 MIC checkpoint、Core condition embeddings 和真实 Generation SELFIES，在单张显式可见 GPU 上比较逐条及
-batch logits/MIC。默认不写产物，只输出 JSON；可用 `--legacy-source` 指定其他冻结 reference。
+batch logits/MIC。默认不写产物，只输出 JSON；可用 `--legacy-source` 指定其他冻结 reference，或用
+`--legacy-path-in-ref temp_judge_generated_mols_MIC.py` 核验 snapshot 中的其他复制 scorer。
 
 ```bash
 CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
@@ -53,6 +54,23 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
 ```
 
 正式冻结结果见 `reproducibility/candidate_mic_migration_parity.json`。
+
+## `verify_small_molecule_screen_lineage.py`
+
+用途：不重跑 44,608-entry GPU screen，逐个核验正式 source SELFIES 与历史 prediction CSV 的 rows、unique
+counts、SHA-256、decoded SMILES set equality 和 finite-positive MIC contract。
+
+```bash
+PYTHONPATH=src python scripts/audit/verify_small_molecule_screen_lineage.py \
+  --input BAA-3170=/path/to/strain_BAA-3170.txt \
+  --input BAA-3197=/path/to/strain_BAA-3197.txt \
+  --legacy-output BAA-3170=/path/to/SMs_mic_predictions_BAA-3170.csv \
+  --legacy-output BAA-3197=/path/to/SMs_mic_predictions_BAA-3197.csv
+```
+
+正式冻结结果见 `reproducibility/small_molecule_screen_lineage.json`。另外使用上述 legacy scorer audit 的
+`--legacy-path-in-ref temp_judge_generated_mols_MIC.py` 在两条真实 BAA-3170 molecules 上完成正式 checkpoint
+GPU parity，见 `reproducibility/small_molecule_screen_scorer_parity.json`。
 
 ## `compare_legacy_peptide_table_mic.py`
 
