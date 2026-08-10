@@ -137,11 +137,10 @@ flowchart LR
 仍待确认：没有找到最终四 panel 组图所用软件/命令；也没有找到精确 timestamp 到 2026-04-03 运行时刻的
 producer commit/log。因此 ledger 明确记录了证据强度，没有伪造不存在的 revision provenance。
 
-结论：这个 P0 gate 已满足。原 642 行混合实现已删除，行为拆为 canonical scoring library、parameterized
-CLI、figure capsule 和机器可读 parity record。当前同名 root 文件不是旧实现，只是为 Core 已验证动态
-import 保留的 thin compatibility bridge；ledger disposition 为 `remove_bridge_after_core_caller_migration`。
-Core 改用 package 并通过跨仓库 caller test 后，bridge 也从最终 public tree 删除。旧实现始终可由 snapshot
-tag 精确恢复。
+结论：这个 P0 gate 已满足并关闭。原 642 行混合实现已删除，行为拆为 canonical scoring library、
+parameterized CLI、figure capsule 和机器可读 parity record。Core PR #32 已直接调用 package，并在两个实际
+Generation outputs、两个 strains 上完成四个 formal-checkpoint logit exact parity；跨仓库 source contract
+通过后，同名临时 bridge 也已从最终 active tree 删除。旧实现始终可由 snapshot tag 精确恢复。
 
 ## 7. Peptide-table scorer 已完成迁移删除
 
@@ -262,8 +261,8 @@ Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优�
    与 `reproducibility/hierarchical_mic_legacy_lineage.json` 接管后删除。
 3. 两个 root chemistry utilities 已迁为通用 table converter 与 supplier-neutral catalogue matcher；正式
    11,401-row conversion byte-exact，5,887,458-row full scan 恢复历史 276-row semantic set，旧 copies 已删除。
-4. 下一批处理三个 experimental synergy-guidance producers；上游 runtime与
-   `judge_generated_mols_MIC.py` compatibility bridge 仍按各自 release gate 处理，不混入普通 legacy 删除。
+4. 三个 experimental synergy-guidance producers 已归并为两个 canonical profiles；上游 runtime 保持
+   attribution 边界，`judge_generated_mols_MIC.py` bridge 的独立 Core caller gate 已满足并完成删除。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为
 snapshot-only；两类都在 gate 满足后删除原始 root 文件。仍按小批次迁移与删除，不做一次性 filesystem

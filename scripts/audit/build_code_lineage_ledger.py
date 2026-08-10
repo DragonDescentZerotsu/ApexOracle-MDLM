@@ -377,8 +377,20 @@ def main() -> None:
     # ``git ls-files`` retains worktree deletions until the migration commit is
     # staged.  Build the release ledger from files that still exist so a
     # deletion gate can be verified before staging or committing.
+    generated_outputs = {
+        (output_dir / name).resolve()
+        for name in (
+            "code_asset_ledger.csv",
+            "code_dependency_edges.csv",
+            "definition_clone_groups.csv",
+            "code_lineage_summary.json",
+        )
+    }
     scope = [
-        relative for relative in tracked_scope(root) if (root / relative).is_file()
+        relative
+        for relative in tracked_scope(root)
+        if (root / relative).is_file()
+        and (root / relative).resolve() not in generated_outputs
     ]
 
     module_map: dict[str, str] = {}
@@ -438,29 +450,14 @@ def main() -> None:
             )
         )
         paper_role = (
-            "main_figure_3a_mic_distribution_source_panel"
-            if relative == "judge_generated_mols_MIC.py"
-            else (
-                "not_yet_linked_to_formal_paper"
-                if plotting or path.suffix == ".ipynb"
-                else "none_identified"
-            )
+            "not_yet_linked_to_formal_paper"
+            if plotting or path.suffix == ".ipynb"
+            else "none_identified"
         )
         disposition = policy["disposition"]
         replacement = policy["replacement"]
         gate = policy["gate"]
         evidence = policy["evidence"]
-        if relative == "judge_generated_mols_MIC.py":
-            paper_role = "compatibility_bridge_for_canonical_fig3a_and_core_mic_scorer"
-            disposition = "remove_bridge_after_core_caller_migration"
-            replacement = (
-                "apexoracle_mdlm.scoring + scripts/reproduce/plot_paper_fig3a.py"
-            )
-            gate = (
-                "原 642 行实现已由 canonical scoring/figure capsule 取代；"
-                "ApexOracle-Core 停止动态 import 此文件并通过跨仓库测试后移除薄兼容桥。"
-            )
-            evidence = "verified_canonical_migration_and_formal_parity"
         absolute_paths = ABSOLUTE_PATH_PATTERN.findall(text)
         rows.append(
             {
@@ -531,7 +528,7 @@ def main() -> None:
     ]
     summary = {
         "schema_version": 1,
-        "scope": "all git-tracked .py/.ipynb/.sh/.yaml/.yml/.json assets",
+        "scope": "all git-tracked .py/.ipynb/.sh/.yaml/.yml/.json assets except generated ledger outputs",
         "upstream_ref": args.upstream_ref,
         "snapshot_ref": args.snapshot_ref,
         "tracked_asset_count": len(rows),

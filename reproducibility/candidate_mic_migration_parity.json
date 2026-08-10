@@ -49,8 +49,13 @@
   },
   "compatibility_boundary": {
     "legacy_body_removed": true,
-    "bridge_relative_path": "judge_generated_mols_MIC.py",
-    "bridge_consumer": "ApexOracle-Core scripts/reproduce/evaluate_remasking_schedule_reviewer.py",
-    "bridge_removal_gate": "Migrate the Core dynamic import to apexoracle_mdlm.scoring and pass the cross-repository caller test."
+    "former_bridge_relative_path": "judge_generated_mols_MIC.py",
+    "bridge_active_tree_removed": true,
+    "former_bridge_consumer": "ApexOracle-Core scripts/reproduce/evaluate_remasking_schedule_reviewer.py",
+    "core_source_commit": "2caad682f1c8eee13e0403871bddc38477429797",
+    "core_pull_request": 32,
+    "core_main_merge_commit": "0025c8b6ff64250708ff73486f2959b4bb08de8a",
+    "core_parity_manifest": "experiments/remasking_schedule_reviewer/mdlm_scoring_bridge_parity.json",
+    "bridge_removal_gate": "satisfied: Core imports apexoracle_mdlm.scoring directly; two real Generation outputs across BAA-3170 and BAA-3197 produced four torch.equal formal-checkpoint logits with maximum absolute difference 0.0; the source contract passes against Core main."
   }
 }

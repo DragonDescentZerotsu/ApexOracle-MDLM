@@ -236,13 +236,13 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 - figure parity：canonical producer 直接消费 377-row frozen CSV；150 dpi legacy/canonical raster shape
   均为 `(729, 737, 3)`，所有 RGB channels 完全一致；
 - 清理结果：旧 642 行主体已从 active tree 删除。Core 的
-  `scripts/reproduce/evaluate_remasking_schedule_reviewer.py` 确实动态 import 此 root filename，所以当前
-  同名文件仅保留约 75 行 thin bridge，内部委托 canonical scorer；Core caller 改用 package 并通过跨仓库
-  test 后删除 bridge；
+  `scripts/reproduce/evaluate_remasking_schedule_reviewer.py` 曾是唯一受控动态 import caller；Core PR #32
+  已改为直接调用 package，两条实际 Generation outputs × 两个 strains 的四个 formal-checkpoint logits
+  均 `torch.equal`、最大差异 `0.0`。跨仓库 caller contract 通过后，约 75 行临时 bridge 也已删除；
 - 机器可读证据：`reproducibility/candidate_mic_migration_parity.json` 与更新后的
   `paper_figure_lineage.json`；恢复点仍为原 annotated tag；
-- 未完成：其他 `judge_*`、`save_*`、clean/noisy guidance profiles 和 full Generation sampler 不由本批
-  自动宣称等价或删除。
+- 边界：其他历史资产的迁移证据仍按各自 manifest 独立解释；Generation full sampler 的可验证完成性与
+  legacy 非 bitwise-deterministic 边界记录在 Generation `reproducibility/full_sampler_mdlm_parity.json`。
 
 ### M3d peptide-table multi-strain MIC pipeline（2026-08-09）
 

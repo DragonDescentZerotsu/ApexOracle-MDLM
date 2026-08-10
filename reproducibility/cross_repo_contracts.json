@@ -195,14 +195,26 @@
       ]
     },
     {
-      "id": "mdlm_candidate_mic_compatibility_bridge",
-      "repository": "mdlm",
-      "path": "judge_generated_mols_MIC.py",
+      "id": "core_direct_mdlm_candidate_mic_scorer",
+      "repository": "synergy",
+      "path": "scripts/reproduce/evaluate_remasking_schedule_reviewer.py",
       "required_substrings": [
         "from apexoracle_mdlm.scoring import",
         "load_candidate_mic_regressor",
-        "class MIC_regressor",
-        "current_directory"
+        "load_condition_embedding_banks",
+        "mdlm_source_root = mdlm_root / \"src\"",
+        "runtime_root=mdlm_root"
+      ]
+    },
+    {
+      "id": "generation_uses_canonical_mdlm_heads",
+      "repository": "generation",
+      "path": "models/dit.py",
+      "required_substrings": [
+        "from apexoracle_mdlm.models import FirstTokenCrossAttention, RegressionHead",
+        "self.co_cross_attn_genome = FirstTokenCrossAttention",
+        "self.co_cross_attn_text = FirstTokenCrossAttention",
+        "self.reg_head = RegressionHead"
       ]
     }
   ],
@@ -219,21 +231,6 @@
         "activation_fn",
         "dropout",
         "out_proj"
-      ]
-    },
-    {
-      "id": "generation_cross_attention_state_modules",
-      "repository": "generation",
-      "path": "models/antibiotic_classifier.py",
-      "class": "FirstTokenAttention_genome",
-      "required_self_attributes": [
-        "mol_to_genome_dim",
-        "key_value_projection",
-        "mha",
-        "attn_norm",
-        "norm1",
-        "ffn",
-        "norm2"
       ]
     }
   ]
