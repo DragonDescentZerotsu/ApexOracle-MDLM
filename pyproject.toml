@@ -18,6 +18,7 @@ embedding = ["hydra-core", "selfies", "tqdm", "transformers"]
 peptide-table = ["matplotlib", "numpy", "pandas", "rdkit", "selfies"]
 small-molecule-screen = ["hydra-core", "matplotlib", "numpy", "selfies", "transformers"]
 peptide-screen = ["hydra-core", "pillow", "rdkit", "selfies", "transformers"]
+hub = ["einops", "flash-attn", "huggingface-hub", "omegaconf", "transformers"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

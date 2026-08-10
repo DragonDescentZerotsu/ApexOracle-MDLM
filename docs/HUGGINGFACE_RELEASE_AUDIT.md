@@ -54,10 +54,23 @@ Hub allowlist 应限于 `.gitattributes`、model card、明确 license/attributi
 config、三份 tokenizer files、safetensors 和必要图片。IDE/cache、full training configs、temp data、debug scripts、
 上传时硬编码路径的 `upload.py` 均不进入 clean tree。
 
-## 仍待作者确认或执行
+## 2026-08-10 作者确认与本地 release-candidate 验收
 
-- 本仓库 source license 是 Apache-2.0，上游 IBM tokenizer 也标记 Apache-2.0；但正式 checkpoint/weights 的
-  发布权和最终 model-card license 仍需作者/合作者明确确认，不能由代码审计代替。
-- 本批只读审计 Hugging Face remote，没有 upload、commit、delete 或 history rewrite。
-- 完成 clean wrapper 后必须做：现有 safetensors strict load、single/padded GPU parity、CPU schema smoke、
-  fresh-download smoke、remote allowlist/file-hash audit，再更新论文和 super-repo 中的 pinned revision。
+- 作者明确确认可以直接公开发布该权重，并指定 model-card license 为 MIT。MIT 只覆盖 ApexOracle-owned
+  wrapper 与 frozen model release；`models/dit.py`、`noise_schedule.py` 和 IBM tokenizer 的 Apache-2.0
+  attribution/许可证副本仍在 capsule 中保留。
+- Canonical wrapper 已迁入 `src/apexoracle_mdlm/hub/`，不再在 import 时运行 Hydra 或读取绝对路径；它会
+  验证 attention-mask shape/non-empty rows、强制转 bool，并允许完整 tokenizer batch 中的
+  `token_type_ids`。
+- `scripts/release/build_huggingface_release.py` 从显式 allowlist 构建 capsule；
+  `publish_huggingface_release.py` 会先验证 manifest，再删除 remote 中不在 allowlist 的文件并上传 capsule。
+  远程删除目标在 commit 前由 API 精确枚举，不使用本地 glob 或仓库级 clean。
+- 本地 capsule 共 18 个 files（含 `.gitattributes` 和 manifest），权重仍为 388,964,184 bytes、SHA-256
+  `b472f7508aaf0fdab4c935caf221415b48a5f8afd4d104a731c9d72d410c2c44`。
+- H100 GPU 上已通过：现有 safetensors `strict=True` load、integer attention mask 的 padded batch、
+  `model(**batch)`、save/load 后全部 state tensors `torch.equal`；代表 single input 相对 legacy 正确
+  boolean-mask 输出全部 `torch.equal`，最大 absolute difference `0.0`。
+- 全仓 92 tests passed，Core/MDLM/Generation 13 项跨仓库 source contract passed。
+
+仍待执行的是 Hub main exact-sync 后，从新固定 revision fresh-download，再做 allowlist、文件 hash、license
+metadata、strict load 和 GPU inference 复核；只有完成该步骤才能把新 revision 写入 super-repo 的 release lock。

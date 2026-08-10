@@ -67,3 +67,5 @@ Thumbs.db
 
 # Large model files
 *.safetensors
+# Local, generated Hugging Face release capsules (may contain model weights).
+.hf-release.*

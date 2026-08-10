@@ -115,8 +115,8 @@ Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable reco
 
 ### M2：DLM inference 与 molecule embedding
 
-状态：**clean DLM hidden-state adapter 与通用 molecule embedding producer 已完成；Hugging Face
-现状审计已完成，clean wrapper/exporter 与 public Hub 更新待执行。**
+状态：**clean DLM hidden-state adapter、通用 molecule embedding producer 与 Hugging Face clean release
+candidate 已完成；Hub remote exact-sync 和 fresh-download 验收正在执行。**
 
 - [x] 提取 clean `t=0`、non-padding candidate-scoring 所需的 DLM hidden-state adapter，保持
   `backbone`/`noise` state keys、legacy RNG consumption 与 bfloat16 block execution；
@@ -127,8 +127,11 @@ Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable reco
 - [x] 对固定 token tensors、正式 checkpoint 和六个 frozen cache samples 做 legacy/new embedding
   逐值比较，全部 `torch.equal`、最大差异 `0.0`；
 - [x] 审计 Hugging Face wrapper、tokenizer/model revision、正式 safetensors 血缘和 license 缺口；
-- [ ] 迁移 clean non-padding Hub wrapper，修复 standard integer attention mask，并以 allowlist 重建 public
-  Hub tree；该步必须在 smoke/parity 和 license/rights 确认后单独执行。
+- [x] 作者确认权重公开发布并选择 MIT；第三方 runtime/tokenizer 继续保留 Apache-2.0 notice；
+- [x] 建立 side-effect-free Hub wrapper、minimal config/model card、exact allowlist builder/publisher 和 tests；
+- [x] 以原 131-tensor safetensors 完成 strict load、integer-mask padded `model(**batch)`、save/load 和 legacy
+  bool-mask GPU parity；代表 single input 全输出 `torch.equal`、最大差异 `0.0`；
+- [ ] 将 clean capsule exact-sync 到 Hub main、从固定新 revision fresh-download，并复核远程 allowlist/hash/GPU；
 
 验收：固定 SELFIES 的 hidden states 与选定 legacy producer 在容差内一致；输出 manifest 记录输入、
 checkpoint、pooling、dtype、shape 和 SHA-256。
@@ -136,8 +139,8 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 M2 embedding producer 迁移详情见 `docs/MOLECULE_EMBEDDING_MIGRATION.md` 和
 `reproducibility/molecule_embedding_migration.json`。旧 Fig. 2b trainer 已映射到 Core canonical runners；
 三个重复 exporter 与该 trainer 均从 active tree 删除，可由 snapshot tag 恢复。
-当前 HF revision、389 MB 权重逐 tensor 血缘、公开 wrapper bug 和 release allowlist 见
-`docs/HUGGINGFACE_RELEASE_AUDIT.md` 与 `reproducibility/huggingface_release_audit.json`；本批未修改 Hub remote。
+原 HF revision、389 MB 权重逐 tensor 血缘、公开 wrapper bug、clean candidate 与 release allowlist 见
+`docs/HUGGINGFACE_RELEASE_AUDIT.md` 与 `reproducibility/huggingface_release_audit.json`。
 
 ### M3：Guidance heads 与 candidate scoring
 

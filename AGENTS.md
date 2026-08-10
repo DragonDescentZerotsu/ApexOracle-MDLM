@@ -160,14 +160,19 @@
   `legacy-code-snapshot-2026-08-09` 恢复。Focused 验证：`PYTHONPATH=src python -m unittest
   tests.test_molecule_embeddings tests.test_dlm_encoder -v`；正式 cache/checkpoint parity 见
   `reproducibility/molecule_embedding_migration.json`。
-- Hugging Face 发布审计：当前 public `Kiria-Nozan/ApexOracle` revision
+- Hugging Face clean release：原 public `Kiria-Nozan/ApexOracle` revision
   `bb93daedb867488b1a009ce9522e037a530a2ab3` 的 389 MB safetensors 已验证与
   `1-255000-fine-tune.ckpt` 的 131 个 non-regression backbone tensors 全部 `torch.equal`。但 public wrapper
   未将 tokenizer 的 integer attention mask 转 bool，单条 model-card 调用会得到错误 hidden states，padded
   batch 会触发 assertion；remote 还含 IDE/cache/config/temp/debug assets，model card 无 license 字段。
-  在 clean wrapper GPU parity、license/weight-rights 确认和 allowlist export 完成前，不得删除本地 HF
-  snapshot 或直接覆盖 Hub。完整边界见 `docs/HUGGINGFACE_RELEASE_AUDIT.md` 与
-  `reproducibility/huggingface_release_audit.json`。
+  作者已于 2026-08-10 确认权重公开发布并指定 MIT；第三方 MDLM runtime/IBM tokenizer 继续保留
+  Apache-2.0 notice。Canonical wrapper 为 `apexoracle_mdlm.hub.model.MolEmbDLM`，会验证并转换 bool mask、
+  接受 `token_type_ids`；发布构建入口为 `python scripts/release/build_huggingface_release.py --output-dir
+  <empty-dir>`，输入 ignored safetensors/tokenizer 与 tracked release template，输出 exact allowlist capsule 和
+  hash manifest。远程 exact-sync 入口为 `scripts/release/publish_huggingface_release.py`，必须显式重复
+  `--repo-id/--confirm-repo-id`；只有 local strict-load、single/padded GPU、save/load parity 通过后才可执行。
+  Focused 验证：`PYTHONPATH=src python -m unittest tests.test_huggingface_release -v`。完整边界和 revision
+  记录见 `docs/HUGGINGFACE_RELEASE_AUDIT.md` 与 `reproducibility/huggingface_release_audit.json`。
 - 正式 main Fig. 3a 血缘核验入口：`/home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm
   python scripts/audit/verify_paper_figure_lineage.py`；默认只读验证 small assets、condition directory counts、
   cache statistics、p-values、manuscript consumer 和 frozen 377-row plotted-data CSV。只有显式
