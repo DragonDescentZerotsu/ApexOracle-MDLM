@@ -55,6 +55,13 @@
   13 条旧 producer 路径都是 shell comments。旧 root copies 由 snapshot 与
   `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md` 恢复；该功能始终标为 experimental all-data guidance，不能
   写成 Core paper synergy CV。
+- **2026-08-10 MDLM module release smoke：** `custom/refactor/apexoracle-mdlm` 的 source commit
+  `c774bd77ed84d97decbc4d4cffbd75ecea213200` 已从 GitHub shallow clone，完成 wheel build/target install、
+  package imports、四个主要 CLI help 和 118 tests；显式挂载 ignored trusted assets 后 20 项 source/schema/
+  strict-head/partner checks 通过。此前仅本地存在的 annotated tag `legacy-code-snapshot-2026-08-09` 已推送
+  `custom`，远端 peeled commit 为 `79eed10cac8d5feb446be886eee0c5b356b23b06`，并在 shallow clone 单独 fetch
+  后通过全部 snapshot-dependent tests。Fresh clone 不内含权重是预期 release boundary；未来由 super-repo
+  asset resolver 提供。Full Generation sampler parity 与 Core compatibility bridge 切换属于下一跨模块阶段。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 

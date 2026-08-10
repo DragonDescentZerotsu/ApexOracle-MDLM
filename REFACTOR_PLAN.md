@@ -326,15 +326,24 @@ Synergy-guidance producer migration 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATIO
 
 ### M5：Clean module release
 
-状态：待执行。
+状态：**module-level source/asset smoke 已完成；只剩跨模块 full Generation parity 与 Core bridge 切换。**
 
-- 清除公共入口中的绝对路径、导入时 Hydra compose 和隐式 device/global state；
-- 完成 license/NOTICE、secret、大文件和 dependency 审计；
-- 提供 embedding smoke、guidance-head load smoke、candidate scoring smoke；
-- 只在作者确认后显式推送 `custom`，不得 push `origin`；
+- [x] 公共 canonical package/CLI 不使用作者机器默认资产路径；legacy upstream runtime 与 bridge 边界已登记；
+- [x] 完成 license/NOTICE、secret、大文件和 dependency 审计；
+- [x] 从远端 branch shallow clone 后 build/install wheel，验证 package imports、四个主要 CLI help 和 118 tests；
+- [x] 通过显式本地 asset mount 对 DLM/classifier/MIC/synergy checkpoints、strict heads、partner keys 和 14 项
+  source contracts 完成合计 20 项 smoke；
+- [x] annotated recovery tag 已推送 `custom`，并在 fresh shallow clone 中单独 fetch 后完成所有
+  snapshot-dependent tests；
+- [x] 只显式推送 `custom`，未 push `origin`；
 - 由 ApexOracle super-repo 固定 clean commit。
 
 验收：fresh clone 可安装；smoke 不依赖作者 cache；资产全部通过 manifest 解析。
+
+2026-08-10 验收的 source commit 为 `c774bd77ed84d97decbc4d4cffbd75ecea213200`；远端 tag peeled commit 为
+`79eed10cac8d5feb446be886eee0c5b356b23b06`。Fresh clone 本身不携带 ignored checkpoints，asset smoke 通过
+显式路径挂载受信本地权重完成；这正是未来 super-repo asset resolver 需要提供的边界。未完成的 full sampler
+属于 Generation 模块验收，不再以保留 MDLM root trainer 为代价阻塞 source cleanup。
 
 ## 5. 变更控制
 
