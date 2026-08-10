@@ -173,6 +173,11 @@
   `--repo-id/--confirm-repo-id`；只有 local strict-load、single/padded GPU、save/load parity 通过后才可执行。
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_huggingface_release -v`。完整边界和 revision
   记录见 `docs/HUGGINGFACE_RELEASE_AUDIT.md` 与 `reproducibility/huggingface_release_audit.json`。
+  **正式 Hub revision 为 `77694f08c1d0664fdb24c5a7bab130c8a3bc2eda`：** remote 仅 18 个 allowlist
+  files，license metadata 为 MIT，weight SHA-256 保持 `b472f750...2c44`；从全新 Hub cache 下载后已验证
+  manifest 0 mismatch、`strict=True` load 和 integer-mask padded `model(**batch)` GPU smoke。第一次 clean
+  commit `b16024b` 暴露 Hub cache symlink root bug，已由 `resolve_runtime_root` 和 regression test 修复，不得
+  作为 release lock。MDLM source fix commit 为 `2eee36e`，已 push 到 `custom/refactor/apexoracle-mdlm`。
 - 正式 main Fig. 3a 血缘核验入口：`/home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm
   python scripts/audit/verify_paper_figure_lineage.py`；默认只读验证 small assets、condition directory counts、
   cache statistics、p-values、manuscript consumer 和 frozen 377-row plotted-data CSV。只有显式

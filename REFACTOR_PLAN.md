@@ -115,8 +115,8 @@ Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable reco
 
 ### M2：DLM inference 与 molecule embedding
 
-状态：**clean DLM hidden-state adapter、通用 molecule embedding producer 与 Hugging Face clean release
-candidate 已完成；Hub remote exact-sync 和 fresh-download 验收正在执行。**
+状态：**clean DLM hidden-state adapter、通用 molecule embedding producer与 Hugging Face clean release
+均已完成；正式 Hub revision 已通过 fresh-download 验收。**
 
 - [x] 提取 clean `t=0`、non-padding candidate-scoring 所需的 DLM hidden-state adapter，保持
   `backbone`/`noise` state keys、legacy RNG consumption 与 bfloat16 block execution；
@@ -131,7 +131,10 @@ candidate 已完成；Hub remote exact-sync 和 fresh-download 验收正在执�
 - [x] 建立 side-effect-free Hub wrapper、minimal config/model card、exact allowlist builder/publisher 和 tests；
 - [x] 以原 131-tensor safetensors 完成 strict load、integer-mask padded `model(**batch)`、save/load 和 legacy
   bool-mask GPU parity；代表 single input 全输出 `torch.equal`、最大差异 `0.0`；
-- [ ] 将 clean capsule exact-sync 到 Hub main、从固定新 revision fresh-download，并复核远程 allowlist/hash/GPU；
+- [x] 将 clean capsule exact-sync 到 Hub main；最终 revision `77694f08c1d0664fdb24c5a7bab130c8a3bc2eda`
+  已从全新 cache 下载，18-file allowlist、MIT metadata、manifest/hash、strict load 和 padded GPU smoke 通过；
+- [x] 将首次 fresh-download 暴露的 Hub symlink runtime-root bug 固化为 regression test，并在 source commit
+  `2eee36e` 修复；失败的中间 Hub revision `b16024b` 不进入任何 release lock；
 
 验收：固定 SELFIES 的 hidden states 与选定 legacy producer 在容差内一致；输出 manifest 记录输入、
 checkpoint、pooling、dtype、shape 和 SHA-256。

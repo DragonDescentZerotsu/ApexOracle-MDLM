@@ -2,7 +2,8 @@
 
 > 审计日期：2026-08-10
 > 远程：`Kiria-Nozan/ApexOracle`
-> 当前 revision：`bb93daedb867488b1a009ce9522e037a530a2ab3`
+> 原始审计 revision：`bb93daedb867488b1a009ce9522e037a530a2ab3`
+> 正式 clean revision：`77694f08c1d0664fdb24c5a7bab130c8a3bc2eda`
 
 ## 已由本地文件、Hugging Face API、正式权重和 GPU 复算验证的事实
 
@@ -72,5 +73,20 @@ config、三份 tokenizer files、safetensors 和必要图片。IDE/cache、full
   boolean-mask 输出全部 `torch.equal`，最大 absolute difference `0.0`。
 - 全仓 92 tests passed，Core/MDLM/Generation 13 项跨仓库 source contract passed。
 
-仍待执行的是 Hub main exact-sync 后，从新固定 revision fresh-download，再做 allowlist、文件 hash、license
-metadata、strict load 和 GPU inference 复核；只有完成该步骤才能把新 revision 写入 super-repo 的 release lock。
+## 正式发布与 fresh-download 验收
+
+- 首次 clean Hub commit `b16024bfcd03cf72f598412accc21b708096535d` 已将 72-file legacy tree 收敛为
+  18-file allowlist，但全新 Hub cache 使用 symlink，旧 runtime-root resolution 会跟随 symlink 到 blob
+  directory，导致找不到 sibling runtime。该 revision 只保留问题追溯，不进入 release lock。
+- Source commit `2eee36e` 改为保留 snapshot symlink parent，并增加 symlink regression test；修订后的正式
+  Hub revision 为 `77694f08c1d0664fdb24c5a7bab130c8a3bc2eda`。
+- 从新建空 cache 下载该固定 revision 后，API/card/file audit 验证：license metadata `mit`、18/18 allowlist
+  files、manifest hash mismatch 为 0、weight SHA-256 仍为
+  `b472f7508aaf0fdab4c935caf221415b48a5f8afd4d104a731c9d72d410c2c44`。
+- 实际 cache-symlink snapshot 上通过 `strict=True` load；Transformers integer attention mask 的两分子
+  padded `model(**batch)` 输出 shape 为 `[2, 10, 768]` 且全部 finite。
+- MDLM source commits `117325c`（clean capsule）与 `2eee36e`（cache-symlink fix）均已 push 到
+  `custom/refactor/apexoracle-mdlm`；没有 push 上游 `origin`。
+
+因此 Hugging Face 发布门槛已经关闭。Super-repo 应固定正式 revision `77694f08...2eda`，不得固定中间
+revision；下一批工作转回本地 legacy HF exporter/runtime duplicate 清理与 M3 guidance caller 收口。

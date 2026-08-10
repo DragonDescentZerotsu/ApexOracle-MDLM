@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "local_release_candidate_validated_remote_pending",
+  "status": "released_and_fresh_download_validated",
   "public_model": {
     "repo_id": "Kiria-Nozan/ApexOracle",
     "api_url": "https://huggingface.co/api/models/Kiria-Nozan/ApexOracle",
@@ -86,6 +86,28 @@
     "full_test_count": 92,
     "cross_repo_check_count": 13
   },
+  "clean_release": {
+    "repo_id": "Kiria-Nozan/ApexOracle",
+    "source_branch": "custom/refactor/apexoracle-mdlm",
+    "source_release_commit": "117325c",
+    "source_symlink_fix_commit": "2eee36e",
+    "intermediate_failed_revision": "b16024bfcd03cf72f598412accc21b708096535d",
+    "intermediate_failure": "Hub cache symlink resolution followed DLM_emb_model.py into the blob directory",
+    "final_revision": "77694f08c1d0664fdb24c5a7bab130c8a3bc2eda",
+    "license_metadata": "mit",
+    "remote_file_count": 18,
+    "manifest_hash_mismatch_count": 0,
+    "fresh_cache_download": true,
+    "fresh_cache_wrapper_is_symlink": true,
+    "strict_safetensors_load": true,
+    "integer_mask_padded_model_starstar_batch": true,
+    "gpu_output_shape": [
+      2,
+      10,
+      768
+    ],
+    "gpu_output_all_finite": true
+  },
   "release_gate": {
     "reuse_existing_safetensors": true,
     "clean_wrapper_required": true,
@@ -94,6 +116,8 @@
     "remote_allowlist_audit_required": true,
     "weight_rights_and_model_card_license_author_confirmation_required": false,
     "weight_rights_and_model_card_license_author_confirmed": true,
-    "remote_modified_in_this_audit": false
+    "remote_modified_in_this_audit": true,
+    "fresh_download_smoke_passed": true,
+    "remote_allowlist_audit_passed": true
   }
 }

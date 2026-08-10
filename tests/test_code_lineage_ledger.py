@@ -160,7 +160,7 @@ class CodeLineageLedgerTests(unittest.TestCase):
             )
         )
         self.assertEqual(
-            audit["status"], "local_release_candidate_validated_remote_pending"
+            audit["status"], "released_and_fresh_download_validated"
         )
         self.assertEqual(
             audit["public_model"]["revision"],
@@ -184,7 +184,16 @@ class CodeLineageLedgerTests(unittest.TestCase):
         self.assertTrue(candidate["strict_safetensors_load"])
         self.assertTrue(candidate["integer_mask_padded_batch"])
         self.assertTrue(candidate["single_input_legacy_boolean_mask_torch_equal"])
-        self.assertFalse(audit["release_gate"]["remote_modified_in_this_audit"])
+        release = audit["clean_release"]
+        self.assertEqual(
+            release["final_revision"],
+            "77694f08c1d0664fdb24c5a7bab130c8a3bc2eda",
+        )
+        self.assertEqual(release["license_metadata"], "mit")
+        self.assertTrue(release["fresh_cache_wrapper_is_symlink"])
+        self.assertTrue(release["integer_mask_padded_model_starstar_batch"])
+        self.assertTrue(audit["release_gate"]["remote_modified_in_this_audit"])
+        self.assertTrue(audit["release_gate"]["fresh_download_smoke_passed"])
 
     def test_legacy_analysis_scripts_are_replaced_and_recoverable(self):
         small_molecule = json.loads(
