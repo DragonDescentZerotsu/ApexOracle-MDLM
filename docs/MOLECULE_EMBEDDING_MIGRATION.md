@@ -57,5 +57,5 @@ table 是 integer + integer，二者不可自动猜测或静默互换。
   `custom/master` 历史中已经存在，不是本次重构新引入；从当前 source 删除不能撤销历史暴露。作者应在
   最终发布前确认对应 token 已 revoked/rotated。是否重写 ApexOracle-MDLM 旧 Git history 应作为独立、
   明确授权的发布操作处理，本次没有 force-push 或改写历史。
-- `huggingface/` wrapper、public model revision、tokenizer revision、checkpoint license 与权重下载 manifest
-  仍属于 M2 后续 gate。
+- `huggingface/` 现状审计已完成，但 clean wrapper/exporter、license/rights 确认和 public Hub 更新仍属于
+  M2 后续 gate；详见 `docs/HUGGINGFACE_RELEASE_AUDIT.md`。

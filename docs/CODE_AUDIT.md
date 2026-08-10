@@ -40,7 +40,7 @@
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
-| Hugging Face | `huggingface/`、`huggingface_push.py` | model/tokenizer wrapper 与发布副本 | 核验现有 HF revision、权重 SHA 和 license 后决定 canonical exporter |
+| Hugging Face | `huggingface/`、`huggingface_push.py` | 已确认 389 MB 权重有效，但 wrapper 的 integer attention-mask 行为错误，且本地/remote 均混有重复 runtime/debug 资产 | 暂留至 clean wrapper parity；随后以 allowlist exporter 替代并更新 public Hub |
 | Case study/debug | notebooks 和历史 manifests | milk/camel/in-vivo plotting、诊断和一次性分析混杂；active root debug/temp sources 已完成消费者审计并迁移或 snapshot-only 清理 | 新项目特例只记 provenance；可复用行为进入通用 package/CLI |
 
 ## 3. 已确认不能直接合并的差异
@@ -67,7 +67,8 @@
 
 - 哪个历史 trainer 精确产生 reviewer generation 使用的 v1 peptide classifier checkpoint；
 - 每个 clean/noisy/padding guidance checkpoint 的唯一 producer、resolved config 和正式角色；
-- Hugging Face 本地文件、public revision 与正式 DLM checkpoint 的对应关系；
+- public Hugging Face model card 的最终 license/weight rights 需作者确认；当前 source repo 为 Apache-2.0、
+  IBM tokenizer 为 Apache-2.0，但 public ApexOracle model card 没有 license metadata；
 - milk/camel、attention 和 synergy guidance 哪些需要进入最终 public examples；
 - 除已迁移的 `judge_generated_mols_MIC.py` family 外，其他 legacy root files 是否仍有未登记的
   外部调用者；已验证 Generation 不 import MDLM package，而 Core reviewer runner 会动态 import

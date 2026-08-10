@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "status": "audited_not_release_ready",
+  "public_model": {
+    "repo_id": "Kiria-Nozan/ApexOracle",
+    "api_url": "https://huggingface.co/api/models/Kiria-Nozan/ApexOracle",
+    "revision": "bb93daedb867488b1a009ce9522e037a530a2ab3",
+    "last_modified": "2025-11-23T20:39:59.000Z",
+    "file_count": 72,
+    "used_storage_bytes": 389129119,
+    "parameter_count": 97237624,
+    "tensor_dtype": "F32",
+    "license_metadata": null,
+    "non_release_assets": {
+      "idea_files": 8,
+      "pycache_files": 7,
+      "training_config_files": 33,
+      "temp_data_files": 1,
+      "debug_scripts": [
+        "compare_source_vs_hf.py",
+        "reproduce_issue.py",
+        "temp_fangping.py",
+        "verify_selfies.py"
+      ]
+    }
+  },
+  "weights": {
+    "local_path": "huggingface/huggingface_model/model.safetensors",
+    "bytes": 388964184,
+    "sha256_and_remote_x_linked_etag": "b472f7508aaf0fdab4c935caf221415b48a5f8afd4d104a731c9d72d410c2c44",
+    "source_checkpoint": "Checkpoints_fangping/1-255000-fine-tune.ckpt",
+    "source_checkpoint_sha256": "77210ddd6cfba7f3f1b74f834715f1ddd3bd30a0caa42c4266565149e1115810",
+    "safetensors_keys": 131,
+    "source_backbone_non_regression_keys": 131,
+    "key_sets_equal": true,
+    "all_tensors_torch_equal": true,
+    "maximum_absolute_difference": 0.0
+  },
+  "tokenizer": {
+    "upstream_repo_id": "ibm-research/materials.selfies-ted",
+    "audited_upstream_revision": "55e83392264cb998f7aa5014847df29868aefeb8",
+    "upstream_license_metadata": "apache-2.0",
+    "tokenizer_json_matches_upstream_revision": true,
+    "tokenizer_json_sha256": "29b3568f4721f2c8635f8c8468e3c5bacddc58e5970f7a7a323d549c296e23c8",
+    "tokenizer_config_sha256": "889efe4908ff2a3fbff71daab928085e4bc29ba75cf86e720bdfb6e7222227fe",
+    "special_tokens_map_sha256": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a"
+  },
+  "runtime_duplication": {
+    "byte_identical_root_copies": [
+      "models/__init__.py",
+      "models/autoregressive.py",
+      "models/dimamba.py",
+      "models/dit.py",
+      "models/ema.py",
+      "noise_schedule.py"
+    ],
+    "duplicate_huggingface_config_files": 2,
+    "mixed_legacy_exporter_lines": 924
+  },
+  "wrapper_behavior": {
+    "standard_attention_mask_dtype": "integer",
+    "integer_single_mask_returns_incorrect_hidden_states": true,
+    "integer_single_mask_max_abs_vs_correct_output": 2339.52294921875,
+    "integer_padded_mask_fails_assertion": true,
+    "bool_single_mask_torch_equal_to_canonical": true,
+    "bool_single_mask_max_abs_vs_canonical": 0.0,
+    "model_kwargs_reject_token_type_ids": true
+  },
+  "release_gate": {
+    "reuse_existing_safetensors": true,
+    "clean_wrapper_required": true,
+    "gpu_single_and_padded_parity_required": true,
+    "fresh_download_smoke_required": true,
+    "remote_allowlist_audit_required": true,
+    "weight_rights_and_model_card_license_author_confirmation_required": true,
+    "remote_modified_in_this_audit": false
+  }
+}

@@ -153,6 +153,28 @@ class CodeLineageLedgerTests(unittest.TestCase):
         self.assertTrue(drift["frozen_cache_matches_actual_cache_producer_checkpoint"])
         self.assertTrue(migration["credential_audit"]["active_source_removed"])
 
+    def test_huggingface_release_audit_freezes_current_blockers(self):
+        audit = json.loads(
+            (ROOT / "reproducibility" / "huggingface_release_audit.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(audit["status"], "audited_not_release_ready")
+        self.assertEqual(
+            audit["public_model"]["revision"],
+            "bb93daedb867488b1a009ce9522e037a530a2ab3",
+        )
+        self.assertIsNone(audit["public_model"]["license_metadata"])
+        self.assertTrue(audit["weights"]["key_sets_equal"])
+        self.assertTrue(audit["weights"]["all_tensors_torch_equal"])
+        self.assertEqual(audit["weights"]["maximum_absolute_difference"], 0.0)
+        behavior = audit["wrapper_behavior"]
+        self.assertTrue(behavior["integer_single_mask_returns_incorrect_hidden_states"])
+        self.assertTrue(behavior["integer_padded_mask_fails_assertion"])
+        self.assertTrue(behavior["bool_single_mask_torch_equal_to_canonical"])
+        self.assertTrue(audit["release_gate"]["clean_wrapper_required"])
+        self.assertFalse(audit["release_gate"]["remote_modified_in_this_audit"])
+
     def test_legacy_analysis_scripts_are_replaced_and_recoverable(self):
         small_molecule = json.loads(
             (
