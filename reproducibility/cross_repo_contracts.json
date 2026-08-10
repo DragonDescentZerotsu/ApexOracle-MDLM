@@ -116,12 +116,14 @@
       ]
     },
     {
-      "id": "mdlm_generation_output_consumer",
+      "id": "mdlm_candidate_mic_compatibility_bridge",
       "repository": "mdlm",
       "path": "judge_generated_mols_MIC.py",
       "required_substrings": [
-        "from apexoracle_mdlm.scoring import find_generated_molecule_file",
-        "require_unique=False"
+        "from apexoracle_mdlm.scoring import",
+        "load_candidate_mic_regressor",
+        "class MIC_regressor",
+        "current_directory"
       ]
     }
   ],

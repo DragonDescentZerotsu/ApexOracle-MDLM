@@ -43,8 +43,14 @@ v1 `ClsHead` 也完成同样检查。这证明参数名和 shape 可严格装载
 
 Canonical generation MIC 文件必须包含 strain、target MIC、target length 和 guidance method 四个字段。
 本地仍有缺 length、缺 guidance、`step_256`、synergy 等早期文件；这些是 legacy variants，不得被当前
-MIC parser 误认。`apexoracle_mdlm.scoring` 已冻结 canonical parser，legacy
-`judge_generated_mols_MIC.py` 只迁移这一段逻辑，保持原先 first-match 返回行为。
+MIC parser 误认。`apexoracle_mdlm.scoring` 已冻结 canonical parser、condition loader、clean DLM adapter
+和 candidate MIC scorer。
+
+Core 的 `scripts/reproduce/evaluate_remasking_schedule_reviewer.py` 会通过文件路径动态 import
+`judge_generated_mols_MIC.py`，设置 `current_directory` 与 `tokenizer` 后构造
+`MIC_regressor(config, checkpoint, device)`。因此旧 642 行实现虽已删除，同名 root 文件暂时保留为仅委托
+canonical scorer 的兼容桥。这个 bridge 是真实 caller contract，不是第二份 legacy implementation；Core
+改用 `apexoracle_mdlm.scoring` 并通过 caller test 后应删除。
 
 Genome embedding 在 load 时乘 `1e14`；ATCC/text embedding 使用各自 filename-to-key 规则。移动目录不会
 改变数值，但改变文件名、scale 或 normalized strain key 都会改变 condition lookup，因此必须作为独立
@@ -61,8 +67,8 @@ breaking change 处理。
 当前禁止：
 
 - 移动或改名 `Checkpoints_fangping`、v1 classifier checkpoint、Core embedding 目录；
-- 虽然 formal head-level GPU parity 已通过，但在 DLM/full sampler parity 前让 Generation 直接改 import
-  新 package；
+- 虽然 formal head-level 与 clean candidate scorer GPU parity 已通过，但在 DLM/full sampler parity 前让
+  Generation 直接改 import 新 package；
 - 将 noisy generation MIC checkpoint 与 clean candidate-scoring checkpoint 合并为一个 profile；
 - 把 Generation 的 dirty checkout 当作 MDLM 重构的一部分修改或提交。
 
@@ -105,7 +111,7 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
 output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
 
 当前 formal bfloat16 GPU head parity 已通过：genome/text attention 与 regression output 均
-`torch.equal`，最大差异 `0.0`。仍待完成 DLM encoder/full sampler、candidate scorer end-to-end parity、
-Generation clean branch/自有 remote、顶层 asset resolver 与 fresh-clone smoke。因此当前可以声明
-“source/schema contract、canonical head strict load 与 head-level GPU parity 已通过”，不能声明三仓库已
-完成端到端 release 验收。
+`torch.equal`，最大差异 `0.0`。clean candidate scorer 也已用正式 checkpoint、真实 BAA-3170 inputs 完成
+逐条和 batch=2 端到端 parity，logits/MIC 均 `torch.equal`，最大差异 `0.0`。仍待完成 full sampler、Core
+compatibility-bridge caller 迁移、Generation clean branch/自有 remote、顶层 asset resolver 与 fresh-clone
+smoke。因此可以分别声明 head 与 candidate-scoring parity，不能声明三仓库整体 release 已端到端验收。

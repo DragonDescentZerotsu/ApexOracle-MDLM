@@ -55,3 +55,13 @@ git restore --source legacy-code-snapshot-2026-08-09 -- path/to/file.py
 
 不得移动、覆盖或重新指向该 tag。重构后的每个删除/迁移批次应在 `docs/CODE_AUDIT.md` 中记录旧路径、
 新入口、验证命令和恢复位置。
+
+2026-08-09 首批 migration 已移除 active tree 中 `judge_generated_mols_MIC.py` 原有的 642 行 mixed
+implementation，仅保留一个 Core caller compatibility bridge。历史完整文件仍可只读查看：
+
+```bash
+git show legacy-code-snapshot-2026-08-09:judge_generated_mols_MIC.py
+```
+
+正式旧/新 scorer 与 Fig. 3a parity 记录见
+`reproducibility/candidate_mic_migration_parity.json`；本次迁移没有改写或移动 tag 下的任何内容。

@@ -1,185 +1,82 @@
-# MDLM 项目
+# ApexOracle-MDLM
 
-> **ApexOracle downstream MDLM 重构中。** 重构前 source-only 版本由 annotated tag
-> `legacy-code-snapshot-2026-08-09` 保护；当前不删除本地数据、checkpoint 或未完成 parity 的 legacy
-> 源码。阶段计划见 [`REFACTOR_PLAN.md`](REFACTOR_PLAN.md)，三仓库连接边界见
-> [`docs/CROSS_REPO_CONTRACTS.md`](docs/CROSS_REPO_CONTRACTS.md)。
+本仓库是 ApexOracle 的 downstream MDLM 模块，负责 DLM 推理、molecule encoding、guidance heads 和
+candidate scoring。它不是合作者维护的 DLM+MTR 预训练仓库，也不会复制 ApexOracle-Core 或
+ApexOracle-Generation 的源码。
 
-本仓库包含用于分子生成和 MIC（最低抑菌浓度）预测的工具，基于 MDLM（掩码扩散语言模型）。
+公开 API 位于 `src/apexoracle_mdlm/`。重构前的历史实验代码可从 annotated tag
+`legacy-code-snapshot-2026-08-09` 完整恢复；active branch 只逐步保留经过测试的 library、参数化 CLI 和
+可复现血缘记录。
 
-## MIC 预测工具
+## 安装
 
-### 1. `temp_judge_generated_mols_MIC.py`
-
-**功能**：对生成的分子进行批量 MIC 预测，并提供统计可视化。
-
-该脚本通过预测分子针对特定细菌菌株的 MIC 值来评估其抗菌活性。它通过小提琴图提供统计分析，并将结果导出为 CSV 格式。
-
-**特性：**
-- 对 SELFIES 格式的分子进行批量 MIC 预测
-- MIC 分布的小提琴图可视化
-- CSV 格式导出预测结果
-- 支持多种细菌菌株
-- 过滤和肽序列转换
-
-**关键配置变量：**
-
-```python
-# 设备配置
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')  # 选择 GPU
-
-# 模型检查点路径
-ckpt_path = '/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/...'
-
-# 要评估的细菌菌株
-strains = ['11775']  # 添加菌株 ID（如 'BAA-999'、'15700'、'15697' 等）
-
-# 包含生成分子的 SELFIES 文件路径
-generate_mol_save_dir = Path('/path/to/selfies/files')
-
-# 小提琴图输出目录
-fig_save_dir = Path('/path/to/save/figures')
-
-# CSV 结果输出目录
-csv_save_dir = Path('/path/to/save/csv')
-
-# CSV 文件名
-csv_save_path = csv_save_dir / 'mic_predictions.csv'
-```
-
-**输入格式：**
-- 输入文件应包含 SELFIES 格式的分子（每行一个）
-- 文件命名应遵循模式：`strain_{strain_id}_..._noise.txt`
-
-**输出：**
-1. **小提琴图**：预测 MIC 值的视觉分布（保存为 PDF）
-2. **CSV 文件**：包含 SELFIES/SMILES 和对应 MIC 值的结构化数据
-
-**使用方法：**
+需要 Python 3.9+ 和 PyTorch：
 
 ```bash
-python temp_judge_generated_mols_MIC.py
+python -m pip install -e '.[scoring,figure]'
 ```
 
-**依赖要求：**
-- 支持 CUDA 的 PyTorch
-- RDKit（用于分子处理）
-- SELFIES 库
-- scikit-learn
-- matplotlib、seaborn、pandas
+正式 candidate scoring 还需要与 upstream MDLM 兼容的运行环境，以及 ApexOracle-Core 提供的三个
+condition-embedding 目录。checkpoint、embedding、generated molecules、cache 和其他大型资产均不进入 Git。
 
----
+## Candidate MIC scoring
 
-### 2. `temp_judge_mol_mic_with_fig.py`
-
-**功能**：生成带有 MIC 预测标注的分子结构图像。
-
-该脚本创建分子的视觉表示，其中每个结构图像都叠加了其预测的 MIC 值和肽序列（如适用）。它过滤高活性分子并生成有组织的输出。
-
-**特性：**
-- 2D 分子结构可视化
-- 图像上直接标注 MIC 值
-- 肽序列识别和显示
-- 自动过滤（MIC < 15 µmol）
-- 标准肽验证
-- 多细菌菌株的批量处理
-
-**关键配置变量：**
-
-```python
-# 设备配置
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
-
-# 模型检查点路径（相同的 MIC 回归模型）
-ckpt_path = '/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/...'
-
-# 要评估的细菌菌株
-strains = ['BAA-999', '15700', '15697', '23272', '4356']
-strain_show_names = ['BAA-999', '15700', '15697', '23272', '4356']
-
-# SELFIES 文件路径
-generate_mol_save_dir = Path('/path/to/selfies/files')
-
-# 图像输出目录
-img_save_dir = Path('/path/to/save/images')
-
-# 过滤后 SELFIES 的输出目录
-selfies_save_dir = Path('/path/to/save/filtered_selfies')
-```
-
-**过滤条件：**
-- 仅处理 MIC < 15 µmol 的分子
-- 必须是有效的标准肽（序列中不含 'X'）
-- 能成功从 SELFIES 转换为 SMILES
-
-**输出：**
-1. **分子图像**：带有结构和 MIC 标注的 PNG 文件
-   - 命名：`mol_{index}_mic_{value}.png`
-   - 尺寸：1500x1500 像素
-   - 包含 MIC 值和肽序列叠加层
-
-2. **过滤后的 SELFIES**：每个菌株一个文本文件，包含符合条件的分子
-   - 位置：`selfies_save_dir/f'strain_{strain_id}.txt'`
-
-**使用方法：**
+`apexoracle_mdlm.scoring` 是 canonical clean scorer。CLI 显式接收全部仓库/资产路径，输出逐行 MIC CSV 和
+可选 provenance manifest：
 
 ```bash
-python temp_judge_mol_mic_with_fig.py
+PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
+  --config-dir configs \
+  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --genome-embeddings /path/to/Genome_embs \
+  --atcc-text-embeddings /path/to/ATCC/embeddings \
+  --text-only-embeddings /path/to/wo_ATCC/embeddings \
+  --generation-file /path/to/generated_selfies.txt \
+  --strain BAA-3170 \
+  --device cuda \
+  --output results/predicted_mic.csv \
+  --manifest results/predicted_mic.manifest.json
 ```
 
-**输出结构：**
-```
-/path/to/save/images/
-└── strain_{strain_id}/
-    ├── mol_0_mic_1.23.png
-    ├── mol_1_mic_2.45.png
-    └── ...
+新实现保持历史 checkpoint fields、clean `t=0` hidden-state path、genome/text conditioning、bfloat16
+attention/head execution 和 MIC inverse transform。正式 legacy/new 等价结果记录在
+`reproducibility/candidate_mic_migration_parity.json`。
 
-/path/to/save/filtered_selfies/
-├── strain_BAA-999.txt
-├── strain_15700.txt
-└── ...
-```
+## 复现论文 Fig. 3a source panel
 
-**依赖要求：**
-- 支持 CUDA 的 PyTorch
-- RDKit（用于结构绘制）
-- PIL/Pillow（用于图像处理）
-- SELFIES 库
-- matplotlib
-
----
-
-## 工作流程
-
-典型使用流程：
-
-1. 使用 MDLM **生成分子**（输出为 SELFIES 格式）
-2. 使用 `temp_judge_generated_mols_MIC.py` **预测 MIC 值**
-   - 获取统计概览
-   - 导出包含所有预测的 CSV 文件
-3. 使用 `temp_judge_mol_mic_with_fig.py` **可视化高活性分子**
-   - 获取带标注的结构图像
-   - 筛选有前景的候选分子
-
-## 依赖库
+377 个 exact plotted rows 已进入版本控制，因此发布图不依赖大型 scoring cache：
 
 ```bash
-pip install torch torchvision
-pip install rdkit-pypi
-pip install selfies
-pip install transformers
-pip install scikit-learn
-pip install matplotlib seaborn pandas
-pip install pillow
-pip install biopython
-pip install hydra-core
-pip install tqdm
+MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
+  --output results/paper_fig3a.pdf \
+  --summary results/paper_fig3a.summary.json
 ```
 
-## 注意事项
+Generation input → Core assets → scorer → cache → plotted data → manuscript 的完整血缘见
+`reproducibility/paper_figure_lineage.json` 和 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
 
-- 两个脚本都需要预训练的 MIC 回归模型检查点
-- 必须事先准备好基因组和文本嵌入
-- GPU 内存需求取决于批大小
-- 推荐使用 SELFIES 格式以获得稳健的分子表示
+## 模块边界
+
+- ApexOracle-Core：genome/text embeddings、clean/noisy MIC checkpoints、prediction 和 reviewer capsules；
+- ApexOracle-Generation：guided diffusion/ReMDM sampling 和 generated SELFIES；
+- ApexOracle-DLM-Pretraining：合作者维护的 DLM+MTR 预训练 producer；
+- ApexOracle-MDLM（本仓库）：downstream DLM inference adapters、guidance components 和 candidate scoring。
+
+根目录 `judge_generated_mols_MIC.py` 目前只是一个很薄的兼容桥，用于一个已审计的 ApexOracle-Core 动态
+import。所有新代码必须使用 `apexoracle_mdlm.scoring`；Core caller 迁移并通过跨仓库测试后会删除此桥。
+
+## 验证与恢复
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+PYTHONPATH=src python scripts/audit/build_code_lineage_ledger.py --check
+PYTHONPATH=src python scripts/audit/verify_paper_figure_lineage.py --check-canonical-plot
+```
+
+当前迁移状态和恢复命令见 `REFACTOR_PLAN.md`、`docs/CODE_AUDIT.md`、
+`docs/CROSS_REPO_CONTRACTS.md` 与 `docs/LEGACY_SNAPSHOT.md`。
+
+## License 与 upstream attribution
+
+发布 license 见 `LICENSE`。来自 upstream MDLM 的 runtime 文件继续保留原项目 attribution；
+ApexOracle-specific 新增与修改由 code lineage ledger 明确记录。

@@ -11,5 +11,9 @@ requires-python = ">=3.9"
 license = {file = "LICENSE"}
 dependencies = ["torch"]
 
+[project.optional-dependencies]
+figure = ["matplotlib", "numpy", "scipy"]
+scoring = ["hydra-core", "transformers"]
+
 [tool.setuptools.packages.find]
 where = ["src"]

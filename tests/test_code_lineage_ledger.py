@@ -50,16 +50,20 @@ class CodeLineageLedgerTests(unittest.TestCase):
             if row["origin_class"] == "post_snapshot_canonical":
                 self.assertEqual(row["target_disposition"], "retain_canonical")
 
-    def test_figure_3a_producer_is_release_critical(self):
+    def test_figure_3a_legacy_path_is_only_a_compatibility_bridge(self):
         row = self.by_path["judge_generated_mols_MIC.py"]
         self.assertEqual(
-            row["paper_role"], "main_figure_3a_mic_distribution_source_panel"
+            row["paper_role"],
+            "compatibility_bridge_for_canonical_fig3a_and_core_mic_scorer",
         )
         self.assertEqual(
             row["target_disposition"],
-            "release_critical_migrate_then_remove_original",
+            "remove_bridge_after_core_caller_migration",
         )
-        self.assertEqual(row["evidence_status"], "verified_formal_figure_lineage")
+        self.assertEqual(
+            row["evidence_status"],
+            "verified_canonical_migration_and_formal_parity",
+        )
 
     def test_major_copied_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(

@@ -99,27 +99,27 @@ Fig. 3a 的本机完整小资产核验与 CSV stale check：
 `delete_ready`。但保护等级只决定“删除前先保住什么”，不决定“原始混乱文件永久保留”。P0--P3 的最终
 落点都必须是 canonical clean implementation 或 snapshot-only recovery，而不是继续暴露旧副本。
 
-## 6. Fig. 3a 已冻结的血缘
+## 6. Fig. 3a 已冻结并迁移的血缘
 
 这里的 Fig. 3a 指论文排版后的第三个 main figure 的 panel a。历史文件名仍为 `Fig4.pdf`，LaTeX label
 仍为 `fig:4`，不能据文件名误判为论文 Fig. 4。
 
 ```mermaid
 flowchart LR
-  G["ApexOracle-Generation\n4 generated-output files"] --> J["MDLM\njudge_generated_mols_MIC.py"]
-  C["ApexOracle-Core\nclean MIC checkpoint"] --> J
-  E["ApexOracle-Core\ngenome/text embeddings"] --> J
-  J --> K["4 frozen MIC caches"]
+  G["ApexOracle-Generation\n4 generated-output files"] --> S["apexoracle_mdlm.scoring\ncanonical scorer"]
+  C["ApexOracle-Core\nclean MIC checkpoint"] --> S
+  E["ApexOracle-Core\ngenome/text embeddings"] --> S
+  S --> K["4 historical frozen MIC caches"]
   K --> D["377 exact plotted rows"]
-  D --> P["3170-3197-guidance-MIC.pdf"]
+  D --> P["apexoracle_mdlm.figures\ncanonical source panel"]
   P --> A["assembled Fig4.pdf"]
   A --> T["sn-article.tex\nprinted main Fig. 3a"]
 ```
 
 已由代码、文件 hash、cache metadata 和数值重算验证：
 
-- producer 是 `judge_generated_mols_MIC.py`，正式角色是
-  `main_figure_3a_mic_distribution_source_panel`；
+- 历史 producer 是 tagged `judge_generated_mols_MIC.py`；canonical producer 是
+  `scripts/reproduce/plot_paper_fig3a.py` 与 `apexoracle_mdlm.figures.generated_mic`；
 - BAA-3170 使用 length 368，BAA-3197 使用 length 232；`target_MIC=1` 标为 Guided，历史
   `target_MIC=1000` operational label 标为 Unconditional；
 - 四组 sample size 为 24、188、59、106；plotted medians 为 223、43、98、61 µmol；
@@ -127,6 +127,9 @@ flowchart LR
   `0.0004` 与 `0.0210`；
 - source panel PDF、assembled PDF、四个 Generation inputs、四个 cache 和正式 checkpoint 的 SHA-256
   均已写入 `paper_figure_lineage.json`。
+- 正式 checkpoint 和两条真实 Generation SELFIES 上，canonical scorer 与 tagged legacy 的逐条和
+  batch=2 logits/MIC 均 `torch.equal`，最大差异 `0.0`；canonical figure 的 150 dpi raster 与历史 panel
+  shape 和所有 RGB channels 完全一致。
 
 根据现有证据作出的高置信推断：source panel 的视觉布局、标签和两个 p 值与 assembled panel a 一致，
 因此它就是组图来源。
@@ -134,9 +137,11 @@ flowchart LR
 仍待确认：没有找到最终四 panel 组图所用软件/命令；也没有找到精确 timestamp 到 2026-04-03 运行时刻的
 producer commit/log。因此 ledger 明确记录了证据强度，没有伪造不存在的 revision provenance。
 
-结论：`judge_generated_mols_MIC.py` 当前为 P0，绝不是可直接删除的普通 legacy plot，但也不会永久留在
-最终 public tree。后续先把它拆成 canonical scoring library、parameterized CLI 和 figure capsule，
-并在正式资产上通过 predictions、CSV、statistics 和 panel output parity，然后删除原脚本。
+结论：这个 P0 gate 已满足。原 642 行混合实现已删除，行为拆为 canonical scoring library、parameterized
+CLI、figure capsule 和机器可读 parity record。当前同名 root 文件不是旧实现，只是为 Core 已验证动态
+import 保留的 thin compatibility bridge；ledger disposition 为 `remove_bridge_after_core_caller_migration`。
+Core 改用 package 并通过跨仓库 caller test 后，bridge 也从最终 public tree 删除。旧实现始终可由 snapshot
+tag 精确恢复。
 
 ## 7. 下一轮人工核验队列
 

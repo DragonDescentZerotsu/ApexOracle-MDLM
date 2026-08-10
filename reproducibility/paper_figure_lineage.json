@@ -3,7 +3,7 @@
   "recorded_at": "2026-08-09",
   "figure_id": "ApexOracle_main_Fig3a",
   "role": "Predicted MIC distributions for unconditional and predictor-guided generation",
-  "status": "release_critical_migrate_then_remove_original",
+  "status": "canonicalized_legacy_body_removed_compatibility_bridge_retained",
   "consumer": {
     "owner": "manuscript",
     "relative_path": "sn-article.tex",
@@ -17,8 +17,15 @@
     "snapshot_ref": "legacy-code-snapshot-2026-08-09",
     "snapshot_file_sha256": "980a49c3044be5d956b34e3472236ffbab8423188b7964ff4409dd9eb857a2ab",
     "snapshot_file_bytes": 23990,
-    "current_file_sha256_at_audit": "233085574ecd1adaadb1ca8fe5d6eb7edbecf6612c028e15b516ebaae2c1fb6b",
-    "current_difference": "Only the generated-output filename parser was redirected to apexoracle_mdlm.scoring while preserving first-match behavior; the scoring, statistics and plotting code was unchanged.",
+    "historical_worktree_sha256_before_migration": "233085574ecd1adaadb1ca8fe5d6eb7edbecf6612c028e15b516ebaae2c1fb6b",
+    "canonical_paths": [
+      "src/apexoracle_mdlm/scoring/mic.py",
+      "src/apexoracle_mdlm/figures/generated_mic.py",
+      "scripts/reproduce/score_generated_molecule_mic.py",
+      "scripts/reproduce/plot_paper_fig3a.py"
+    ],
+    "compatibility_bridge": "judge_generated_mols_MIC.py",
+    "current_difference": "The historical 642-line mixed scoring/statistics/plotting body was removed. Canonical package modules and parameterized CLIs now own those behaviors. The root filename remains only as a thin MIC_regressor compatibility bridge for an audited ApexOracle-Core dynamic import.",
     "historical_invocation": "Direct script execution; device and all formal paths are hard-coded in the legacy entrypoint.",
     "source_revision_confidence": "high_but_not_timestamp_proven",
     "source_revision_note": "The snapshot script reproduces the exact labels, groups and displayed p-values and names the source-panel output. No commit or execution log timestamped exactly to the 2026-04-03 PDF creation was found."
@@ -175,7 +182,9 @@
   "verified_facts": [
     "The legacy MDLM script writes the source-panel PDF and uses the four named Generation output files, the clean candidate MIC checkpoint and Core genome/text embeddings.",
     "The four ignored caches identify the same source filenames and checkpoint and reproduce the plotted sample counts, medians and displayed two-sided Mann-Whitney p-values.",
-    "The audited manuscript includes Fig4.pdf and describes its panel a as the same unconditional-versus-guided predicted MIC comparison."
+    "The audited manuscript includes Fig4.pdf and describes its panel a as the same unconditional-versus-guided predicted MIC comparison.",
+    "The canonical scorer produced torch.equal logits and inverse-transformed MIC values for two real BAA-3170 Generation outputs, both one-at-a-time and in a two-sample batch, against the tagged legacy implementation.",
+    "The canonical Fig. 3a producer consumes 377 frozen exact plotted rows and reproduces the legacy source-panel raster with the recorded parity metrics."
   ],
   "inferences": [
     "Visual layout, labels and p-values establish that the MDLM source PDF is the panel-a source used in the assembled figure with high confidence."
@@ -184,5 +193,5 @@
     "The external application or exact command used to assemble the four-panel Fig4.pdf was not found in tracked source.",
     "A timestamped commit or execution log proving the exact judge_generated_mols_MIC.py revision used on 2026-04-03 was not found."
   ],
-  "deletion_gate": "Do not remove judge_generated_mols_MIC.py, its unique scoring behavior, or the four cache records until a canonical scoring/plotting capsule exports exact plotted data and passes checkpoint/input/output parity, and the manuscript provenance points to that canonical capsule."
+  "deletion_gate": "The historical implementation body has satisfied its migration gate and was removed. Keep only the thin judge_generated_mols_MIC.py bridge until ApexOracle-Core stops dynamically importing that filename and a cross-repository caller test passes; all historical code remains recoverable from legacy-code-snapshot-2026-08-09."
 }

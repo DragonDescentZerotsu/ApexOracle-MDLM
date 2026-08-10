@@ -1,194 +1,88 @@
-# MDLM Project
+# ApexOracle-MDLM
 
-> **ApexOracle downstream MDLM 重构中。** 本 checkout 正在从历史 upstream-MDLM + ApexOracle
-> 单文件实验集合，整理为可作为 super-repo submodule 使用的 downstream MDLM 模块。重构前源码已由
-> annotated tag `legacy-code-snapshot-2026-08-09` 保护；当前不会删除数据、checkpoint 或尚未验证的
-> legacy source。
+Downstream DLM runtime, molecule encoding, guidance heads, and candidate scoring for ApexOracle.
+This repository is one module of the ApexOracle super-repository; it is not the collaborator-owned
+DLM+MTR pretraining codebase and it does not vendor ApexOracle-Core or ApexOracle-Generation.
 
-- 重构阶段与验收：[`REFACTOR_PLAN.md`](REFACTOR_PLAN.md)
-- 代码功能与处置审计：[`docs/CODE_AUDIT.md`](docs/CODE_AUDIT.md)
-- Core/MDLM/Generation 跨仓库契约：[`docs/CROSS_REPO_CONTRACTS.md`](docs/CROSS_REPO_CONTRACTS.md)
-- Legacy 恢复方法：[`docs/LEGACY_SNAPSHOT.md`](docs/LEGACY_SNAPSHOT.md)
+The active public API lives under `src/apexoracle_mdlm/`. Historical experiments remain recoverable
+from the annotated Git tag `legacy-code-snapshot-2026-08-09` while the active branch is being reduced
+to tested libraries, parameterized command-line entries, and reproducibility records.
 
-在 canonical embedding/scoring CLI 完成前，下面的历史入口不能解释为最终 public quickstart。
+## Install
 
-[中文版](README_zh.md)
-
-This repository contains tools for molecular generation and MIC (Minimum Inhibitory Concentration) prediction using MDLM (Masked Diffusion Language Model).
-
-## MIC Prediction Tools
-
-### 1. `temp_judge_generated_mols_MIC.py`
-
-**Purpose**: Batch MIC prediction for generated molecules with statistical visualization.
-
-This script evaluates the antimicrobial activity of generated molecules by predicting their MIC values against specific bacterial strains. It provides statistical analysis through violin plots and exports results to CSV format.
-
-**Features:**
-- Batch MIC prediction for molecules in SELFIES format
-- Violin plot visualization of MIC distributions
-- CSV export of prediction results
-- Support for multiple bacterial strains
-- Filtering and peptide sequence conversion
-
-**Key Configuration Variables:**
-
-```python
-# Device configuration
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')  # Select GPU
-
-# Model checkpoint path
-ckpt_path = '/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/...'
-
-# Bacterial strains to evaluate
-strains = ['11775']  # Add strain IDs (e.g., 'BAA-999', '15700', '15697', etc.)
-
-# Path to SELFIES files containing generated molecules
-generate_mol_save_dir = Path('/path/to/selfies/files')
-
-# Output directory for violin plots
-fig_save_dir = Path('/path/to/save/figures')
-
-# Output directory for CSV results
-csv_save_dir = Path('/path/to/save/csv')
-
-# CSV file name
-csv_save_path = csv_save_dir / 'mic_predictions.csv'
-```
-
-**Input Format:**
-- Input files should contain molecules in SELFIES format (one per line)
-- Files should be named following pattern: `strain_{strain_id}_..._noise.txt`
-
-**Output:**
-1. **Violin plots**: Visual distribution of predicted MIC values (saved as PDF)
-2. **CSV file**: Structured data with SELFIES/SMILES and corresponding MIC values
-
-**Usage:**
+Python 3.9 or newer and PyTorch are required. Install the package in editable mode from this module:
 
 ```bash
-python temp_judge_generated_mols_MIC.py
+python -m pip install -e '.[scoring,figure]'
 ```
 
-**Requirements:**
-- PyTorch with CUDA support
-- RDKit (for molecule handling)
-- SELFIES library
-- scikit-learn
-- matplotlib, seaborn, pandas
+Formal candidate scoring additionally needs the upstream-compatible MDLM runtime dependencies from
+the supplied environment and three ApexOracle-Core condition-embedding directories. Checkpoints,
+embeddings, generated molecules, caches, and other large assets are intentionally not stored in Git.
 
----
+## Candidate MIC scoring
 
-### 2. `temp_judge_mol_mic_with_fig.py`
-
-**Purpose**: Generate molecular structure images with annotated MIC predictions.
-
-This script creates visual representations of molecules where each structure image is overlaid with its predicted MIC value and peptide sequence (if applicable). It filters high-activity molecules and generates organized output.
-
-**Features:**
-- 2D molecular structure visualization
-- Direct MIC value annotation on images
-- Peptide sequence identification and display
-- Automatic filtering (MIC < 15 µmol)
-- Canonical peptide validation
-- Batch processing for multiple bacterial strains
-
-**Key Configuration Variables:**
-
-```python
-# Device configuration
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
-
-# Model checkpoint path (same MIC regression model)
-ckpt_path = '/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/...'
-
-# Bacterial strains to evaluate
-strains = ['BAA-999', '15700', '15697', '23272', '4356']
-strain_show_names = ['BAA-999', '15700', '15697', '23272', '4356']
-
-# Path to SELFIES files
-generate_mol_save_dir = Path('/path/to/selfies/files')
-
-# Output directory for images
-img_save_dir = Path('/path/to/save/images')
-
-# Output directory for filtered SELFIES
-selfies_save_dir = Path('/path/to/save/filtered_selfies')
-```
-
-**Filtering Criteria:**
-- Only molecules with MIC < 15 µmol are processed
-- Must be valid canonical peptides (no 'X' in sequence)
-- Successfully convertible from SELFIES to SMILES
-
-**Output:**
-1. **Molecular images**: PNG files with structure and MIC annotations
-   - Naming: `mol_{index}_mic_{value}.png`
-   - Size: 1500x1500 pixels
-   - Includes MIC value and peptide sequence overlay
-
-2. **Filtered SELFIES**: Text file per strain with qualified molecules
-   - Location: `selfies_save_dir/f'strain_{strain_id}.txt'`
-
-**Usage:**
+`apexoracle_mdlm.scoring` owns the canonical clean candidate scorer. The CLI takes every repository
+and asset location explicitly and writes a row-level CSV plus an optional provenance manifest:
 
 ```bash
-python temp_judge_mol_mic_with_fig.py
+PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
+  --config-dir configs \
+  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --genome-embeddings /path/to/Genome_embs \
+  --atcc-text-embeddings /path/to/ATCC/embeddings \
+  --text-only-embeddings /path/to/wo_ATCC/embeddings \
+  --generation-file /path/to/generated_selfies.txt \
+  --strain BAA-3170 \
+  --device cuda \
+  --output results/predicted_mic.csv \
+  --manifest results/predicted_mic.manifest.json
 ```
 
-**Output Structure:**
-```
-/path/to/save/images/
-└── strain_{strain_id}/
-    ├── mol_0_mic_1.23.png
-    ├── mol_1_mic_2.45.png
-    └── ...
+The implementation preserves the historical checkpoint fields, clean `t=0` DLM hidden-state path,
+genome/text conditioning, bfloat16 attention/head execution, and inverse MIC transform. Formal
+legacy/new parity evidence is recorded in `reproducibility/candidate_mic_migration_parity.json`.
 
-/path/to/save/filtered_selfies/
-├── strain_BAA-999.txt
-├── strain_15700.txt
-└── ...
-```
+## Reproduce the source panel for paper Fig. 3a
 
-**Requirements:**
-- PyTorch with CUDA support
-- RDKit (for structure drawing)
-- PIL/Pillow (for image processing)
-- SELFIES library
-- matplotlib
-
----
-
-## Workflow
-
-Typical usage workflow:
-
-1. **Generate molecules** using MDLM (output in SELFIES format)
-2. **Predict MIC values** using `temp_judge_generated_mols_MIC.py`
-   - Get statistical overview
-   - Export CSV with all predictions
-3. **Visualize high-activity molecules** using `temp_judge_mol_mic_with_fig.py`
-   - Get annotated structure images
-   - Filter for promising candidates
-
-## Dependencies
+The exact 377 plotted rows are versioned, so the released figure does not require regenerating or
+committing large score caches:
 
 ```bash
-pip install torch torchvision
-pip install rdkit-pypi
-pip install selfies
-pip install transformers
-pip install scikit-learn
-pip install matplotlib seaborn pandas
-pip install pillow
-pip install biopython
-pip install hydra-core
-pip install tqdm
+MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
+  --output results/paper_fig3a.pdf \
+  --summary results/paper_fig3a.summary.json
 ```
 
-## Notes
+The complete Generation input → Core asset → scorer → cache → plotted-data → manuscript lineage is
+in `reproducibility/paper_figure_lineage.json` and `docs/LEGACY_CODE_LINEAGE_LEDGER.md`.
 
-- Both scripts require pre-trained MIC regression model checkpoints
-- Genome and text embeddings must be prepared beforehand
-- GPU memory requirements depend on batch size
-- SELFIES format is preferred for robust molecule representation
+## Module boundaries
+
+- ApexOracle-Core owns genome/text embeddings, clean and noisy MIC checkpoints, prediction, and
+  reviewer reproduction capsules.
+- ApexOracle-Generation owns guided diffusion/ReMDM sampling and generated SELFIES files.
+- ApexOracle-DLM-Pretraining owns the collaborator-produced DLM+MTR training pipeline.
+- ApexOracle-MDLM (this repository) owns downstream DLM inference adapters, guidance components, and
+  candidate scoring.
+
+The root `judge_generated_mols_MIC.py` is currently only a thin compatibility bridge for one audited
+ApexOracle-Core dynamic import. New code must use `apexoracle_mdlm.scoring`; the bridge will disappear
+after the Core caller migrates and its cross-repository test passes.
+
+## Verification and recovery
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+PYTHONPATH=src python scripts/audit/build_code_lineage_ledger.py --check
+PYTHONPATH=src python scripts/audit/verify_paper_figure_lineage.py --check-canonical-plot
+```
+
+See `REFACTOR_PLAN.md`, `docs/CODE_AUDIT.md`, `docs/CROSS_REPO_CONTRACTS.md`, and
+`docs/LEGACY_SNAPSHOT.md` for current migration status and exact recovery commands.
+
+## License and upstream attribution
+
+The downstream release retains the repository license in `LICENSE`. Upstream MDLM-derived runtime
+files remain attributed to their original project; ApexOracle-specific additions and modifications
+are tracked explicitly in the code lineage ledger.

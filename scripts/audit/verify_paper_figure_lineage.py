@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,11 @@ def parse_args() -> argparse.Namespace:
         "--include-large-assets",
         action="store_true",
         help="Also SHA-256 the 9.17 GB formal checkpoint.",
+    )
+    parser.add_argument(
+        "--check-canonical-plot",
+        action="store_true",
+        help="Render the canonical producer and compare it with the legacy source-panel raster.",
     )
     return parser.parse_args()
 
@@ -93,9 +99,18 @@ def main() -> None:
     assert (
         hashlib.sha256(snapshot_payload).hexdigest() == producer["snapshot_file_sha256"]
     )
-    current_producer = roots["mdlm"] / producer["relative_path"]
-    assert sha256(current_producer) == producer["current_file_sha256_at_audit"]
-    results.append({"check": "producer_snapshot_and_current_hash", "status": "passed"})
+    for relative_path in producer["canonical_paths"]:
+        if not (roots["mdlm"] / relative_path).is_file():
+            raise FileNotFoundError(roots["mdlm"] / relative_path)
+    compatibility_bridge = roots["mdlm"] / producer["compatibility_bridge"]
+    if not compatibility_bridge.is_file():
+        raise FileNotFoundError(compatibility_bridge)
+    results.append(
+        {
+            "check": "legacy_snapshot_and_canonical_producer_paths",
+            "status": "passed",
+        }
+    )
 
     cache_assets: dict[tuple[str, str], tuple[dict[str, Any], Path]] = {}
     for asset in manifest["assets"]:
@@ -223,6 +238,76 @@ def main() -> None:
     else:
         raise FileNotFoundError(
             f"Missing {args.plotted_data}; run once with --write-plotted-data"
+        )
+
+    if args.check_canonical_plot:
+        from PIL import Image
+        import numpy as np
+
+        from apexoracle_mdlm.figures import (
+            load_generated_mic_records,
+            plot_generated_mic_distributions,
+        )
+
+        source_panel = next(
+            resolve_asset(asset, roots)
+            for asset in manifest["assets"]
+            if asset["id"] == "fig3a_source_panel_pdf"
+        )
+        with tempfile.TemporaryDirectory(prefix="apexoracle_fig3a_parity_") as temp_dir:
+            temp_root = Path(temp_dir)
+            canonical_pdf = temp_root / "canonical.pdf"
+            records = load_generated_mic_records(args.plotted_data)
+            figure, _, _ = plot_generated_mic_distributions(records)
+            figure.savefig(canonical_pdf, bbox_inches="tight")
+            for source, stem in (
+                (source_panel, "legacy"),
+                (canonical_pdf, "canonical"),
+            ):
+                subprocess.run(
+                    [
+                        "pdftoppm",
+                        "-png",
+                        "-singlefile",
+                        "-r",
+                        "150",
+                        str(source),
+                        str(temp_root / stem),
+                    ],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            legacy_raster = np.asarray(
+                Image.open(temp_root / "legacy.png").convert("RGB"), dtype=np.int16
+            )
+            canonical_raster = np.asarray(
+                Image.open(temp_root / "canonical.png").convert("RGB"), dtype=np.int16
+            )
+            if legacy_raster.shape != canonical_raster.shape:
+                raise AssertionError(
+                    "Canonical Fig. 3a raster shape differs from the legacy panel: "
+                    f"{canonical_raster.shape} vs {legacy_raster.shape}."
+                )
+            difference = np.abs(legacy_raster - canonical_raster)
+            pixel_mae = float(difference.mean())
+            exact_fraction = float(np.mean(difference == 0))
+            max_difference = int(difference.max())
+            if pixel_mae > 1e-3 or exact_fraction < 0.99999:
+                raise AssertionError(
+                    "Canonical Fig. 3a raster parity failed: "
+                    f"MAE={pixel_mae}, exact_fraction={exact_fraction}."
+                )
+        results.append(
+            {
+                "check": "canonical_source_panel_raster_parity",
+                "status": "passed",
+                "dpi": 150,
+                "shape": list(legacy_raster.shape),
+                "pixel_mae": pixel_mae,
+                "max_channel_difference": max_difference,
+                "exact_channel_fraction": exact_fraction,
+            }
         )
 
     print(json.dumps({"figure_id": manifest["figure_id"], "checks": results}, indent=2))

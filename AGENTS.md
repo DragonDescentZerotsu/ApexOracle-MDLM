@@ -43,7 +43,7 @@
 
 ## 当前 canonical callable contracts
 
-- `apexoracle_mdlm.checkpoints`：`load_torch_file(path, map_location, weights_only)`、
+- `apexoracle_mdlm.checkpoints`：`load_torch_file(path, map_location, weights_only, mmap)`、
   `extract_state_dict(payload, key)` 与 `strip_state_dict_prefix(state_dict, prefix)`；输出为原 payload、
   validated state mapping 或不修改输入的 `OrderedDict`。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_checkpoint_io -v`。
@@ -57,16 +57,27 @@
   `load_atcc_embeddings`/`load_text_embeddings`；主要参数为 directory、scale、device 和
   `strict_unique`，输出 `dict[str, torch.Tensor]`。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_embedding_io -v`。
-- 这些 M1 contracts 尚未切换任何 legacy GPU caller；当前只建立可测试 replacement。正式 DLM
-  embedding、guidance 和 scoring 入口将在 M2/M3 登记。
+- 这些 M1 contracts 已被 canonical candidate scorer 使用；其他 legacy GPU caller 仍未整体切换。
 - `apexoracle_mdlm.models.RegressionHead` 与 `FirstTokenCrossAttention`：保持历史 parameter names 和
   state-dict schema；后者用 `return_attention` 显式选择 tensor-only 或 `(tensor, weights)` contract，
   并用 `legacy_squeeze` 冻结 batch-size-one 历史 shape。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_model_heads -v`。本批仍未切换 legacy callers。
-- `apexoracle_mdlm.scoring`：`parse_generated_molecule_filename`、
+- `apexoracle_mdlm.models.DLMHiddenStateEncoder`：clean `t=0` DLM hidden-state adapter；主要参数为 upstream
+  config 与 vocab size，输入 token IDs，输出逐 token hidden states。`build_upstream_dlm_hidden_state_encoder`
+  保持历史 RNG consumption、bfloat16 blocks 与 state keys。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_dlm_encoder -v`。
+- `apexoracle_mdlm.scoring`：`CandidateMICRegressor`、`load_candidate_mic_regressor`、
+  `load_condition_embedding_banks` 与 `score_selfies_strings`；输入为显式 checkpoint/embedding/tokenizer/
+  strain/device，输出 MIC tensor。公开 CLI 为 `scripts/reproduce/score_generated_molecule_mic.py`，输出逐行
+  CSV 与可选 JSON manifest。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_candidate_mic_scoring -v`。正式 parity 为两条真实 BAA-3170
+  inputs 的逐条和 batch=2 logits/MIC `torch.equal`、最大差异 `0.0`，记录在
+  `reproducibility/candidate_mic_migration_parity.json`。
+- `apexoracle_mdlm.scoring` 另提供 `parse_generated_molecule_filename`、
   `format_generated_molecule_filename` 与 `find_generated_molecule_file`；canonical 输入 schema 为
   `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt`，输出 parsed dataclass、filename
-  或匹配文件名。`judge_generated_mols_MIC.py` 已仅迁移此 parser，并显式保留 first-match legacy 行为。
+  或匹配文件名。旧 `judge_generated_mols_MIC.py` 主体已删除；同名文件仅为 Core 动态 import 保留 thin
+  compatibility bridge，所有新 caller 必须使用 package。
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_generated_files -v`。
 - 跨仓库只读审计入口：`PYTHONPATH=src python scripts/audit/cross_repo_contracts.py
   --synergy-root <core> --generation-root <generation>`；主要参数为三个 repo roots 和可选 manifest，输出
@@ -84,4 +95,6 @@
   python scripts/audit/verify_paper_figure_lineage.py`；默认只读验证 small assets、condition directory counts、
   cache statistics、p-values、manuscript consumer 和 frozen 377-row plotted-data CSV。只有显式
   `--include-large-assets` 才重新 hash 9.17 GB checkpoint，只有有意更新 capsule 时才用
-  `--write-plotted-data`。manifest 为 `reproducibility/paper_figure_lineage.json`。
+  `--write-plotted-data`；`--check-canonical-plot` 临时渲染并执行 raster parity。canonical 公开入口为
+  `scripts/reproduce/plot_paper_fig3a.py --output <pdf>`，输入 377-row frozen CSV，输出 figure 和可选 summary
+  JSON。manifest 为 `reproducibility/paper_figure_lineage.json`。

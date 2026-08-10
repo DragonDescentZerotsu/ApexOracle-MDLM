@@ -2,7 +2,8 @@
 
 > 建立日期：2026-08-09
 > 当前 branch：`refactor/apexoracle-mdlm`
-> 状态：M0/M1/M1.5 已完成；M3 已冻结跨仓库 schema 并迁移一个低风险 parser，GPU caller parity 尚未完成
+> 状态：M0/M1/M1.5 已完成；首个 DLM clean hidden-state adapter、candidate MIC scorer 与 Fig. 3a capsule
+> 已完成正式迁移和 GPU parity；其余 embedding/guidance/scoring families 仍按 ledger 分批处理
 
 ## 1. 目标与不变量
 
@@ -114,9 +115,11 @@ Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable reco
 
 ### M2：DLM inference 与 molecule embedding
 
-状态：待执行。
+状态：**已迁移 clean candidate-scoring 所需的 DLM hidden-state adapter；通用 embedding producer 待执行。**
 
-- 提取唯一的 DLM checkpoint loader，冻结 clean/noisy、padding、pooling 和 model-size profiles；
+- [x] 提取 clean `t=0`、non-padding candidate-scoring 所需的 DLM hidden-state adapter，保持
+  `backbone`/`noise` state keys、legacy RNG consumption 与 bfloat16 block execution；
+- [ ] 提取其余 clean/noisy、padding、pooling 和 model-size profiles；
 - 合并 `save_*_emb_dict.py` 为参数化 CLI，同时保留 dataset adapter；
 - 对固定 token tensors和正式 checkpoint 做 legacy/new embedding 逐值比较；
 - 审计 Hugging Face wrapper、tokenizer/model revision 和权重发布边界。
@@ -126,8 +129,8 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 
 ### M3：Guidance heads 与 candidate scoring
 
-状态：共享 heads、generation checkpoint/file contracts 已迁移并通过 CPU/schema parity；仅
-`judge_generated_mols_MIC.py` 的 filename parser 已切换，模型 caller 尚未切换。
+状态：共享 heads、generation checkpoint/file contracts、clean candidate MIC scorer 与 Fig. 3a producer
+已迁移。旧 642 行 `judge_generated_mols_MIC.py` 实现已删除；因 Core 有真实动态 import，暂留薄兼容桥。
 
 共享 heads 实现 commit：`136905c`。
 
@@ -141,17 +144,23 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   absolute difference 为 `0.0`；
 - [x] 冻结 Generation output filename schema，并将 `judge_generated_mols_MIC.py` 的 split parser 切换为
   canonical parser，保持 first-match legacy contract；
-- [ ] 完成 DLM encoder/full Generation runtime 与 candidate scorer end-to-end parity，并逐个切换
-  trainer/scoring 模型 caller；
+- [x] 用正式 9.17 GB clean checkpoint 和两条真实 BAA-3170 Generation outputs 比较 tagged legacy 与
+  canonical scorer：逐条与 batch=2 的 logits/MIC 均 `torch.equal`，最大差异 `0.0`；
+- [x] 将 Fig. 3a 拆为 frozen 377-row plotted data、无副作用 figure library 与参数化 CLI；canonical/legacy
+  150 dpi raster 逐 channel 完全一致；
+- [x] 移除 `judge_generated_mols_MIC.py` 的模型复制、绝对路径、scoring/statistics/plotting 混合主体；
+  仅保留委托到 canonical scorer 的 Core compatibility bridge；
+- [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
 - 对保存的正式 checkpoint 和小 batch 做 logit/prediction parity。
 
 验收：state-dict keys 严格一致；固定 batch predictions 达到约定的逐值或数值容差一致。
 
-跨仓库 source contract 记录于 `docs/CROSS_REPO_CONTRACTS.md`；机器可读资产/源码检查为
+迁移证据见 `reproducibility/candidate_mic_migration_parity.json`。跨仓库 source contract 记录于
+`docs/CROSS_REPO_CONTRACTS.md`；机器可读资产/源码检查为
 `reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前七项
-source/AST 检查通过，但这不替代最终 GPU replay。
+source/AST 检查通过；candidate scorer 已完成正式 GPU replay，但 full sampler 仍未完成。
 
 Cross-repository contract 实现 commit：`4521c53`。
 

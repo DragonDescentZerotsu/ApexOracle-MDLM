@@ -442,15 +442,20 @@ def main() -> None:
             )
         )
         disposition = policy["disposition"]
+        replacement = policy["replacement"]
         gate = policy["gate"]
         evidence = policy["evidence"]
         if relative == "judge_generated_mols_MIC.py":
-            disposition = "release_critical_migrate_then_remove_original"
-            gate = (
-                "Fig. 3a scoring/plot capsule、exact plotted data、input/checkpoint manifest "
-                "和 legacy/new parity 完成且论文 consumer 改指 canonical producer 后才可移除。"
+            paper_role = "compatibility_bridge_for_canonical_fig3a_and_core_mic_scorer"
+            disposition = "remove_bridge_after_core_caller_migration"
+            replacement = (
+                "apexoracle_mdlm.scoring + scripts/reproduce/plot_paper_fig3a.py"
             )
-            evidence = "verified_formal_figure_lineage"
+            gate = (
+                "原 642 行实现已由 canonical scoring/figure capsule 取代；"
+                "ApexOracle-Core 停止动态 import 此文件并通过跨仓库测试后移除薄兼容桥。"
+            )
+            evidence = "verified_canonical_migration_and_formal_parity"
 
         absolute_paths = ABSOLUTE_PATH_PATTERN.findall(text)
         rows.append(
@@ -476,7 +481,7 @@ def main() -> None:
                 "notebook_executed_cells": notebook_executed,
                 "paper_role": paper_role,
                 "target_disposition": disposition,
-                "canonical_replacement": policy["replacement"],
+                "canonical_replacement": replacement,
                 "deletion_gate": gate,
                 "evidence_status": evidence,
             }

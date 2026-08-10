@@ -1,7 +1,8 @@
 # Downstream MDLM 代码与文件系统审计
 
 > 审计日期：2026-08-09
-> 状态：全量逐文件 ledger、复制血缘和 Fig. 3a 正式 producer 血缘已建立；后续迁移证据持续追加
+> 状态：全量逐文件 ledger 和复制血缘已建立；Fig. 3a/candidate MIC 第一批已完成 canonical 迁移，
+> 其余文件后续持续追加证据
 
 ## 1. 已由 Git/文件系统/AST 验证的事实
 
@@ -21,7 +22,7 @@
   `reproducibility/code_asset_ledger.csv`，不再只依赖本文件的 family-level 概述。
 - 已同时生成 local-import/external-reference edges 和 AST-normalized function/class clone groups。复制代码
   没有 import 也会进入 `definition_clone_groups.csv`，因此后续删除不会遗漏隐式实现血缘。
-- 正式 main Fig. 3a 的 producer 已确认位于 `judge_generated_mols_MIC.py`；377 个 exact plotted rows、
+- 正式 main Fig. 3a 的历史 producer 已确认位于 tagged `judge_generated_mols_MIC.py`；377 个 exact plotted rows、
   Generation inputs、Core checkpoint/condition embeddings、四个 cache、source/assembled PDFs 和 manuscript
   consumer 已冻结在 `reproducibility/paper_figure_lineage.json`。它在 canonical capsule/parity 完成前为
   P0 release-critical hold，不得删除。
@@ -67,7 +68,7 @@
 - 每个 clean/noisy/padding guidance checkpoint 的唯一 producer、resolved config 和正式角色；
 - Hugging Face 本地文件、public revision 与正式 DLM checkpoint 的对应关系；
 - milk/camel、attention 和 synergy guidance 哪些需要进入最终 public examples；
-- 除已核对的 `judge_generated_mols_MIC.py` output consumer 外，其他 legacy root files 是否仍有未登记的
+- 除已迁移的 `judge_generated_mols_MIC.py` family 外，其他 legacy root files 是否仍有未登记的
   外部调用者；已验证 Generation 不 import MDLM package，而 Core reviewer runner 会动态 import
   Generation runtime。
 
@@ -136,9 +137,30 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   fixed seed、2-sample synthetic batch 和 bfloat16 autocast 时，genome attention、text attention 和
   regression output 均 `torch.equal`，最大 absolute difference `0.0`，输出 shape `(2, 1)`，单卡峰值
   allocated memory 约 7.13 GiB；未启动 sampler 或写产物；
-- caller 迁移：仅将 `judge_generated_mols_MIC.py::find_matching_generated_file` 从脆弱 `_` split 改为
-  canonical parser，保持 legacy first-match/`None` contract；其他 scoring/model callers 未切换；
+- caller 迁移（已由后续 M2/M3c 取代）：本批当时仅切换 filename parser；其他 caller 当时未切换；
 - 验证：13 个新 focused tests passed；跨仓库 output writer、checkpoint loader、embedding config、Core
   dynamic import、MDLM consumer、RegressionHead AST 和 attention modules 共 7 项 source audit passed；
 - 未完成：DLM encoder/full Generation runtime、candidate scorer end-to-end parity 和 Generation clean
-  release；不能将本批描述为端到端等价完成。
+  release；这些边界中的 candidate scorer 已由后续 M2/M3c 完成，full Generation runtime 仍未完成。
+
+### M2/M3c clean candidate MIC scorer 与 Fig. 3a（2026-08-09）
+
+- legacy 来源：`legacy-code-snapshot-2026-08-09:judge_generated_mols_MIC.py`，SHA-256
+  `980a49c3...a2ab`；旧文件将 DLM wrapper、condition loader、MIC model、hard-coded paths、scoring cache、
+  statistics 和 plotting 混在 642 行 root script 中；
+- canonical 新入口：`apexoracle_mdlm.models.DLMHiddenStateEncoder`、
+  `apexoracle_mdlm.scoring.CandidateMICRegressor`、`apexoracle_mdlm.figures.generated_mic`，以及
+  `scripts/reproduce/score_generated_molecule_mic.py` 和 `plot_paper_fig3a.py`；
+- 正式 scorer parity：使用 Core clean checkpoint 与 Generation 两条真实 368-token BAA-3170 SELFIES，
+  tagged legacy/canonical 的逐条与 batch=2 logits、inverse-transformed MIC 均 `torch.equal`，最大差异
+  `0.0`，单卡峰值 allocated 9,170,041,344 bytes；
+- figure parity：canonical producer 直接消费 377-row frozen CSV；150 dpi legacy/canonical raster shape
+  均为 `(729, 737, 3)`，所有 RGB channels 完全一致；
+- 清理结果：旧 642 行主体已从 active tree 删除。Core 的
+  `scripts/reproduce/evaluate_remasking_schedule_reviewer.py` 确实动态 import 此 root filename，所以当前
+  同名文件仅保留约 75 行 thin bridge，内部委托 canonical scorer；Core caller 改用 package 并通过跨仓库
+  test 后删除 bridge；
+- 机器可读证据：`reproducibility/candidate_mic_migration_parity.json` 与更新后的
+  `paper_figure_lineage.json`；恢复点仍为原 annotated tag；
+- 未完成：其他 `judge_*`、`save_*`、clean/noisy guidance profiles 和 full Generation sampler 不由本批
+  自动宣称等价或删除。
