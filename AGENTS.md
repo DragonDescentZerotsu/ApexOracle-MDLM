@@ -32,6 +32,13 @@
   output `torch.equal`、最大差异 `0.0`。原 sources 由 snapshot tag 和
   `docs/MIC_GUIDANCE_MIGRATION.md` 恢复后从 active tree 删除，Core audit 改读 migration manifest；不得再让
   外部 caller 依赖 root trainer path。
+- **2026-08-10 hierarchical MIC handoff：** 11 个 root `DP_inhouse_*` drivers 是历史
+  strain/species/phylum variants，canonical owner 为 Core；逐文件 source/profile、Core replacement hashes、
+  live consumer scan 和 722,786,228,244-byte local output inventory 已冻结在
+  `reproducibility/hierarchical_mic_legacy_lineage.json`。Core runner/equivalence/comparator focused tests 为
+  43 passed；删除后全仓 107 tests 与 13 项跨仓库 contracts 通过。原 sources 由 snapshot tag 与
+  `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md` 恢复后从 active tree 删除；checkpoint/log 不移动、不删除、
+  不进 Git。此职责不得在 MDLM 新建第二份 runner。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 

@@ -54,6 +54,20 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src conda run --no-capture-output -n 
 
 完整边界与恢复命令见 `docs/MIC_GUIDANCE_MIGRATION.md`。
 
+## `verify_hierarchical_mic_legacy_lineage.py`
+
+用途：从 MDLM snapshot tag 读取 11 个 historical strain/species/phylum hierarchical MIC drivers，冻结逐文件
+hash/profile/recovery command；同时核验 Core canonical runner/config/experiment/cleanup manifest、一个跨仓库
+byte-identical snapshot source、三个 repo 的 live filename consumers，并只统计本地 checkpoint/log 数量与体积。
+该入口不会加载或 hash 数百 GB checkpoint，也不会移动、删除历史资产。
+
+```bash
+PYTHONPATH=src python scripts/audit/verify_hierarchical_mic_legacy_lineage.py \
+  --output reproducibility/hierarchical_mic_legacy_lineage.json
+```
+
+冻结结果与 Core focused tests 见 `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md`。
+
 ## `verify_paper_figure_lineage.py`
 
 用途：核验正式 main Fig. 3a 的 tagged historical producer、canonical producer paths、四个 Generation inputs、四个 MIC caches、

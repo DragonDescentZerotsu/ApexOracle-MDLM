@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "snapshot_ref": "legacy-code-snapshot-2026-08-09",
+  "canonical_owner": "ApexOracle-Core",
+  "canonical_replacement": {
+    "runner": {
+      "relative_path": "scripts/reproduce/run_hierarchical_mic.py",
+      "sha256": "b66101adf0e8ad781f99d4a3800b158b326de8470f5b780b9f740cf710468a3c",
+      "bytes": 384
+    },
+    "config": {
+      "relative_path": "configs/hierarchical_mic/legacy_mdlm.yaml",
+      "sha256": "344419cf1d7fbadafbfcd662d8076719213cfd8273f6584a3ae38c8c4cfa02f0",
+      "bytes": 2852
+    },
+    "experiment_readme": {
+      "relative_path": "experiments/hierarchical_mic/README.md",
+      "sha256": "aee34ec65d1d33498117cbc2945d8e4c21a5326c3088fef4e35c6c1689b0f375",
+      "bytes": 15320
+    },
+    "cleanup_manifest": {
+      "relative_path": "experiments/hierarchical_mic/legacy_cleanup.json",
+      "sha256": "a7a0a51ec36ef744a6ceb1c4253aefcc8784217406d619346241b1975d2aff51",
+      "bytes": 2318
+    }
+  },
+  "sources": {
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_11_species_5_ensemble.py": {
+      "sha256": "d1ac11a478f64ba82540aadb54f7553032157e23a1f1789dc0735852233d59ae",
+      "bytes": 90923,
+      "lines": 1651,
+      "profile": {
+        "holdout": "species_11_cluster",
+        "molecule": "online_chemberta_mtr_first_token",
+        "batch_size": 70,
+        "ensembles": 7,
+        "freeze_epochs": 3,
+        "output": "11_species_w_SM/7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_11_species_5_ensemble.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_11_species_5_ensemble_MDLM_MTR.py": {
+      "sha256": "eb6467f8fd3661129cf6ef19b95fa79cd5a75dfdb0e1fd5fe1a666caa8f1d947",
+      "bytes": 98640,
+      "lines": 1773,
+      "profile": {
+        "holdout": "species_11_cluster",
+        "molecule": "online_dlm_dit_first_token",
+        "batch_size": 30,
+        "ensembles": 7,
+        "freeze_epochs": 3,
+        "output": "11_species_w_SM/MDLM_MTR_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_11_species_5_ensemble_MDLM_MTR.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_3_species_5_ensemble.py": {
+      "sha256": "8c529937b94152ba52a6ba01ef079e7e327944e9aea86046f9001fa1886b5356",
+      "bytes": 89191,
+      "lines": 1647,
+      "profile": {
+        "holdout": "phylum_3_cluster",
+        "molecule": "online_chemberta_mtr_first_token",
+        "batch_size": 70,
+        "ensembles": 7,
+        "freeze_epochs": 3,
+        "output": "3_species_w_SM/7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_3_species_5_ensemble.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_3_species_5_ensemble_MDLM_MTR.py": {
+      "sha256": "7664288b92cb4c9da69fb3ced058c8a6f0bbb069e71acf6c61e77215bcb59080",
+      "bytes": 98022,
+      "lines": 1775,
+      "profile": {
+        "holdout": "phylum_3_cluster",
+        "molecule": "online_dlm_dit_first_token",
+        "batch_size": 30,
+        "ensembles": 7,
+        "freeze_epochs": 3,
+        "output": "3_species_w_SM/MDLM_MTR_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_3_species_5_ensemble_MDLM_MTR.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_ChemBERTa.py": {
+      "sha256": "cd0e1b7d5d558a78f6931374eccf18fbd3c6c3e5f633fdce1e82fdf7da3c2a68",
+      "bytes": 109549,
+      "lines": 1920,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "online_dlm_dit_first_token_last_reg_v1_despite_filename",
+        "batch_size": 70,
+        "ensembles": 7,
+        "freeze_epochs": 10,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_ChemBERTa.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR.py": {
+      "sha256": "87210eff42d83d8f84555dbf8fbd3a88926de85aae934847b764bba5fa6ff15a",
+      "bytes": 110650,
+      "lines": 1942,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "online_dlm_dit_first_token_finetuned_checkpoint",
+        "batch_size": 30,
+        "ensembles": 7,
+        "freeze_epochs": 3,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_cls_cuseqlen_dit.py": {
+      "sha256": "9c7343efd294faceaeadb5d66b5e9f6adc660cf8692bab3bdd11d6e83d2c8efd",
+      "bytes": 112072,
+      "lines": 1959,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "online_dlm_non_pad_first_token_eval",
+        "batch_size": 30,
+        "ensembles": 1,
+        "freeze_epochs": 3000,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_cls_1_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_cls_cuseqlen_dit.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_cuseqlen_dit.py": {
+      "sha256": "f645c70225d66cda42369b39dc1c87f5d639eaa6b64b27fd8d6dde80ce37f2d1",
+      "bytes": 112179,
+      "lines": 1959,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "online_dlm_non_pad_masked_mean_train",
+        "batch_size": 30,
+        "ensembles": 7,
+        "freeze_epochs": 3000,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_mean_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_cuseqlen_dit.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_fix.py": {
+      "sha256": "19cd08f1db152108a3b93e6a4200dededbcd86e36b266c72ab11d0ef955ec1b9",
+      "bytes": 113118,
+      "lines": 1981,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "cached_dlm_first_token",
+        "batch_size": 90,
+        "ensembles": 7,
+        "freeze_epochs": 5000,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_fix_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_fix.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_fix_mean.py": {
+      "sha256": "b5df9a27dd3bd3ffed9b414704031dd97730d6a11f0b1f00a623f46a6961ae6b",
+      "bytes": 113133,
+      "lines": 1981,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "cached_dlm_mean",
+        "batch_size": 90,
+        "ensembles": 7,
+        "freeze_epochs": 5000,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_fix_mean_7_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_fix_mean.py"
+    },
+    "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_mean_cuseqlen_dit.py": {
+      "sha256": "ae37819eaafda0a51eefdeab7cd9b595ab4c577d4fa4837fc8554ed5bd5e83f5",
+      "bytes": 112209,
+      "lines": 1960,
+      "profile": {
+        "holdout": "strain_3_fold_dynamic",
+        "molecule": "online_dlm_non_pad_masked_mean_eval",
+        "batch_size": 30,
+        "ensembles": 1,
+        "freeze_epochs": 3000,
+        "output": "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_mean_1_fold_ensembles"
+      },
+      "recovery": "git show legacy-code-snapshot-2026-08-09:DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_strains_MDLM_MTR_mean_cuseqlen_dit.py"
+    }
+  },
+  "exact_cross_repo_snapshot_match": {
+    "path": "DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_species_3_species_5_ensemble.py",
+    "core_ref": "legacy-code-snapshot-2026-07-17",
+    "torch_equal_source_bytes": true
+  },
+  "historical_output_directories": {
+    "11_species_w_SM/7_fold_ensembles": {
+      "relative_path": "11_species_w_SM/7_fold_ensembles",
+      "exists": true,
+      "files": 9,
+      "checkpoint_files": 7,
+      "log_files": 2,
+      "bytes": 63420732302,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "11_species_w_SM/MDLM_MTR_7_fold_ensembles": {
+      "relative_path": "11_species_w_SM/MDLM_MTR_7_fold_ensembles",
+      "exists": true,
+      "files": 2,
+      "checkpoint_files": 1,
+      "log_files": 1,
+      "bytes": 9473201885,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "3_species_w_SM/7_fold_ensembles": {
+      "relative_path": "3_species_w_SM/7_fold_ensembles",
+      "exists": true,
+      "files": 25,
+      "checkpoint_files": 21,
+      "log_files": 4,
+      "bytes": 133531330477,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "3_species_w_SM/MDLM_MTR_7_fold_ensembles": {
+      "relative_path": "3_species_w_SM/MDLM_MTR_7_fold_ensembles",
+      "exists": true,
+      "files": 8,
+      "checkpoint_files": 7,
+      "log_files": 1,
+      "bytes": 71611683651,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "strain_wise_w_SM_b_attn/MDLM_MTR_7_fold_ensembles": {
+      "relative_path": "strain_wise_w_SM_b_attn/MDLM_MTR_7_fold_ensembles",
+      "exists": true,
+      "files": 23,
+      "checkpoint_files": 19,
+      "log_files": 4,
+      "bytes": 194387544060,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_cls_1_fold_ensembles": {
+      "relative_path": "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_cls_1_fold_ensembles",
+      "exists": true,
+      "files": 2,
+      "checkpoint_files": 1,
+      "log_files": 1,
+      "bytes": 9474410420,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_mean_1_fold_ensembles": {
+      "relative_path": "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_mean_1_fold_ensembles",
+      "exists": true,
+      "files": 2,
+      "checkpoint_files": 1,
+      "log_files": 1,
+      "bytes": 9474413512,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_mean_7_fold_ensembles": {
+      "relative_path": "strain_wise_w_SM_b_attn/MDLM_MTR_cuseqlen_dit_mean_7_fold_ensembles",
+      "exists": true,
+      "files": 6,
+      "checkpoint_files": 4,
+      "log_files": 2,
+      "bytes": 37896497452,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "strain_wise_w_SM_b_attn/MDLM_MTR_fix_7_fold_ensembles": {
+      "relative_path": "strain_wise_w_SM_b_attn/MDLM_MTR_fix_7_fold_ensembles",
+      "exists": true,
+      "files": 24,
+      "checkpoint_files": 21,
+      "log_files": 3,
+      "bytes": 193516414485,
+      "policy": "local historical asset; do not move, delete, or commit"
+    },
+    "strain_wise_w_SM_b_attn/MDLM_MTR_fix_mean_7_fold_ensembles": {
+      "relative_path": "strain_wise_w_SM_b_attn/MDLM_MTR_fix_mean_7_fold_ensembles",
+      "exists": false,
+      "files": 0,
+      "checkpoint_files": 0,
+      "log_files": 0,
+      "bytes": 0,
+      "policy": "local historical asset; do not move, delete, or commit"
+    }
+  },
+  "runtime_or_config_consumers": [],
+  "verified_facts": [
+    "All eleven active-tree sources are recoverable byte-for-byte from the MDLM snapshot tag.",
+    "The files cover historical strain/species/phylum variants, not downstream MDLM public APIs.",
+    "Core owns the unified runner, data preparation, split adapters, checkpoint loader, tests, and cleanup manifest.",
+    "One phylum ChemBERTa source is byte-identical across the MDLM and Core snapshots.",
+    "No live Python, shell, or YAML caller in MDLM, Core, or Generation references the eleven filenames.",
+    "Historical checkpoint/log directories remain local and are not deleted or moved by source cleanup."
+  ],
+  "limits": [
+    "The old strain split depended on process hash ordering; the exact 2025 membership was not recovered.",
+    "Several exploratory output grids are incomplete or share an output directory, so source-to-every-checkpoint identity is not asserted.",
+    "This audit maps source roles and the Core replacement; it does not claim every historical variant is a paper producer."
+  ]
+}

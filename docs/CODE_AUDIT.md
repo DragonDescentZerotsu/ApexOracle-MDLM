@@ -2,7 +2,8 @@
 
 > 审计日期：2026-08-09
 > 状态：全量逐文件 ledger 和复制血缘已建立；candidate scoring、论文图、classifier 与 MIC guidance
-> producer 已分批迁移；剩余 hierarchical/synergy/upstream families 继续逐项追加证据
+> producer 已分批迁移；hierarchical MIC duplicate drivers 已完成 Core handoff；剩余
+> synergy/chemistry/upstream families 继续逐项追加证据
 
 ## 1. 已由 Git/文件系统/AST 验证的事实
 
@@ -34,7 +35,7 @@
 | Upstream runtime | `main.py`、`diffusion.py`、`dataloader.py`、`noise_schedule.py`、`models/`、`configs/` | DLM inference 的基础，但混有上游 train/eval 和本地 SELFIES config | M2 前原地保留；最终只暴露 downstream 所需 runtime adapter，并记录 upstream attribution |
 | Molecule embedding | snapshot 中的 `save_DBAASP_id_emb_dict.py`、`save_*synergy*_emb_dict.py` | 多次复制 DLM wrapper、tokenization 和 pooling；已迁移并从 active tree 删除 | `apexoracle_mdlm.embeddings.molecule` + `scripts/reproduce/export_molecule_embeddings.py` |
 | Fig. 2b DLM benchmark | snapshot 中的 `DBAASP_MLM_MDLM.py` | 19-task fivefold downstream MIC trainer，不是 embedding producer；已从 active tree 删除 | Core 的 `reproduce_fig2b_mdlm_cached_5fold.py` 与 `run_fig2b_shared_mdlm_online.py` |
-| Hierarchical MIC | `DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_*` | 大量 strain/species/phylum 复制 driver；Core 已有 canonical replacements | 不再作为本 repo 公共 API；验证 source mapping 后在 M4 从活动树移除 |
+| Hierarchical MIC | snapshot 中的 `DP_inhouse_SM_MIC_with_text_genome_test_on_non_seen_*` | 11 个 strain/species/phylum 复制 driver 已逐项映射到 Core；无 live filename consumer，43 项 Core tests 通过 | 不再作为本 repo 公共 API；root copies 已由 snapshot/lineage 接管并删除 |
 | MIC guidance | snapshot 中的 `guaidance_regressor_all_data*.py` | 六份 sources 已归并为五个 clean/noisy/padding/non-pad/eval profiles；五个正式 checkpoint schema 与 Generation regression exact parity 已验证 | `apexoracle_mdlm.models` + `apexoracle_mdlm.training` + `scripts/reproduce/train_mic_guidance.py`；旧 root copies 已删除 |
 | Peptide classifier | snapshot 中的 `guaidance_classifier_all_data*.py` | 三个 noisy/pooling/padding/data profiles 已分开；正式 v1 head strict load 和三 profile GPU parity 已完成，exact timestamped producer revision 仍未知 | `apexoracle_mdlm.models` + `scripts/reproduce/train_peptide_classifier.py`；旧 root copies 已删除 |
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
@@ -60,8 +61,8 @@
 - 最大维护风险不是 Git 源码体积，而是复制 definitions、导入时执行配置、隐式全局变量和绝对路径。
 - 第一批应先迁移纯 I/O 与 checkpoint contracts；直接先改 DiT/attention/GPU runner 会把目录整理与
   科学行为变化混在一起，难以证明等价。
-- Core 已经覆盖的 hierarchical MIC drivers 是后续最主要的可清理 root 文件群，但必须先建立逐文件
-  source mapping，而不是立即删除。
+- Core 已经覆盖的 11 个 hierarchical MIC drivers 已完成逐文件 source/profile mapping、历史 output
+  inventory 和 replacement tests，满足从 MDLM active tree 删除的 gate；该职责不在 MDLM 新建第二份实现。
 
 ## 5. 仍待确认/验证
 
@@ -82,6 +83,19 @@
 新入口、验证命令/结果、snapshot tag、资产变化和外部 caller/论文 consumer audit，并在本文件追加迁移批次。
 只有 deletion gate 全部满足且人工更新为 `delete_ready` 的文件才允许进入删除 commit。自动分类出的
 `snapshot-only candidate` 不等于可删除。
+
+## 7. Hierarchical MIC drivers 已完成 Core handoff
+
+11 个 root `DP_inhouse_*` drivers 的完整 source hash、profile、batch size、freeze epoch 和恢复命令已冻结。
+它们覆盖历史 11-species、3-phylum 和 dynamic strain variants；其中所谓 `strains_ChemBERTa.py` 实际加载
+DLM `last_reg_v1`，不能按文件名误记为 ChemBERTa producer。一个 3-phylum source 与 Core snapshot
+byte-identical，三个仓库均无 live filename consumer。
+
+Core unified runner、legacy config、experiment record 和 cleanup manifest 的 hashes 已写入 machine-readable
+lineage；43 项 runner/equivalence/comparator tests 通过。十个存在的历史 output directories 共
+722,786,228,244 bytes，仅登记数量与体积并原地保留。旧 dynamic hash split 没有恢复 exact historical
+membership，且多个 checkpoint grids 不完整或共用目录，因此这里不声称每个旧 run 都已 bitwise replay。
+详见 `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md`。
 
 作者于 2026-08-09 确认：这里的保守 gate 用于防止误删，不表示把可疑 legacy 文件永久留在 public
 branch。重要或暂时不确定的代码应先重构独有行为，再删除原始副本；确认没有独有功能的代码完成

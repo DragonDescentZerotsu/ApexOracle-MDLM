@@ -256,8 +256,12 @@ Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优�
 
 1. 六个 `guaidance_regressor_all_data*.py` 已归并为五个 MIC guidance profiles；正式 checkpoint schema、
    Generation regression GPU exact parity 和 Core 唯一 source-path consumer migration 均完成，root copies 已由
-   snapshot 接管后删除。下一批转向 Core 已替代的 `DP_inhouse_*` hierarchical drivers，逐文件核对 source
-   mapping 后再清理。
+   snapshot 接管后删除。
+2. 11 个 Core-replaced `DP_inhouse_*` hierarchical drivers 已完成 source/profile mapping、consumer scan、
+   722,786,228,244-byte historical output inventory 和 43 项 Core replacement tests；root copies 由 snapshot
+   与 `reproducibility/hierarchical_mic_legacy_lineage.json` 接管后删除。
+3. 下一批核验两个 root chemistry utilities，再处理三个 experimental synergy-guidance producers；上游 runtime
+   与 `judge_generated_mols_MIC.py` compatibility bridge 仍按各自 release gate 处理，不混入普通 legacy 删除。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为
 snapshot-only；两类都在 gate 满足后删除原始 root 文件。仍按小批次迁移与删除，不做一次性 filesystem

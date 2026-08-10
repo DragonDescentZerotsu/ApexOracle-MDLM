@@ -3,7 +3,8 @@
 > 建立日期：2026-08-09
 > 当前 branch：`refactor/apexoracle-mdlm`
 > 状态：M0/M1/M1.5 已完成；DLM adapters、candidate scoring、Fig. 3a、peptide classifier 和五个 MIC
-> guidance producer profiles 已完成迁移与正式资产验证；其余 legacy families 继续按 ledger 分批处理
+> guidance producer profiles 已完成迁移与正式资产验证；11 个 Core-replaced hierarchical MIC drivers
+> 已完成 handoff 审计，正在从 active tree 收口；其余 legacy families 继续按 ledger 分批处理
 
 ## 1. 目标与不变量
 
@@ -290,10 +291,11 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 
 ### M4：Legacy driver 收口
 
-状态：待执行。
+状态：**执行中；hierarchical MIC 批次已满足删除 gate。**
 
 - 只从 ledger 中逐文件满足 deletion gate、经证据更新为 `delete_ready` 的条目开始清理；
-- Core 已替代的 `DP_inhouse_*` hierarchical drivers 从活动入口撤下；
+- [x] Core 已替代的 11 个 `DP_inhouse_*` hierarchical drivers 完成逐文件 source/profile mapping、跨仓库
+  consumer audit、历史 output inventory 与 43 项 Core focused tests，并从活动入口撤下；
 - synergy guidance、interpretability、milk/camel case study 中独有且仍需发布的行为重构为
   `experimental/`、`examples/` 或 canonical library，不保留原始 root-level 副本；
 - debug、一次性绘图和 superseded temp scripts 在 source/consumer mapping 完成后从活动树删除；若其中
@@ -302,6 +304,11 @@ Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 
 验收：README 不再列出复制脚本作为公共入口；active tree 不再保留已迁移的 root legacy 副本；每个移除
 文件都有 tag、ledger 决策，以及必要时的新入口和验证证据。
+
+Hierarchical MIC 的完整 mapping、恢复命令与不能声称 exact historical replay 的边界见
+`docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md` 和
+`reproducibility/hierarchical_mic_legacy_lineage.json`；本批没有移动或删除 checkpoint/log。
+删除后 MDLM 全仓 107 tests 与 13 项跨仓库 contracts 均通过。
 
 ### M5：Clean module release
 

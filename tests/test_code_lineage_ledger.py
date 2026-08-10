@@ -516,17 +516,25 @@ class CodeLineageLedgerTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / path).is_file(), path)
 
-    def test_major_copied_definition_group_is_preserved(self):
+    def test_remaining_synergy_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""
         ) as handle:
             clones = list(csv.DictReader(handle))
         regression = [row for row in clones if row["symbol_names"] == "RegressionHead"]
         self.assertTrue(regression)
-        # M2/M3 removed obsolete exporter and MIC-guidance trainer copies. The
-        # remaining legacy families must still stay visible until their own
-        # migration gates close.
-        self.assertGreaterEqual(max(int(row["file_count"]) for row in regression), 10)
+        # M2--M4 removed migrated embedding, MIC-guidance, and Core-owned
+        # hierarchical copies. The three synergy-guidance producers remain
+        # visible until their separate migration gate closes.
+        self.assertEqual(max(int(row["file_count"]) for row in regression), 3)
+        self.assertEqual(
+            set(regression[0]["paths"].split(";")),
+            {
+                "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification.py",
+                "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification_clean.py",
+                "synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification_noise.py",
+            },
+        )
         self.assertTrue((ROOT / "src/apexoracle_mdlm/models/heads.py").is_file())
 
     def test_fig3a_exact_plotted_rows_match_manifest(self):
