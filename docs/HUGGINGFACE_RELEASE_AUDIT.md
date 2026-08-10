@@ -89,4 +89,14 @@ config、三份 tokenizer files、safetensors 和必要图片。IDE/cache、full
   `custom/refactor/apexoracle-mdlm`；没有 push 上游 `origin`。
 
 因此 Hugging Face 发布门槛已经关闭。Super-repo 应固定正式 revision `77694f08...2eda`，不得固定中间
-revision；下一批工作转回本地 legacy HF exporter/runtime duplicate 清理与 M3 guidance caller 收口。
+revision。
+
+## 本地 active-tree legacy 清理
+
+发布验收后，旧 HF deletion gate 已关闭。三份 tokenizer JSON 以原 SHA-256 迁入
+`huggingface/release/`，clean builder 的默认 tokenizer source 同步切换到该目录。旧 wrapper、config/
+upload exporter、model card/images、六份与根 runtime byte-identical 的 copies 和 924 行 mixed
+`huggingface_push.py` 已从 tracked active tree 删除；ignored safetensors 保持原路径未移动。跨 MDLM、Core、
+Generation 的 local-path consumer scan 没有发现 runtime caller。完整恢复 hashes 与 replacement mapping 见
+`reproducibility/huggingface_legacy_cleanup.json`；focused 6 tests 和新构建 18-file capsule 的 manifest/
+weight hash 均通过。下一批工作转入 M3 remaining guidance caller 收口。

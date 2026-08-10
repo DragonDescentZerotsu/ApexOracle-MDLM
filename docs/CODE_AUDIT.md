@@ -40,7 +40,7 @@
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
 | Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
-| Hugging Face | `huggingface/`、`huggingface_push.py` | 已确认 389 MB 权重有效，但 wrapper 的 integer attention-mask 行为错误，且本地/remote 均混有重复 runtime/debug 资产 | 暂留至 clean wrapper parity；随后以 allowlist exporter 替代并更新 public Hub |
+| Hugging Face | canonical `huggingface/release/`；旧 `huggingface_model/`/`huggingface_push.py` 由 snapshot 恢复 | 正式 18-file Hub revision 已 fresh-download 验收；旧 wrapper/runtime/exporter 无 active consumer，三份 tokenizer byte-exact 迁入 release template | clean builder/publisher + `apexoracle_mdlm.hub`；旧 tracked 副本已清除，ignored weight 原地保留 |
 | Case study/debug | notebooks 和历史 manifests | milk/camel/in-vivo plotting、诊断和一次性分析混杂；active root debug/temp sources 已完成消费者审计并迁移或 snapshot-only 清理 | 新项目特例只记 provenance；可复用行为进入通用 package/CLI |
 
 ## 3. 已确认不能直接合并的差异
@@ -105,6 +105,18 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   outputs 的 hashes/keys/shapes 后确认无消费者，不创建项目特定 API。
 - 六个 source 均由 snapshot 恢复后删除；ignored data/embedding assets 保持原地。详见
   `docs/DEBUG_FILE_CLEANUP.md` 和 `reproducibility/debug_file_cleanup_lineage.json`。
+
+### Legacy Hugging Face exporter/runtime cleanup（2026-08-10）
+
+- Public Hub 正式 revision、MIT/Apache attribution、权重/tokenizer lineage、integer-mask fix、save/load parity
+  和 fresh-cache symlink GPU smoke 已全部完成，因此原 ledger deletion gate 已关闭。
+- 三份 tokenizer JSON 以相同 SHA-256 迁至 `huggingface/release/`；builder 默认读取该 template。Ignored
+  389 MB safetensors 未移动，也未加入 Git。
+- 两份 config exporter、旧 wrapper、upload script、model card/images、六份 byte-identical runtime copies 和
+  924 行 `huggingface_push.py` 已转为 snapshot-only；后者唯一 main 行为只是写一份 hard-coded config JSON，
+  其大量 dataset/head helpers 无 caller 且已有 canonical I/O/head replacements。
+- MDLM/Core/Generation local-path consumer scan 为 0；源 hashes、replacement 和恢复测试见
+  `reproducibility/huggingface_legacy_cleanup.json` 与 `tests/test_huggingface_release.py`。
 
 ### M1 checkpoint/embedding I/O（2026-08-09）
 

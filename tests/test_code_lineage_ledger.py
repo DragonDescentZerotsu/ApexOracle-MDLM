@@ -482,9 +482,9 @@ class CodeLineageLedgerTests(unittest.TestCase):
             clones = list(csv.DictReader(handle))
         regression = [row for row in clones if row["symbol_names"] == "RegressionHead"]
         self.assertTrue(regression)
-        # M2 removed the extra copy embedded in the obsolete Fig. 2b driver;
-        # the remaining clone group stays visible until the M3 trainer pass.
-        self.assertGreaterEqual(max(int(row["file_count"]) for row in regression), 21)
+        # M2 removed copies embedded in the obsolete Fig. 2b and Hugging Face
+        # exporters; the remaining trainer clone group stays visible until M3.
+        self.assertGreaterEqual(max(int(row["file_count"]) for row in regression), 20)
         self.assertTrue((ROOT / "src/apexoracle_mdlm/models/heads.py").is_file())
 
     def test_fig3a_exact_plotted_rows_match_manifest(self):

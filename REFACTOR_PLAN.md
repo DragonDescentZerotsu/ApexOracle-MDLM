@@ -135,6 +135,9 @@ Canonical 说明见 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`；machine-readable reco
   已从全新 cache 下载，18-file allowlist、MIT metadata、manifest/hash、strict load 和 padded GPU smoke 通过；
 - [x] 将首次 fresh-download 暴露的 Hub symlink runtime-root bug 固化为 regression test，并在 source commit
   `2eee36e` 修复；失败的中间 Hub revision `b16024b` 不进入任何 release lock；
+- [x] 将三份 tokenizer 资产迁到 canonical release template；删除已被 clean Hub release 替代的旧 wrapper、
+  config/export/upload scripts、重复 runtime、model card/images 和 mixed `huggingface_push.py` tracked 副本；
+  ignored safetensors 保持原地，所有旧 source/blob 由 snapshot tag 和 cleanup manifest 恢复；
 
 验收：固定 SELFIES 的 hidden states 与选定 legacy producer 在容差内一致；输出 manifest 记录输入、
 checkpoint、pooling、dtype、shape 和 SHA-256。
@@ -144,6 +147,8 @@ M2 embedding producer 迁移详情见 `docs/MOLECULE_EMBEDDING_MIGRATION.md` 和
 三个重复 exporter 与该 trainer 均从 active tree 删除，可由 snapshot tag 恢复。
 原 HF revision、389 MB 权重逐 tensor 血缘、公开 wrapper bug、clean candidate 与 release allowlist 见
 `docs/HUGGINGFACE_RELEASE_AUDIT.md` 与 `reproducibility/huggingface_release_audit.json`。
+Active-tree legacy HF 删除清单、源 SHA、replacement 和 consumer audit 见
+`reproducibility/huggingface_legacy_cleanup.json`。
 
 ### M3：Guidance heads 与 candidate scoring
 

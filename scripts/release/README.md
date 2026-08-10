@@ -8,10 +8,10 @@ Build the exact, hash-manifested allowlist in a new empty directory:
 python scripts/release/build_huggingface_release.py --output-dir /path/to/empty-dir
 ```
 
-The builder reuses the ignored frozen `model.safetensors`, tracked tokenizer
-assets, canonical Hub wrapper, minimal attributed MDLM runtime, MIT model
-license and Apache-2.0 third-party notices. It fails if the weight hash differs
-or the destination is non-empty.
+The builder reuses the ignored frozen `model.safetensors`, tokenizer assets
+under `huggingface/release/`, canonical Hub wrapper, minimal attributed MDLM
+runtime, MIT model license and Apache-2.0 third-party notices. It fails if the
+weight hash differs or the destination is non-empty.
 
 After local strict-load and GPU parity, synchronize one explicitly confirmed
 Hub repository:

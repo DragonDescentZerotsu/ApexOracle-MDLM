@@ -13,8 +13,8 @@ from typing import Iterable
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_WEIGHT = REPOSITORY_ROOT / "huggingface/huggingface_model/model.safetensors"
-DEFAULT_TOKENIZER = REPOSITORY_ROOT / "huggingface/huggingface_model"
 TEMPLATE_ROOT = REPOSITORY_ROOT / "huggingface/release"
+DEFAULT_TOKENIZER = TEMPLATE_ROOT
 EXPECTED_WEIGHT_SHA256 = (
     "b472f7508aaf0fdab4c935caf221415b48a5f8afd4d104a731c9d72d410c2c44"
 )

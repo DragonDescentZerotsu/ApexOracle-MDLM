@@ -178,6 +178,13 @@
   manifest 0 mismatch、`strict=True` load 和 integer-mask padded `model(**batch)` GPU smoke。第一次 clean
   commit `b16024b` 暴露 Hub cache symlink root bug，已由 `resolve_runtime_root` 和 regression test 修复，不得
   作为 release lock。MDLM source fix commit 为 `2eee36e`，已 push 到 `custom/refactor/apexoracle-mdlm`。
+- **2026-08-10 legacy Hugging Face active-tree 清理：** 正式 Hub release/fresh-download gate 关闭后，三份
+  tokenizer assets 已按 byte-exact hash 迁到 `huggingface/release/`；旧 wrapper、两份 config exporter、
+  上传脚本、924 行 mixed `huggingface_push.py`、重复 runtime、旧 model card/images 全部由
+  `legacy-code-snapshot-2026-08-09` 和 `reproducibility/huggingface_legacy_cleanup.json` 恢复，不再进入
+  active tracked tree。六份旧 runtime 与根 upstream runtime byte-identical；跨 MDLM/Core/Generation consumer
+  scan 为 0。Ignored `huggingface/huggingface_model/model.safetensors` 保持原地未移动。Clean builder 默认从
+  `huggingface/release/` 读取 tokenizer，并已重建 18-file capsule、验证 manifest 与 weight hash。
 - 正式 main Fig. 3a 血缘核验入口：`/home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm
   python scripts/audit/verify_paper_figure_lineage.py`；默认只读验证 small assets、condition directory counts、
   cache statistics、p-values、manuscript consumer 和 frozen 377-row plotted-data CSV。只有显式

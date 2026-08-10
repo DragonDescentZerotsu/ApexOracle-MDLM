@@ -108,6 +108,15 @@
     ],
     "gpu_output_all_finite": true
   },
+  "active_tree_cleanup": {
+    "status": "passed",
+    "manifest": "reproducibility/huggingface_legacy_cleanup.json",
+    "legacy_tracked_sources_removed": 16,
+    "tokenizer_assets_moved_to_release_template": 3,
+    "ignored_weight_moved": false,
+    "rebuilt_capsule_file_count": 18,
+    "rebuilt_capsule_manifest_hash_mismatch_count": 0
+  },
   "release_gate": {
     "reuse_existing_safetensors": true,
     "clean_wrapper_required": true,
