@@ -37,6 +37,15 @@ class ConditionEmbeddingBanks:
     text_only: Mapping[str, torch.Tensor]
 
 
+@dataclass(frozen=True)
+class MICAttentionOutput:
+    """MIC logit plus averaged genome/text cross-attention weights."""
+
+    logits: torch.Tensor
+    genome_attention: torch.Tensor
+    text_attention: torch.Tensor
+
+
 def load_condition_embedding_banks(
     *,
     genome_directory: str | PathLike[str],
@@ -169,6 +178,24 @@ class CandidateMICRegressor(nn.Module):
     ) -> torch.Tensor:
         """Apply one strain condition to precomputed molecule CLS states."""
 
+        return self._predict_from_cls_embedding(molecule_cls, strain, False)
+
+    def predict_with_attention_from_cls_embedding(
+        self,
+        molecule_cls: torch.Tensor,
+        strain: str,
+    ) -> MICAttentionOutput:
+        """Return the MIC logit and both averaged attention vectors."""
+
+        return self._predict_from_cls_embedding(molecule_cls, strain, True)
+
+    def _predict_from_cls_embedding(
+        self,
+        molecule_cls: torch.Tensor,
+        strain: str,
+        return_attention: bool,
+    ) -> torch.Tensor | MICAttentionOutput:
+
         genome, text = self._conditions(
             strain,
             batch_size=molecule_cls.shape[0],
@@ -186,10 +213,24 @@ class CandidateMICRegressor(nn.Module):
             else nullcontext()
         )
         with autocast:
-            genome_condition = self.co_cross_attn_genome(
-                molecule_cls, genome, genome_mask
+            genome_result = self.co_cross_attn_genome(
+                molecule_cls,
+                genome,
+                genome_mask,
+                return_attention=return_attention,
             )
-            text_condition = self.co_cross_attn_text(molecule_cls, text, text_mask)
+            text_result = self.co_cross_attn_text(
+                molecule_cls,
+                text,
+                text_mask,
+                return_attention=return_attention,
+            )
+            if return_attention:
+                genome_condition, genome_attention = genome_result
+                text_condition, text_attention = text_result
+            else:
+                genome_condition = genome_result
+                text_condition = text_result
             fused = torch.cat(
                 (
                     genome_condition.reshape(-1, genome.shape[-1]),
@@ -197,10 +238,25 @@ class CandidateMICRegressor(nn.Module):
                 ),
                 dim=1,
             )
-            return self.reg_head(fused)
+            logits = self.reg_head(fused)
+        if return_attention:
+            return MICAttentionOutput(logits, genome_attention, text_attention)
+        return logits
 
     def forward(self, input_ids: torch.Tensor, strain: str) -> torch.Tensor:
         return self.predict_from_cls_embedding(
+            self.encode_molecules(input_ids),
+            strain,
+        )
+
+    def forward_with_attention(
+        self,
+        input_ids: torch.Tensor,
+        strain: str,
+    ) -> MICAttentionOutput:
+        """Encode molecules and return prediction plus attention weights."""
+
+        return self.predict_with_attention_from_cls_embedding(
             self.encode_molecules(input_ids),
             strain,
         )

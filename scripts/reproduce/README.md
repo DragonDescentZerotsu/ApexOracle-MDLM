@@ -79,6 +79,18 @@ PYTHONPATH=src python -m unittest tests.test_peptide_candidates \
 `reproducibility/peptide_candidate_screen_parity.json`。Generation 的 73-row candidate pool 与已清理
 round-trip diagnostic 边界见 `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md`。
 
+## `analyze_mic_attention.py`
+
+功能：对一个显式 SMILES/SELFIES 与一个 genome-backed strain 导出正式 MIC prediction 的完整 genome/text
+averaged attention；在写 annotation 前强制验证 FASTA/GenBank sequence/order、saved embedding shape 与
+11-kb/10-kb window contract。输出 `genome_attention.csv`、`genome_annotations.csv`、
+`text_attention.csv` 和 `manifest.json`。CDS 采用 overlap mapping，并以 `fully_contained` 标记历史 inclusion。
+
+主要参数：candidate MIC scorer 的 config/checkpoint/condition banks，加 `--molecule-file`、
+`--molecule-format`、`--strain`、对应 `--genome-fasta/--genome-genbank/--genome-embedding`、`--threshold`
+和 `--output-dir`。Attention 是 PyTorch 默认的跨 heads 平均值，只能作 descriptive/hypothesis-generating
+解释。正式 ApexOracle-18 lineage 与两套 exact outputs 见 `docs/INTERPRETABILITY_LINEAGE.md`。
+
 ## `plot_paper_fig3a.py`
 
 功能：消费 `reproducibility/paper_fig3a_plotted_data.csv` 的 377 个 frozen exact rows，生成论文 Fig. 3a

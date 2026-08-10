@@ -100,6 +100,22 @@ class CandidateMICScoringTests(unittest.TestCase):
             )
         )
 
+    def test_attention_output_preserves_prediction_and_condition_lengths(self):
+        torch.manual_seed(9)
+        model = self.make_model()
+        input_ids = torch.tensor([[1, 2, 3]])
+        prediction = model(input_ids, "A")
+        result = model.forward_with_attention(input_ids, "A")
+        self.assertTrue(torch.equal(result.logits, prediction))
+        self.assertEqual(result.genome_attention.shape, (1, 1, 2))
+        self.assertEqual(result.text_attention.shape, (1, 1, 3))
+        self.assertTrue(
+            torch.allclose(result.genome_attention.sum(dim=-1), torch.ones(1, 1))
+        )
+        self.assertTrue(
+            torch.allclose(result.text_attention.sum(dim=-1), torch.ones(1, 1))
+        )
+
     def test_missing_condition_has_precise_error(self):
         model = self.make_model()
         with self.assertRaisesRegex(KeyError, "No genome or text-only"):

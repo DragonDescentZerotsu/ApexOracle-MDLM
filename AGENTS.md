@@ -82,6 +82,12 @@
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_candidate_synergy_scoring
   tests.test_checkpoint_schemas -v`；正式单条 GPU parity 见
   `reproducibility/candidate_synergy_migration_parity.json`。
+- MIC interpretability：`CandidateMICRegressor.forward_with_attention` 返回 prediction 与 genome/text averaged
+  attention；`apexoracle_mdlm.interpretability` 验证 saved tensor/FASTA/GenBank window contract 并映射 overlap
+  CDS。公开入口为 `scripts/reproduce/analyze_mic_attention.py`，输出 genome/text attention CSV、annotation CSV
+  和 manifest；不得将 attention 写成 per-head、causal 或 single-gene attribution。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_interpretability_attention tests.test_candidate_mic_scoring -v`；
+  正式 ApexOracle-18 两 strain parity 见 `reproducibility/mic_attention_migration_parity.json`。
 - `apexoracle_mdlm.scoring` 另提供 `parse_generated_molecule_filename`、
   `format_generated_molecule_filename` 与 `find_generated_molecule_file`；canonical 输入 schema 为
   `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt`，输出 parsed dataclass、filename

@@ -7,6 +7,7 @@ import argparse
 import ast
 import hashlib
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -160,6 +161,41 @@ def check_formal_assets(
     return results
 
 
+def check_saved_tensor_window_contract(roots: dict[str, Path]) -> dict[str, Any]:
+    """Compare MDLM and Core window coordinates on edge-case contig lengths."""
+
+    core_source_root = str(roots["synergy"] / "src")
+    if core_source_root not in sys.path:
+        sys.path.insert(0, core_source_root)
+    from apexoracle.evaluation.genome_condition_reviewer import (
+        build_saved_tensor_windows as core_windows,
+    )
+    from apexoracle_mdlm.interpretability import (
+        build_saved_tensor_windows as mdlm_windows,
+    )
+
+    lengths = [21_500, 10_000, 35_000]
+    expected = core_windows(lengths)
+    actual = [
+        {
+            "fragment_index": row.fragment_index,
+            "contig_index": row.contig_index,
+            "start": row.start,
+            "end": row.end,
+        }
+        for row in mdlm_windows(lengths)
+    ]
+    if actual != expected:
+        raise RuntimeError(
+            f"Core/MDLM saved-tensor window contract differs: {actual} != {expected}."
+        )
+    return {
+        "id": "core_mdlm_saved_tensor_window_coordinates",
+        "status": "passed",
+        "edge_case_windows": actual,
+    }
+
+
 def check_gpu_head_parity(
     manifest: dict[str, Any], roots: dict[str, Path]
 ) -> dict[str, Any]:
@@ -282,6 +318,7 @@ def main() -> None:
     }
     manifest: dict[str, Any] = json.loads(args.manifest.read_text(encoding="utf-8"))
     results: list[dict[str, Any]] = []
+    results.append(check_saved_tensor_window_contract(roots))
 
     for check in manifest["static_checks"]:
         path = roots[check["repository"]] / check["path"]

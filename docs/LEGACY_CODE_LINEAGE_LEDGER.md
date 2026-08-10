@@ -206,16 +206,21 @@ canonical library/CLI/checkpoint schema；Generation 正式 checkpoint 与真实
 reference；历史 PDF 无正式 consumer。因此两个 mixed drivers 由 snapshot/lineage 恢复后从 active tree 删除，
 而 checkpoint producer trainers 留待后续独立合并 clean/noise profiles。
 
-## 12. 下一轮人工核验队列
+## 12. Interpretability notebooks/scripts 已完成迁移清理
+
+论文 ApexOracle-18 attention case 已迁为 canonical forward、参数化 CLI、Core-compatible saved-window mapping
+和两套 exact tables。两个 scripts byte-identical，`show.ipynb` 前六个 code cells 又重复于完整 interpretability
+notebook；四项均由 snapshot hashes 恢复后从 active tree 删除。Attention 已明确为四 heads 平均且只能作
+hypothesis-generating association；完整证据边界见 `docs/INTERPRETABILITY_LINEAGE.md`。
+
+## 13. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
-1. `show.ipynb`、`show_interpretability.ipynb`、`visualize_attn*.py`：输出多、可能包含独有
-   interpretability/case-study 图；
-2. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`：逐项搜索论文图、caption、
+1. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`：逐项搜索论文图、caption、
    reviewer 文档和外部输出 hash；
-3. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
+2. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
    自动放行。
 
 人工核验完成后，对重要/不确定的独有行为直接建立 clean replacement，对确认无独有角色的文件转为

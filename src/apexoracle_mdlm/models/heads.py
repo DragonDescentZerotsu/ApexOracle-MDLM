@@ -56,8 +56,12 @@ class FirstTokenCrossAttention(nn.Module):
     ) -> None:
         super().__init__()
         self.mol_to_genome_dim = nn.Linear(mol_cls_embed_dim, condition_embed_dim)
-        self.key_value_projection = nn.Linear(condition_embed_dim, condition_embed_dim * 2)
-        self.mha = nn.MultiheadAttention(condition_embed_dim, num_heads, dropout=dropout)
+        self.key_value_projection = nn.Linear(
+            condition_embed_dim, condition_embed_dim * 2
+        )
+        self.mha = nn.MultiheadAttention(
+            condition_embed_dim, num_heads, dropout=dropout
+        )
         self.attn_norm = nn.LayerNorm(condition_embed_dim)
         self.norm1 = nn.LayerNorm(condition_embed_dim)
         self.ffn = nn.Sequential(
@@ -79,6 +83,7 @@ class FirstTokenCrossAttention(nn.Module):
         mol_cls_emb: torch.Tensor,
         condition_embeddings: torch.Tensor,
         key_padding_mask: torch.Tensor,
+        return_attention: bool | None = None,
         **_: object,
     ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         condition_dim = condition_embeddings.shape[-1]
@@ -107,6 +112,9 @@ class FirstTokenCrossAttention(nn.Module):
         output = self.norm1(query_residual + attention_residual)
         output = self.norm2(output + self.ffn(output))
 
-        if self.return_attention:
+        should_return_attention = (
+            self.return_attention if return_attention is None else return_attention
+        )
+        if should_return_attention:
             return output, attention_weights
         return output

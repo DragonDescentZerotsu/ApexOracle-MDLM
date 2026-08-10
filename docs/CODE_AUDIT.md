@@ -267,3 +267,18 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   `torch.equal`，最大差异 `0.0`；
 - `3170-guidance-MIC.pdf` 无正式论文/reviewer consumer，只作 provenance；两个 broken mixed drivers 已删除，
   外部 Generation outputs/images 未修改。完整边界见 `docs/SYNERGY_CANDIDATE_SCORING_LINEAGE.md`。
+
+### M3i MIC attention interpretability（2026-08-10）
+
+- 论文 ApexOracle-18/BAA-3170/11775 case 的 producer 已从 output-heavy notebook 追溯到正式 clean MIC
+  checkpoint、candidate SMILES、condition tensors、FASTA/GenBank 与 saved Evo-2 tensor；
+- canonical scorer 增加无状态 `forward_with_attention`，保持原 prediction API；interpretability package
+  冻结 Core-compatible global-fragment-index window contract、sequence/order/tensor checks、完整 attention tables
+  和 overlap CDS mapping；
+- snapshot/canonical 的两 strain logit、MIC、genome/text attention 全部 `torch.equal`、最大差异 `0.0`；
+  selected genome indices 和论文 loci 与 notebook 一致；
+- legacy 标注为 “Head 0” 的 tensor 实为四 heads 平均；contig-adjusted bounds 未用于 predicate，但 focal
+  selected windows 均在 contig 0，故不改变论文两 loci；canonical 另补回跨 boundary features；
+- 没有 orthology/pangenome 或 causal validation，因此 strain-unique 只保留为待单独核验的论文表述。两个
+  byte-identical scripts 和两个重复 notebooks 已由 snapshot/lineage 接管后删除。详见
+  `docs/INTERPRETABILITY_LINEAGE.md`。

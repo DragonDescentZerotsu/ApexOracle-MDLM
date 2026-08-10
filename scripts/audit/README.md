@@ -75,6 +75,23 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src pyth
 
 冻结结果见 `reproducibility/candidate_synergy_migration_parity.json`。
 
+## `compare_legacy_mic_attention.py`
+
+用途：从 snapshot 提取 `visualize_attn.py`，加载正式 clean MIC checkpoint 与 candidate，一次比较多个 strain
+的 legacy/canonical logit、MIC、genome attention 和 text attention。该入口验证模型 forward，不承担
+FASTA/GenBank annotation；后者由公开 reproduce CLI 的显式资产检查负责。
+
+```bash
+CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src python \
+  scripts/audit/compare_legacy_mic_attention.py \
+  --core-root /path/to/ApexOracle-Core \
+  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --molecule-file /path/to/ApexOracle_18.txt --molecule-format smiles \
+  --strain BAA-3170 --strain 11775
+```
+
+冻结结果见 `reproducibility/mic_attention_migration_parity.json`。
+
 ## `verify_small_molecule_screen_lineage.py`
 
 用途：不重跑 44,608-entry GPU screen，逐个核验正式 source SELFIES 与历史 prediction CSV 的 rows、unique

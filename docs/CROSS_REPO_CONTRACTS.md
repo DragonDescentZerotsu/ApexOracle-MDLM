@@ -78,6 +78,12 @@ bfloat16 GPU parity 已与 checkpoint producer 的 tensor-returning implementati
 `reproducibility/candidate_synergy_migration_parity.json`。这只验证 experimental all-data candidate scorer，
 不等于 Core 论文 cross-validation synergy predictor 或 full sampler 已验收。
 
+论文 MIC attention case 还要求 Core/MDLM 对 saved Evo-2 tensor 的 fragment index 给出完全相同的坐标。
+`cross_repo_contracts.py` 现在既检查两边 source entry，也在 `[21500,10000,35000]` 这种 multi-contig edge case
+上直接比较坐标。公开 interpretability CLI 另外要求 FASTA/GenBank sequence/order 与 embedding row count 一致，
+再输出 overlap annotations。该 compatibility mapping 的 global fragment index 不会在 FASTA record 间 reset；
+这是现有 saved tensor 的冻结 producer contract，不应推广为新 Evo-2 producer 的推荐实现。
+
 ## 4. 当前允许与禁止的重构
 
 允许：
@@ -122,7 +128,8 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
 ```
 
 该审计只读源码，检查 MIC/synergy output writer、动态 imports、checkpoint key usage、embedding config、MDLM
-consumer，并验证 Generation 的 `RegressionHead` 仍与 MDLM frozen producer AST 一致。
+consumer、Core/MDLM saved-window coordinates，并验证 Generation 的 `RegressionHead` 仍与 MDLM frozen
+producer AST 一致。
 
 在作者机器上核验 trusted formal checkpoints 时追加 `--check-assets`。该模式以 CPU `mmap` 读取 manifest
 中的 DLM、classifier、MIC、synergy checkpoint 与 synergy partner dictionary，执行 schema、partner-key

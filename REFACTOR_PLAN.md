@@ -188,6 +188,14 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   `>15` threshold；确认 violin PDF 无正式 consumer 后转为 snapshot-only，删除两个 mixed drivers；
 - [x] 本批最终验收为全仓 71 tests passed、跨仓库 source/formal-asset 16 checks passed、Fig. 3a canonical
   raster parity exact；Core/Synergy 与 Generation checkout 全程只读；
+- [x] 确认 `show_interpretability.ipynb` 是论文 ApexOracle-18 attention case-study producer；迁移正式
+  MIC prediction+attention forward、saved-window/GenBank annotation 与参数化 CLI；
+- [x] 以正式 checkpoint、ApexOracle-18、BAA-3170/11775 完成 logit/MIC/genome/text attention exact GPU
+  parity，并冻结两套 compact exact CSV/manifests；明确 attention 是四 heads 平均、不是 per-head；
+- [x] 修正 legacy annotation 的 general multi-contig/boundary mapping，记录 focal loci 不受 contig bug 影响；
+  将 causal/single-gene/strain-unique 保持为未验证边界后，删除两个重复 scripts 与两个 output-heavy notebooks；
+- [x] 本批最终验收为全仓 76 tests passed、跨仓库 source/formal-asset 19 checks passed、Fig. 3a canonical
+  raster parity exact；两套 interpretability CSV/manifest 使用 LF 且 hash 自洽；Core/Generation 全程只读；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；

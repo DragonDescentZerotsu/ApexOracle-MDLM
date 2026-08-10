@@ -9,6 +9,7 @@ from .generated_files import (
 from .mic import (
     CandidateMICRegressor,
     ConditionEmbeddingBanks,
+    MICAttentionOutput,
     build_candidate_mic_regressor,
     load_candidate_mic_regressor,
     load_condition_embedding_banks,
@@ -56,6 +57,7 @@ __all__ = [
     "CandidateMICRegressor",
     "CandidateSynergyClassifier",
     "ConditionEmbeddingBanks",
+    "MICAttentionOutput",
     "PeptideCandidateResult",
     "PeptideScreenJob",
     "STRUCTURE_COLUMNS",

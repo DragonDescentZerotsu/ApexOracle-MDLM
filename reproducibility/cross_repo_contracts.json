@@ -139,6 +139,28 @@
       ]
     },
     {
+      "id": "core_saved_tensor_window_contract",
+      "repository": "synergy",
+      "path": "src/apexoracle/evaluation/genome_condition_reviewer.py",
+      "required_substrings": [
+        "def build_saved_tensor_windows",
+        "while fragment_index * step < record_length",
+        "\"fragment_index\": fragment_index",
+        "\"contig_index\": record_index"
+      ]
+    },
+    {
+      "id": "mdlm_mic_attention_interpretability",
+      "repository": "mdlm",
+      "path": "src/apexoracle_mdlm/interpretability/attention.py",
+      "required_substrings": [
+        "def build_saved_tensor_windows",
+        "def load_verified_genome_assets",
+        "def attention_rows",
+        "def annotate_selected_windows"
+      ]
+    },
+    {
       "id": "generation_embedding_config",
       "repository": "generation",
       "path": "configs/config.yaml",

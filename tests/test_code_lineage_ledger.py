@@ -232,6 +232,83 @@ class CodeLineageLedgerTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / path).is_file(), path)
 
+    def test_interpretability_assets_are_replaced_and_recoverable(self):
+        lineage = json.loads(
+            (ROOT / "reproducibility" / "interpretability_lineage.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertTrue(lineage["active_legacy_assets_removed"])
+        for legacy_path, metadata in lineage["legacy_assets"].items():
+            self.assertNotIn(legacy_path, self.by_path)
+            legacy_source = subprocess.check_output(
+                [
+                    "git",
+                    "show",
+                    f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(
+                hashlib.sha256(legacy_source).hexdigest(), metadata["sha256"]
+            )
+
+        parity = json.loads(
+            (
+                ROOT / "reproducibility" / "mic_attention_migration_parity.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(parity["status"], "passed")
+        for case in parity["strains"]:
+            for comparison in case["comparisons"].values():
+                self.assertTrue(comparison["torch_equal"])
+                self.assertEqual(comparison["max_abs_difference"], 0.0)
+
+        for strain, expected in (
+            ("apexoracle18_baa3170", [90, 156, 302]),
+            ("apexoracle18_11775", [251, 385]),
+        ):
+            manifest = json.loads(
+                (
+                    ROOT
+                    / "reproducibility"
+                    / "interpretability"
+                    / strain
+                    / "manifest.json"
+                ).read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["attention"]["genome_selected_indices"], expected)
+            self.assertEqual(
+                manifest["verified_genome_contract"]["window_count"],
+                manifest["verified_genome_contract"]["embedding_shape"][0],
+            )
+
+        products = {}
+        for strain in ("apexoracle18_baa3170", "apexoracle18_11775"):
+            with (
+                ROOT
+                / "reproducibility"
+                / "interpretability"
+                / strain
+                / "genome_annotations.csv"
+            ).open(encoding="utf-8", newline="") as handle:
+                products[strain] = {row["product"] for row in csv.DictReader(handle)}
+        self.assertIn(
+            "O11 family O-antigen polymerase", products["apexoracle18_baa3170"]
+        )
+        self.assertIn("NeuE protein", products["apexoracle18_11775"])
+        self.assertIn(
+            "alpha-2,8-polysialyltransferase family protein",
+            products["apexoracle18_11775"],
+        )
+
+        for path in (
+            "src/apexoracle_mdlm/interpretability/attention.py",
+            "scripts/reproduce/analyze_mic_attention.py",
+            "scripts/audit/compare_legacy_mic_attention.py",
+        ):
+            self.assertTrue((ROOT / path).is_file(), path)
+
     def test_major_copied_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""
