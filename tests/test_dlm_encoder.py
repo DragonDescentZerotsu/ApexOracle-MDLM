@@ -1,11 +1,18 @@
 import unittest
+import tempfile
+from pathlib import Path
+import sys
+from types import ModuleType
 from types import SimpleNamespace
 
 import torch
 from torch import nn
 from torch.nn import functional as F
 
-from apexoracle_mdlm.models import DLMHiddenStateEncoder
+from apexoracle_mdlm.models import (
+    DLMHiddenStateEncoder,
+    build_upstream_dlm_hidden_state_encoder,
+)
 
 
 class ToyVocabEmbedding(nn.Module):
@@ -116,6 +123,35 @@ class DLMHiddenStateEncoderTests(unittest.TestCase):
         )
         processed = encoder._process_sigma(torch.tensor([[3.0], [4.0]]))
         self.assertTrue(torch.equal(processed, torch.zeros(2)))
+
+    def test_runtime_root_must_contain_attributed_upstream_files(self):
+        config = SimpleNamespace(parameterization="subs", time_conditioning=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(FileNotFoundError, "runtime is incomplete"):
+                build_upstream_dlm_hidden_state_encoder(
+                    config,
+                    11,
+                    runtime_root=Path(temp_dir),
+                )
+
+    def test_runtime_root_rejects_conflicting_top_level_modules(self):
+        config = SimpleNamespace(parameterization="subs", time_conditioning=True)
+        previous = sys.modules.get("noise_schedule")
+        conflicting = ModuleType("noise_schedule")
+        conflicting.__file__ = "/tmp/unrelated_runtime/noise_schedule.py"
+        sys.modules["noise_schedule"] = conflicting
+        try:
+            with self.assertRaisesRegex(RuntimeError, "conflicting top-level"):
+                build_upstream_dlm_hidden_state_encoder(
+                    config,
+                    11,
+                    runtime_root=Path(__file__).resolve().parents[1],
+                )
+        finally:
+            if previous is None:
+                sys.modules.pop("noise_schedule", None)
+            else:
+                sys.modules["noise_schedule"] = previous
 
 
 if __name__ == "__main__":

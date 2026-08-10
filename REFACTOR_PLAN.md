@@ -150,6 +150,12 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   150 dpi raster 逐 channel 完全一致；
 - [x] 移除 `judge_generated_mols_MIC.py` 的模型复制、绝对路径、scoring/statistics/plotting 混合主体；
   仅保留委托到 canonical scorer 的 Core compatibility bridge；
+- [x] 将 `temp_predict_mic_from_peptide_csv.py` 的 peptide conversion、多 strain padded-batch scoring、CSV
+  assembly 和 violin plot 迁入 canonical package/CLI；正式 32-sample batch 的 conversion、CLS、两个
+  strain logits 和 predictions 均与 tagged legacy 精确一致，并精确复核历史 CSV rows；
+- [x] 冻结 peptide-table batch-size sensitivity：历史 batch size 为 32，DLM 当前忽略 attention mask，
+  因此 batch size/composition 是 prediction protocol，不是单纯性能参数；
+- [x] 确认该 temp script 无外部 runtime caller 和正式论文/reviewer consumer 后从 active tree 删除；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
@@ -157,7 +163,8 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
 
 验收：state-dict keys 严格一致；固定 batch predictions 达到约定的逐值或数值容差一致。
 
-迁移证据见 `reproducibility/candidate_mic_migration_parity.json`。跨仓库 source contract 记录于
+迁移证据见 `reproducibility/candidate_mic_migration_parity.json` 与
+`reproducibility/peptide_table_migration_parity.json`。跨仓库 source contract 记录于
 `docs/CROSS_REPO_CONTRACTS.md`；机器可读资产/源码检查为
 `reproducibility/cross_repo_contracts.json`，执行入口为 `scripts/audit/cross_repo_contracts.py`。当前七项
 source/AST 检查通过；candidate scorer 已完成正式 GPU replay，但 full sampler 仍未完成。

@@ -56,6 +56,11 @@ Genome embedding 在 load 时乘 `1e14`；ATCC/text embedding 使用各自 filen
 改变数值，但改变文件名、scale 或 normalized strain key 都会改变 condition lookup，因此必须作为独立
 breaking change 处理。
 
+Peptide-table screening 仍消费 Core 的同一个 clean MIC checkpoint 和 condition embeddings，但没有被 Core
+或 Generation import。它的历史 padded batch 没有向 DLM 传递 attention mask，因此 batch size/composition
+会影响预测；复现 2026-03-27 camel-milk output 时 batch size 固定为 32。该边界已记录在
+`reproducibility/peptide_table_migration_parity.json`，不能在跨仓库路径整理时顺手改变。
+
 ## 4. 当前允许与禁止的重构
 
 允许：

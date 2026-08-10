@@ -47,13 +47,31 @@ batch logits/MIC。默认不写产物，只输出 JSON；可用 `--legacy-source
 CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
   scripts/audit/compare_legacy_candidate_mic.py \
   --core-root /path/to/ApexOracle-Core \
-  --generation-root /path/to/ApexOracle-Generation \
   --checkpoint /path/to/clean_mic_checkpoint.pth \
   --generation-file /path/to/generated_selfies.txt \
   --strain BAA-3170 --limit 2
 ```
 
 正式冻结结果见 `reproducibility/candidate_mic_migration_parity.json`。
+
+## `compare_legacy_peptide_table_mic.py`
+
+用途：从 snapshot tag 临时提取已从 active tree 删除的 `temp_predict_mic_from_peptide_csv.py`，比较真实
+peptide rows 的 RDKit/SELFIES conversion、正式 checkpoint 的 padded DLM CLS、两个 strain logits、完整
+prediction frame，并对照 2026-03-27 历史 CSV。默认选择历史第一个完整 batch（rows 0--31）和 invalid
+row 534；`--batch-size 32` 是复现协议，不可在 parity audit 中任意缩小。
+
+```bash
+CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src python \
+  scripts/audit/compare_legacy_peptide_table_mic.py \
+  --core-root /path/to/ApexOracle-Core \
+  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --input /path/to/Camel_All_Peptide_Protein_unique.csv \
+  --historical-predictions /path/to/camel_milk_mic_predictions.csv \
+  --strains '#002' 15697 --batch-size 32
+```
+
+正式冻结结果见 `reproducibility/peptide_table_migration_parity.json`。
 
 ## `cross_repo_contracts.py`
 

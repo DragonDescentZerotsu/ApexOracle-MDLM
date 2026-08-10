@@ -11,6 +11,7 @@ from apexoracle_mdlm.scoring import (
     normalize_selfies_for_tokenizer,
     read_selfies_file,
     regression_logit_to_mic,
+    score_selfies_across_strains,
     score_selfies_strings,
 )
 
@@ -40,6 +41,20 @@ class LogitOnlyModel(nn.Module):
     def forward(self, input_ids, strain):
         del strain
         return input_ids.sum(dim=1, keepdim=True).to(torch.float32) / 10
+
+
+class ReusableEncodingModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.encode_calls = 0
+
+    def encode_molecules(self, input_ids):
+        self.encode_calls += 1
+        return input_ids.sum(dim=1, keepdim=True).to(torch.float32)
+
+    def predict_from_cls_embedding(self, embeddings, strain):
+        offset = {"A": 0.0, "B": 1.0}[strain]
+        return embeddings / 10 + offset
 
 
 class CandidateMICScoringTests(unittest.TestCase):
@@ -118,6 +133,43 @@ class CandidateMICScoringTests(unittest.TestCase):
             path = Path(temp_dir) / "molecules.txt"
             path.write_text("[C]\n\n[N]\n", encoding="utf-8")
             self.assertEqual(read_selfies_file(path), ["[C]", "", "[N]"])
+
+    def test_multi_strain_batches_reuse_each_molecule_encoding(self):
+        tokenizer = FakeTokenizer()
+        model = ReusableEncodingModel()
+        strings = ["[C]", "[N]", "[O]"]
+        result = score_selfies_across_strains(
+            model,
+            tokenizer,
+            strings,
+            strains=["A", "B"],
+            batch_size=2,
+            device="cpu",
+        )
+        self.assertEqual(model.encode_calls, 2)
+        self.assertEqual(set(result), {"A", "B"})
+        self.assertEqual(len(result["A"]), 3)
+        self.assertTrue(torch.equal(result["B"], result["A"] / 10))
+
+    def test_multi_strain_scoring_rejects_ambiguous_protocol(self):
+        with self.assertRaisesRegex(ValueError, "positive"):
+            score_selfies_across_strains(
+                ReusableEncodingModel(),
+                FakeTokenizer(),
+                ["[C]"],
+                strains=["A"],
+                batch_size=0,
+                device="cpu",
+            )
+        with self.assertRaisesRegex(ValueError, "duplicates"):
+            score_selfies_across_strains(
+                ReusableEncodingModel(),
+                FakeTokenizer(),
+                ["[C]"],
+                strains=["A", "A"],
+                batch_size=1,
+                device="cpu",
+            )
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@
 | MIC guidance | `guaidance_regressor_all_data*.py` | clean/noisy、padding、CLS/mean 等不同历史协议 | M3 通过 profiles 统一代码，协议差异保留为 config，不改 checkpoint schema |
 | Peptide classifier | `guaidance_classifier_all_data*.py` | generation guidance head；v1 checkpoint 与 v2 label data 不可混写 | M3 分开 v1 provenance 与 v2 experimental trainer |
 | Synergy guidance | `synergy_Evo_train_new_reg_MDLM_one_base_model_all_data_classification*.py` | all-data/post-paper generation support，不等于论文 synergy CV | 标为 experimental；默认 release quickstart 不启用 |
-| Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`、`temp_predict_mic_from_peptide_csv.py` | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
+| Candidate scoring | `judge_generated_mols_*`、`judge_mol_*`；历史 `temp_predict_mic_from_peptide_csv.py` 已迁移删除 | 重要 downstream 功能，但包含模型定义复制、全局 Hydra、绝对路径、绘图和 I/O 混合 | M3 拆为 scoring library、CLI 和 plotting examples |
 | Chemistry | `DBAASP_semiles_to_SELFEIS.py`、`aa_seq_to_smiles.py`、`smiles_to_peptide.py`、`match_molecules.py` | 历史转换与 catalog matching | 新 chemistry 优先依赖 PepLink；历史 parser 仅为复现保留 |
 | Hugging Face | `huggingface/`、`huggingface_push.py` | model/tokenizer wrapper 与发布副本 | 核验现有 HF revision、权重 SHA 和 license 后决定 canonical exporter |
 | Case study/debug | `temp_milk*`、`p_value_reference.py`、`debug*.py`、notebooks | milk/camel/in-vivo plotting、诊断和一次性分析混杂 | 先由 tag 保存；必要者迁入 `examples/`，其余在 M4 归档移除 |
@@ -164,3 +164,29 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   `paper_figure_lineage.json`；恢复点仍为原 annotated tag；
 - 未完成：其他 `judge_*`、`save_*`、clean/noisy guidance profiles 和 full Generation sampler 不由本批
   自动宣称等价或删除。
+
+### M3d peptide-table multi-strain MIC pipeline（2026-08-09）
+
+- legacy 来源：`legacy-code-snapshot-2026-08-09:temp_predict_mic_from_peptide_csv.py`，SHA-256
+  `576cf459...eb8d`；原 748 行脚本复制 DLM/head/embedding loaders，同时混合作者绝对路径、camel-milk
+  defaults、conversion、batch inference、CSV 与 plotting；
+- consumer audit：Core、Generation、正式 manuscript/reviewer 文档均无 runtime 或资产引用；本机存在
+  2026-03-27 的内部 camel-milk input/preprocessed/prediction 三个 ignored CSV，可作为正式历史对照；
+- canonical 新入口：`apexoracle_mdlm.scoring.peptide_table`、
+  `CandidateMICRegressor.encode_molecules/predict_from_cls_embedding`、
+  `apexoracle_mdlm.figures.plot_mic_distribution` 与
+  `scripts/reproduce/score_peptide_table_mic.py`；
+- 真实历史资产：73,520 input rows，73,456 valid、64 `contains_X` invalid；prediction CSV 有 13 strain
+  columns。三个文件的 size/SHA-256 均记录在 `reproducibility/peptide_table_migration_parity.json`，继续
+  ignored，不进入 Git；
+- 正式 parity：rows 0--31 加 invalid row 534，batch size 32、padded shape `(32, 354)`，conversion frame、
+  DLM CLS、`#002`/`15697` logits、legacy/canonical prediction frame 全部精确一致；两个 strain 还与历史
+  CSV float32 rows 精确一致；单卡峰值 allocated 9,170,008,576 bytes；
+- public CLI smoke：在不把 repo root 加入 `PYTHONPATH` 的条件下通过显式 `--runtime-root` 成功加载
+  attributed top-level runtime，生成 32-row structures/predictions CSV、manifest 和两个非空 violin PDFs；
+  两个 prediction columns 对历史前 32 rows 最大差异均为 `0.0`；
+- 新发现并冻结的边界：旧 DLM 不消费 attention mask，因此改变 batch composition/size 会改变 padding，
+  可能改变 prediction；历史 camel-milk protocol 必须用 batch size 32，并由每次 manifest 记录。修复
+  attention mask 属于未来 versioned scientific protocol，不能在清理中静默改变；
+- 清理结果：canonical replacement、正式 parity、historical lineage 和 consumer audit 均完成，旧 root
+  script 已从 active tree 删除；完整源码由 snapshot tag 恢复，不保留第二份 legacy copy。

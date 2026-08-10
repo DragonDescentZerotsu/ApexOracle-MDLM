@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+"""Convert a peptide CSV and score it across one or more strain conditions."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import torch
+from hydra import compose, initialize_config_dir
+from transformers import AutoTokenizer
+
+from apexoracle_mdlm.figures import plot_mic_distribution
+from apexoracle_mdlm.scoring import (
+    add_mic_predictions,
+    conversion_summary,
+    convert_peptides_to_structures,
+    load_candidate_mic_regressor,
+    load_condition_embedding_banks,
+    load_peptide_table,
+)
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(16 * 1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def parse_args() -> argparse.Namespace:
+    repository_root = Path(__file__).resolve().parents[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--runtime-root", type=Path, default=repository_root)
+    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--peptide-column", default="Peptide")
+    parser.add_argument("--protein-column", default="Protein")
+    parser.add_argument("--strains", nargs="+", required=True)
+    parser.add_argument("--config-dir", type=Path, required=True)
+    parser.add_argument("--config-name", default="config")
+    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--genome-embeddings", type=Path, required=True)
+    parser.add_argument("--atcc-text-embeddings", type=Path, required=True)
+    parser.add_argument("--text-only-embeddings", type=Path, required=True)
+    parser.add_argument("--tokenizer", default="ibm-research/materials.selfies-ted")
+    parser.add_argument("--device", default="cuda")
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--limit", type=int)
+    parser.add_argument("--output-directory", type=Path, required=True)
+    parser.add_argument("--structures-name", default="peptide_structures.csv")
+    parser.add_argument("--predictions-name", default="peptide_mic_predictions.csv")
+    parser.add_argument("--plot", action="store_true")
+    parser.add_argument("--hash-checkpoint", action="store_true")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    if args.batch_size < 1:
+        raise ValueError("--batch-size must be positive.")
+    if len(set(args.strains)) != len(args.strains):
+        raise ValueError("--strains must not contain duplicates.")
+    device = torch.device(args.device)
+    if device.type != "cuda" or not torch.cuda.is_available():
+        raise RuntimeError(
+            "The attributed upstream DiT runtime requires an available CUDA device."
+        )
+    peptide_frame = load_peptide_table(
+        args.input,
+        peptide_column=args.peptide_column,
+        protein_column=args.protein_column,
+        limit=args.limit,
+    )
+    structure_frame = convert_peptides_to_structures(peptide_frame)
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+    with initialize_config_dir(
+        config_dir=str(args.config_dir.resolve()),
+        version_base=None,
+    ):
+        config = compose(config_name=args.config_name)
+    banks = load_condition_embedding_banks(
+        genome_directory=args.genome_embeddings,
+        atcc_text_directory=args.atcc_text_embeddings,
+        text_only_directory=args.text_only_embeddings,
+    )
+    model = load_candidate_mic_regressor(
+        config,
+        vocab_size=len(tokenizer.get_vocab()),
+        condition_embeddings=banks,
+        checkpoint_path=args.checkpoint,
+        device=device,
+        runtime_root=args.runtime_root.resolve(),
+    )
+    prediction_frame = add_mic_predictions(
+        structure_frame,
+        model,
+        tokenizer,
+        strains=args.strains,
+        batch_size=args.batch_size,
+        device=str(device),
+    )
+
+    args.output_directory.mkdir(parents=True, exist_ok=True)
+    structures_path = args.output_directory / args.structures_name
+    predictions_path = args.output_directory / args.predictions_name
+    structure_frame.to_csv(structures_path, index=False)
+    prediction_frame.to_csv(predictions_path, index=False)
+    figures: list[dict[str, object]] = []
+    if args.plot:
+        figure_directory = args.output_directory / "violin_figures"
+        figure_directory.mkdir(parents=True, exist_ok=True)
+        for strain in args.strains:
+            if not prediction_frame[strain].gt(0).any():
+                continue
+            output = figure_directory / f"strain_{strain}_MIC_distribution.pdf"
+            figure, _ = plot_mic_distribution(
+                prediction_frame[strain].to_numpy(),
+                strain=strain,
+            )
+            figure.savefig(output, format="pdf", bbox_inches="tight", dpi=300)
+            plt.close(figure)
+            figures.append(
+                {"strain": strain, "path": str(output), "sha256": sha256(output)}
+            )
+    manifest = {
+        "schema_version": 1,
+        "input": {
+            "path": str(args.input),
+            "sha256": sha256(args.input),
+        },
+        "columns": {
+            "peptide": args.peptide_column,
+            "protein": args.protein_column,
+        },
+        "conversion": conversion_summary(structure_frame),
+        "strains": args.strains,
+        "batch_size": args.batch_size,
+        "runtime_root": str(args.runtime_root.resolve()),
+        "tokenizer": args.tokenizer,
+        "checkpoint": {
+            "path": str(args.checkpoint),
+            "bytes": args.checkpoint.stat().st_size,
+            "sha256": sha256(args.checkpoint) if args.hash_checkpoint else None,
+        },
+        "outputs": {
+            "structures": {
+                "path": str(structures_path),
+                "sha256": sha256(structures_path),
+            },
+            "predictions": {
+                "path": str(predictions_path),
+                "sha256": sha256(predictions_path),
+            },
+            "figures": figures,
+        },
+    }
+    manifest_path = args.output_directory / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(manifest, indent=2, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

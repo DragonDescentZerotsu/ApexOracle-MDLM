@@ -65,6 +65,26 @@ class CodeLineageLedgerTests(unittest.TestCase):
             "verified_canonical_migration_and_formal_parity",
         )
 
+    def test_peptide_table_legacy_driver_is_replaced_and_recoverable(self):
+        self.assertNotIn("temp_predict_mic_from_peptide_csv.py", self.by_path)
+        manifest = json.loads(
+            (
+                ROOT / "reproducibility" / "peptide_table_migration_parity.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(manifest["status"], "passed")
+        self.assertTrue(manifest["legacy_source"]["active_tree_removed"])
+        self.assertEqual(
+            manifest["historical_case_study"]["conversion_counts"],
+            {
+                "valid": 73456,
+                "invalid": 64,
+                "invalid_reason_counts": {"contains_X": 64},
+            },
+        )
+        for path in manifest["canonical_components"]:
+            self.assertTrue((ROOT / path).is_file(), path)
+
     def test_major_copied_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""

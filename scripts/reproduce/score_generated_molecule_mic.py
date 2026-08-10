@@ -30,7 +30,9 @@ def sha256(path: Path) -> str:
 
 
 def parse_args() -> argparse.Namespace:
+    repository_root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser()
+    parser.add_argument("--runtime-root", type=Path, default=repository_root)
     parser.add_argument("--config-dir", type=Path, required=True)
     parser.add_argument("--config-name", default="config")
     parser.add_argument("--checkpoint", type=Path, required=True)
@@ -74,6 +76,7 @@ def main() -> None:
         condition_embeddings=banks,
         checkpoint_path=args.checkpoint,
         device=device,
+        runtime_root=args.runtime_root.resolve(),
     )
     selfies_strings = read_selfies_file(args.generation_file)
     predictions = score_selfies_strings(
@@ -110,6 +113,7 @@ def main() -> None:
         "tokenizer": args.tokenizer,
         "config_name": args.config_name,
         "config_dir": str(args.config_dir),
+        "runtime_root": str(args.runtime_root.resolve()),
         "checkpoint": {
             "path": str(args.checkpoint),
             "bytes": args.checkpoint.stat().st_size,

@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from contextlib import nullcontext
+import importlib
+from os import PathLike
+from pathlib import Path
+import sys
 from typing import Any, Callable
 
 import torch
@@ -95,15 +99,45 @@ class DLMHiddenStateEncoder(nn.Module):
 def build_upstream_dlm_hidden_state_encoder(
     config: Any,
     vocab_size: int,
+    *,
+    runtime_root: str | PathLike[str] | None = None,
 ) -> DLMHiddenStateEncoder:
     """Build the adapter from this checkout's attributed upstream runtime."""
 
-    from models.dit import DIT
-    from noise_schedule import get_noise
+    root = (
+        Path(runtime_root).resolve()
+        if runtime_root is not None
+        else Path(__file__).resolve().parents[3]
+    )
+    required = (root / "models" / "dit.py", root / "noise_schedule.py")
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(
+            "Attributed upstream MDLM runtime is incomplete; missing: "
+            + ", ".join(missing)
+        )
+    for module_name in ("models", "noise_schedule"):
+        loaded_module = sys.modules.get(module_name)
+        loaded_path = getattr(loaded_module, "__file__", None)
+        if loaded_path is not None and root not in Path(loaded_path).resolve().parents:
+            raise RuntimeError(
+                f"A conflicting top-level {module_name!r} module is already imported "
+                f"from {loaded_path}; expected the attributed runtime under {root}."
+            )
+    root_string = str(root)
+    inserted = root_string not in sys.path
+    if inserted:
+        sys.path.insert(0, root_string)
+    try:
+        dit_module = importlib.import_module("models.dit")
+        noise_module = importlib.import_module("noise_schedule")
+    finally:
+        if inserted:
+            sys.path.remove(root_string)
 
     return DLMHiddenStateEncoder(
         config,
         vocab_size,
-        backbone_factory=lambda cfg, size: DIT(cfg, vocab_size=size),
-        noise_factory=get_noise,
+        backbone_factory=lambda cfg, size: dit_module.DIT(cfg, vocab_size=size),
+        noise_factory=noise_module.get_noise,
     )

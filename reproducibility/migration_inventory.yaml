@@ -36,10 +36,11 @@ groups:
     phase: M4
     action: retain_as_experimental
   - id: candidate_scoring
-    globs: [judge_generated_mols_*.py, judge_mol_*.py, judge_smi2pep2smi_mol_mic_with_fig.py, temp_predict_mic_from_peptide_csv.py]
+    globs: [judge_generated_mols_*.py, judge_mol_*.py, judge_smi2pep2smi_mol_mic_with_fig.py]
+    migrated_and_removed: [temp_predict_mic_from_peptide_csv.py]
     target: src/apexoracle_mdlm/scoring
     phase: M3
-    action: canonical_filename_parser_migrated_then_split_library_cli_plotting
+    action: canonical_candidate_and_peptide_table_paths_migrated_then_continue_split_library_cli_plotting
   - id: chemistry_legacy
     paths: [DBAASP_semiles_to_SELFEIS.py, aa_seq_to_smiles.py, smiles_to_peptide.py, match_molecules.py]
     target_dependency: PepLink

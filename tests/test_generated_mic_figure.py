@@ -9,6 +9,7 @@ matplotlib.use("Agg")
 from apexoracle_mdlm.figures import (
     load_generated_mic_records,
     plot_generated_mic_distributions,
+    plot_mic_distribution,
     summarize_generated_mic_records,
 )
 
@@ -58,6 +59,21 @@ class GeneratedMICFigureTests(unittest.TestCase):
             output = Path(temp_dir) / "panel.pdf"
             figure.savefig(output, bbox_inches="tight")
             self.assertGreater(output.stat().st_size, 10_000)
+
+    def test_generic_mic_distribution_filters_invalid_values(self):
+        figure, axis = plot_mic_distribution(
+            [1.0, 2.0, float("nan"), -1.0],
+            strain="test-strain",
+        )
+        self.assertEqual(
+            axis.get_title(), "Molecule MIC distribution\nagainst test-strain"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "distribution.pdf"
+            figure.savefig(output, bbox_inches="tight")
+            self.assertGreater(output.stat().st_size, 1_000)
+        with self.assertRaisesRegex(ValueError, "No finite positive"):
+            plot_mic_distribution([float("nan")], strain="empty")
 
 
 if __name__ == "__main__":

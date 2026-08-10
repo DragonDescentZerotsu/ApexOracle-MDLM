@@ -143,7 +143,19 @@ import 保留的 thin compatibility bridge；ledger disposition 为 `remove_brid
 Core 改用 package 并通过跨仓库 caller test 后，bridge 也从最终 public tree 删除。旧实现始终可由 snapshot
 tag 精确恢复。
 
-## 7. 下一轮人工核验队列
+## 7. Peptide-table scorer 已完成迁移删除
+
+历史 `temp_predict_mic_from_peptide_csv.py` 没有外部 runtime caller 或正式论文/reviewer consumer，但其
+peptide → RDKit SMILES → SELFIES、多 strain batch scoring 和 invalid-row preservation 是可复用功能，因此
+没有直接作为 snapshot-only 丢弃。该行为现已迁入 `apexoracle_mdlm.scoring.peptide_table` 和参数化 CLI，
+并以正式 checkpoint、历史 camel-milk input/output 做过 exact parity。
+
+审计还发现 batch size 是科学协议：旧 DLM 忽略 attention mask，同一 sequence 所见 padding 随 batch
+composition 改变。历史 73,520-row 输出使用 batch size 32；canonical manifest 必须记录该值。旧 748 行
+root script 的 migration gate 已满足并从 active tree 删除，hash、counts、parity 和恢复命令见
+`reproducibility/peptide_table_migration_parity.json`。
+
+## 8. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：

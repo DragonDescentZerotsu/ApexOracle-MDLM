@@ -13,7 +13,7 @@ ApexOracle-Generation 的源码。
 需要 Python 3.9+ 和 PyTorch：
 
 ```bash
-python -m pip install -e '.[scoring,figure]'
+python -m pip install -e '.[scoring,figure,peptide-table]'
 ```
 
 正式 candidate scoring 还需要与 upstream MDLM 兼容的运行环境，以及 ApexOracle-Core 提供的三个
@@ -26,6 +26,7 @@ condition-embedding 目录。checkpoint、embedding、generated molecules、cach
 
 ```bash
 PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
+  --runtime-root . \
   --config-dir configs \
   --checkpoint /path/to/clean_mic_checkpoint.pth \
   --genome-embeddings /path/to/Genome_embs \
@@ -41,6 +42,29 @@ PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
 新实现保持历史 checkpoint fields、clean `t=0` hidden-state path、genome/text conditioning、bfloat16
 attention/head execution 和 MIC inverse transform。正式 legacy/new 等价结果记录在
 `reproducibility/candidate_mic_migration_parity.json`。
+
+## Peptide-table MIC screening
+
+Canonical table workflow 保留所有输入行，将 peptide 依次转换为 RDKit canonical SMILES 和 SELFIES，再让
+每个 padded DLM batch 复用于多个 strain condition：
+
+```bash
+PYTHONPATH=src python scripts/reproduce/score_peptide_table_mic.py \
+  --runtime-root . \
+  --input /path/to/peptides.csv \
+  --strains '#002' 15697 \
+  --config-dir configs \
+  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --genome-embeddings /path/to/Genome_embs \
+  --atcc-text-embeddings /path/to/ATCC/embeddings \
+  --text-only-embeddings /path/to/wo_ATCC/embeddings \
+  --device cuda --batch-size 32 \
+  --output-directory results/peptide_screen --plot
+```
+
+这里的 batch size 属于历史科学协议：attributed DLM path 接收 padding token，但没有使用 tokenizer
+attention mask。复现历史 camel-milk screen 必须使用 `32`；canonical CLI 会在 `manifest.json` 中记录该值。
+迁移和历史输出 hash 见 `reproducibility/peptide_table_migration_parity.json`。
 
 ## 复现论文 Fig. 3a source panel
 

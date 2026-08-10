@@ -63,8 +63,9 @@
   并用 `legacy_squeeze` 冻结 batch-size-one 历史 shape。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_model_heads -v`。本批仍未切换 legacy callers。
 - `apexoracle_mdlm.models.DLMHiddenStateEncoder`：clean `t=0` DLM hidden-state adapter；主要参数为 upstream
-  config 与 vocab size，输入 token IDs，输出逐 token hidden states。`build_upstream_dlm_hidden_state_encoder`
-  保持历史 RNG consumption、bfloat16 blocks 与 state keys。Focused 验证：
+  config、vocab size 与显式 `runtime_root`（需包含 top-level `models/dit.py`、`noise_schedule.py`），输入 token
+  IDs，输出逐 token hidden states。`build_upstream_dlm_hidden_state_encoder` 默认从 source checkout 推导 root，
+  并拒绝冲突的外部 `models` package；保持历史 RNG consumption、bfloat16 blocks 与 state keys。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_dlm_encoder -v`。
 - `apexoracle_mdlm.scoring`：`CandidateMICRegressor`、`load_candidate_mic_regressor`、
   `load_condition_embedding_banks` 与 `score_selfies_strings`；输入为显式 checkpoint/embedding/tokenizer/
@@ -79,6 +80,14 @@
   或匹配文件名。旧 `judge_generated_mols_MIC.py` 主体已删除；同名文件仅为 Core 动态 import 保留 thin
   compatibility bridge，所有新 caller 必须使用 package。
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_generated_files -v`。
+- `apexoracle_mdlm.scoring` 的 peptide-table contract：`load_peptide_table`、
+  `convert_peptides_to_structures`、`score_selfies_across_strains` 与 `add_mic_predictions`；输入为显式列名、
+  peptide table、strain list、batch size 和 device，输出保留 invalid rows 的 structure/prediction frames。
+  `CandidateMICRegressor.encode_molecules`/`predict_from_cls_embedding` 允许一个 padded DLM batch 复用多个
+  strain。公开入口为 `scripts/reproduce/score_peptide_table_mic.py`，输出两个 CSV、manifest 和可选 figures。
+  历史 protocol 的 batch size 固定为 32，因为 DLM 不消费 attention mask；改变 batch size 必须作为新
+  protocol 并重新验证。Focused 验证：`PYTHONPATH=src python -m unittest tests.test_peptide_table -v`；正式
+  parity 见 `reproducibility/peptide_table_migration_parity.json`。
 - 跨仓库只读审计入口：`PYTHONPATH=src python scripts/audit/cross_repo_contracts.py
   --synergy-root <core> --generation-root <generation>`；主要参数为三个 repo roots 和可选 manifest，输出
   stdout JSON，不写文件；`--check-assets` 仅用于 trusted formal checkpoints，以 CPU `mmap` 追加 schema

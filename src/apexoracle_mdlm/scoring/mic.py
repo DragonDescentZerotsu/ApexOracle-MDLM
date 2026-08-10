@@ -157,9 +157,18 @@ class CandidateMICRegressor(nn.Module):
         text = text.unsqueeze(0).expand(batch_size, -1, -1)
         return genome, text
 
-    def forward(self, input_ids: torch.Tensor, strain: str) -> torch.Tensor:
-        molecule_hidden = self.mdlm_model(input_ids)
-        molecule_cls = molecule_hidden[:, 0, :]
+    def encode_molecules(self, input_ids: torch.Tensor) -> torch.Tensor:
+        """Encode a padded token batch once and return its first-token states."""
+
+        return self.mdlm_model(input_ids)[:, 0, :]
+
+    def predict_from_cls_embedding(
+        self,
+        molecule_cls: torch.Tensor,
+        strain: str,
+    ) -> torch.Tensor:
+        """Apply one strain condition to precomputed molecule CLS states."""
+
         genome, text = self._conditions(
             strain,
             batch_size=molecule_cls.shape[0],
@@ -190,16 +199,27 @@ class CandidateMICRegressor(nn.Module):
             )
             return self.reg_head(fused)
 
+    def forward(self, input_ids: torch.Tensor, strain: str) -> torch.Tensor:
+        return self.predict_from_cls_embedding(
+            self.encode_molecules(input_ids),
+            strain,
+        )
+
 
 def build_candidate_mic_regressor(
     config: Any,
     *,
     vocab_size: int,
     condition_embeddings: ConditionEmbeddingBanks,
+    runtime_root: str | PathLike[str] | None = None,
 ) -> CandidateMICRegressor:
     """Build the formal 768/8192/4096 scorer from the upstream runtime."""
 
-    encoder = build_upstream_dlm_hidden_state_encoder(config, vocab_size)
+    encoder = build_upstream_dlm_hidden_state_encoder(
+        config,
+        vocab_size,
+        runtime_root=runtime_root,
+    )
     return CandidateMICRegressor(encoder, condition_embeddings)
 
 
@@ -210,6 +230,7 @@ def load_candidate_mic_regressor(
     condition_embeddings: ConditionEmbeddingBanks,
     checkpoint_path: str | PathLike[str],
     device: str | torch.device,
+    runtime_root: str | PathLike[str] | None = None,
 ) -> CandidateMICRegressor:
     """Build and strictly load a candidate MIC scorer on an explicit device."""
 
@@ -217,6 +238,7 @@ def load_candidate_mic_regressor(
         config,
         vocab_size=vocab_size,
         condition_embeddings=condition_embeddings,
+        runtime_root=runtime_root,
     )
     payload = load_torch_file(
         checkpoint_path,
@@ -272,6 +294,53 @@ def score_selfies_strings(
         mic = regression_logit_to_mic(model(unpadded, strain)).squeeze()
         predictions.append(mic.detach().cpu().to(torch.float32))
     return torch.stack(predictions)
+
+
+@torch.inference_mode()
+def score_selfies_across_strains(
+    model: CandidateMICRegressor,
+    tokenizer: Tokenizer,
+    selfies_strings: Sequence[str],
+    *,
+    strains: Sequence[str],
+    batch_size: int,
+    device: str | torch.device,
+) -> dict[str, torch.Tensor]:
+    """Score padded SELFIES batches while reusing each DLM encoding by strain.
+
+    This is the historical peptide-table protocol. It intentionally differs
+    from :func:`score_selfies_strings`, which removes padding and scores one
+    generated molecule at a time for the paper candidate workflow.
+    """
+
+    if batch_size < 1:
+        raise ValueError("batch_size must be positive.")
+    if len(set(strains)) != len(strains):
+        raise ValueError("strains must not contain duplicates.")
+    results: dict[str, list[torch.Tensor]] = {strain: [] for strain in strains}
+    target_device = torch.device(device)
+    for start in range(0, len(selfies_strings), batch_size):
+        batch = selfies_strings[start : start + batch_size]
+        encoded = tokenizer(
+            [normalize_selfies_for_tokenizer(item) for item in batch],
+            return_tensors="pt",
+            padding=True,
+            truncation=False,
+            add_special_tokens=True,
+        )
+        input_ids = encoded["input_ids"]
+        if input_ids.ndim == 1:
+            input_ids = input_ids.unsqueeze(0)
+        molecule_cls = model.encode_molecules(input_ids.to(target_device))
+        for strain in strains:
+            logits = model.predict_from_cls_embedding(molecule_cls, strain).squeeze(-1)
+            results[strain].append(
+                regression_logit_to_mic(logits).detach().cpu().to(torch.float32)
+            )
+    return {
+        strain: (torch.cat(chunks) if chunks else torch.empty(0, dtype=torch.float32))
+        for strain, chunks in results.items()
+    }
 
 
 def read_selfies_file(path: str | PathLike[str]) -> list[str]:

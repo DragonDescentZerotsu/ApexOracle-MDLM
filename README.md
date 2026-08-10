@@ -13,7 +13,7 @@ to tested libraries, parameterized command-line entries, and reproducibility rec
 Python 3.9 or newer and PyTorch are required. Install the package in editable mode from this module:
 
 ```bash
-python -m pip install -e '.[scoring,figure]'
+python -m pip install -e '.[scoring,figure,peptide-table]'
 ```
 
 Formal candidate scoring additionally needs the upstream-compatible MDLM runtime dependencies from
@@ -27,6 +27,7 @@ and asset location explicitly and writes a row-level CSV plus an optional proven
 
 ```bash
 PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
+  --runtime-root . \
   --config-dir configs \
   --checkpoint /path/to/clean_mic_checkpoint.pth \
   --genome-embeddings /path/to/Genome_embs \
@@ -42,6 +43,30 @@ PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
 The implementation preserves the historical checkpoint fields, clean `t=0` DLM hidden-state path,
 genome/text conditioning, bfloat16 attention/head execution, and inverse MIC transform. Formal
 legacy/new parity evidence is recorded in `reproducibility/candidate_mic_migration_parity.json`.
+
+## Peptide-table MIC screening
+
+The canonical table workflow preserves input rows while converting peptide sequences through RDKit
+canonical SMILES and SELFIES, then reuses each padded DLM batch across multiple strain conditions:
+
+```bash
+PYTHONPATH=src python scripts/reproduce/score_peptide_table_mic.py \
+  --runtime-root . \
+  --input /path/to/peptides.csv \
+  --strains '#002' 15697 \
+  --config-dir configs \
+  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --genome-embeddings /path/to/Genome_embs \
+  --atcc-text-embeddings /path/to/ATCC/embeddings \
+  --text-only-embeddings /path/to/wo_ATCC/embeddings \
+  --device cuda --batch-size 32 \
+  --output-directory results/peptide_screen --plot
+```
+
+Batch size is part of this historical protocol because the attributed DLM path receives padding but
+does not consume the tokenizer attention mask. Use `32` to reproduce the frozen camel-milk screen;
+every canonical run records it in `manifest.json`. Migration and historical-output hashes are in
+`reproducibility/peptide_table_migration_parity.json`.
 
 ## Reproduce the source panel for paper Fig. 3a
 
