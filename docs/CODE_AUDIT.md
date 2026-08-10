@@ -235,3 +235,20 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 - 清理结果：445 行 temp driver 已删除；root `smiles_to_peptide.py` 只保留 canonical parser thin bridge，
   供尚未迁移的两个 legacy caller 过渡，所有新代码直接 import package。完整事实与限制见
   `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`。
+
+### M3g Generation peptide candidate screening 与 round-trip 诊断（2026-08-10）
+
+- 正式 candidate-screen 行为由现有 scorer/parser/renderer 覆盖；CLI 新增 portable
+  `job_id,strain,input` CSV manifest，一次 load model 后可顺序处理多个 Generation files，不再复制 400 多行
+  model/scoring/drawing code；
+- 73-row pool 已冻结为 81 个 target-strain files、120,069 bytes、tree SHA-256 `4990e19c...9666`；其中
+  BAA-3170 为 41 files/23 rows，BAA-3197 为 40 files/50 rows；
+- 当前 `judge_mol_mic_with_fig.py` 实际硬编码 BS60/66/70/86 和 Ben project embeddings，与 73-row BAA
+  profile 不同；没有 producer command、逐条 MIC 或 timestamped revision，故只确认 protocol 与高置信产物
+  血缘，不作 byte-exact producer claim；
+- `smi2pep2smi` 使用 handcrafted residue table 重建 linear structures、关闭 threshold 后重新评分；两份输出为
+  23/9 rows，图片为 15 张，且没有 consumer，因此作为 snapshot-only internal diagnostic；
+- 清理结果：删除两个 root mixed drivers、仅被 round-trip caller 使用的 2,325 行 `aa_seq_to_smiles.py` 和已无
+  caller 的 parser bridge；Core 中内容不同的同名文件未修改。完整 hashes、事实/推断边界和恢复命令见
+  `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md` 与
+  `reproducibility/generation_peptide_screen_lineage.json`。

@@ -171,6 +171,14 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   hashes；case 只作为 provenance 文档，不形成 milk-specific public API；
 - [x] 以正式 checkpoint、两条真实 BAA-999 input 完成 tagged temp driver/canonical scorer exact GPU parity，
   然后从 active tree 删除旧 445 行 temp driver；
+- [x] 将通用 candidate screen 扩展为 `job_id,strain,input` manifest 模式，替代
+  `judge_mol_mic_with_fig.py` 的 Generation 多 length 文件循环；冻结 81 files/73 rows 的 candidate-pool
+  tree hash，并明确当前 BS-profile source 不是 73-row BAA pool 的 byte-exact producer；
+- [x] 核验 `judge_smi2pep2smi_mol_mic_with_fig.py` 是关闭 MIC threshold、以 handcrafted residue table
+  重建 linear peptide 的内部诊断；冻结两份输出和 15 张图片，确认无 runtime/论文/reviewer consumer 后
+  设为 snapshot-only；
+- [x] 删除上述两个重复 scorer/plot drivers、仅供 round-trip 使用的 2,325 行 `aa_seq_to_smiles.py` 以及
+  已无 caller 的 `smiles_to_peptide.py` compatibility bridge；Core 的不同同名副本保持只读未修改；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；

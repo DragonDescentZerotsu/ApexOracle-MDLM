@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Score one structure-encoded peptide pool across explicit strain conditions."""
+"""Screen explicit structure-encoded peptide pool/strain jobs."""
 
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from apexoracle_mdlm.figures import render_annotated_candidate
 from apexoracle_mdlm.scoring import (
     load_candidate_mic_regressor,
     load_condition_embedding_banks,
+    load_peptide_screen_jobs,
     qualification_summary,
     qualify_peptide_candidates,
     read_selfies_file,
@@ -54,8 +55,10 @@ def parse_args() -> argparse.Namespace:
     repository_root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser()
     parser.add_argument("--runtime-root", type=Path, default=repository_root)
-    parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--strains", nargs="+", required=True)
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument("--input", type=Path)
+    input_group.add_argument("--job-manifest", type=Path)
+    parser.add_argument("--strains", nargs="+")
     parser.add_argument("--mic-threshold", type=float, default=15.0)
     parser.add_argument("--config-dir", type=Path, required=True)
     parser.add_argument("--config-name", default="config")
@@ -74,8 +77,30 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    if len(set(args.strains)) != len(args.strains):
-        raise ValueError("--strains must not contain duplicates.")
+    if args.input is not None:
+        if not args.strains:
+            raise ValueError("--strains is required with --input.")
+        if len(set(args.strains)) != len(args.strains):
+            raise ValueError("--strains must not contain duplicates.")
+        jobs = [
+            {
+                "job_id": f"strain_{strain}",
+                "strain": strain,
+                "input_path": args.input.resolve(),
+            }
+            for strain in args.strains
+        ]
+    else:
+        if args.strains:
+            raise ValueError("--strains cannot be combined with --job-manifest.")
+        jobs = [
+            {
+                "job_id": job.job_id,
+                "strain": job.strain,
+                "input_path": job.input_path,
+            }
+            for job in load_peptide_screen_jobs(args.job_manifest)
+        ]
     if args.limit is not None and args.limit < 0:
         raise ValueError("--limit must be non-negative.")
     if args.output_directory.exists() and any(args.output_directory.iterdir()):
@@ -88,9 +113,6 @@ def main() -> None:
             "The attributed upstream DiT runtime requires an available CUDA device."
         )
 
-    selfies_strings = read_selfies_file(args.input)
-    if args.limit is not None:
-        selfies_strings = selfies_strings[: args.limit]
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     with initialize_config_dir(
         config_dir=str(args.config_dir.resolve()), version_base=None
@@ -119,6 +141,8 @@ def main() -> None:
         image_root.mkdir()
     fieldnames = [
         "strain",
+        "job_id",
+        "input_path",
         "row_index",
         "source_selfies",
         "smiles",
@@ -128,16 +152,26 @@ def main() -> None:
         "qualification_status",
         "invalid_reason",
     ]
-    strain_outputs = {}
+    job_outputs = {}
+    input_cache = {}
+    total_scored_rows = 0
     with screen_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
-        for strain in args.strains:
+        for job in jobs:
+            input_path = job["input_path"]
+            if input_path not in input_cache:
+                input_cache[input_path] = read_selfies_file(input_path)
+            source_selfies = input_cache[input_path]
+            selfies_strings = (
+                source_selfies if args.limit is None else source_selfies[: args.limit]
+            )
+            total_scored_rows += len(selfies_strings)
             mic_values = score_selfies_strings(
                 model,
                 tokenizer,
                 selfies_strings,
-                strain=strain,
+                strain=job["strain"],
                 device=device,
             )
             results = qualify_peptide_candidates(
@@ -146,20 +180,27 @@ def main() -> None:
                 mic_threshold=args.mic_threshold,
             )
             for result in results:
-                writer.writerow({"strain": strain, **result.as_row()})
+                writer.writerow(
+                    {
+                        "strain": job["strain"],
+                        "job_id": job["job_id"],
+                        "input_path": str(input_path),
+                        **result.as_row(),
+                    }
+                )
             qualified = [
                 result
                 for result in results
                 if result.qualification_status == "qualified"
             ]
-            qualified_path = qualified_directory / f"strain_{strain}.txt"
+            qualified_path = qualified_directory / f"{job['job_id']}.txt"
             qualified_path.write_text(
                 "\n".join(result.output_selfies for result in qualified),
                 encoding="utf-8",
             )
             images = None
             if args.draw_qualified:
-                image_directory = image_root / f"strain_{strain}"
+                image_directory = image_root / job["job_id"]
                 image_directory.mkdir()
                 for result in qualified:
                     image = render_annotated_candidate(
@@ -175,7 +216,14 @@ def main() -> None:
                         )
                     )
                 images = directory_manifest(image_directory)
-            strain_outputs[strain] = {
+            job_outputs[job["job_id"]] = {
+                "strain": job["strain"],
+                "input": {
+                    "path": str(input_path),
+                    "sha256": sha256(input_path),
+                    "source_rows": len(source_selfies),
+                    "scored_rows": len(selfies_strings),
+                },
                 "qualification": qualification_summary(results),
                 "qualified_selfies": {
                     "path": str(qualified_path),
@@ -186,7 +234,7 @@ def main() -> None:
             }
 
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
         "protocol": {
             "input_format": "one_selfies_per_line",
             "molecule_batch_size": 1,
@@ -196,13 +244,23 @@ def main() -> None:
             "unknown_residue_policy": "exclude_sequence_containing_uppercase_X",
             "drawing_is_qualification_gating": False,
         },
-        "input": {
-            "path": str(args.input),
-            "sha256": sha256(args.input),
-            "source_rows": len(read_selfies_file(args.input)),
-            "scored_rows": len(selfies_strings),
-        },
-        "strains": args.strains,
+        "input_mode": "shared_pool" if args.input is not None else "job_manifest",
+        "job_manifest": (
+            {
+                "path": str(args.job_manifest),
+                "sha256": sha256(args.job_manifest),
+            }
+            if args.job_manifest is not None
+            else None
+        ),
+        "jobs": [
+            {
+                "job_id": job["job_id"],
+                "strain": job["strain"],
+                "input_path": str(job["input_path"]),
+            }
+            for job in jobs
+        ],
         "runtime_root": str(args.runtime_root.resolve()),
         "tokenizer": args.tokenizer,
         "checkpoint": {
@@ -219,9 +277,9 @@ def main() -> None:
             "screen": {
                 "path": str(screen_path),
                 "sha256": sha256(screen_path),
-                "rows": len(selfies_strings) * len(args.strains),
+                "rows": total_scored_rows,
             },
-            "by_strain": strain_outputs,
+            "by_job": job_outputs,
         },
     }
     manifest_path = args.output_directory / "manifest.json"

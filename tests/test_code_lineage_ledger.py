@@ -24,7 +24,11 @@ class CodeLineageLedgerTests(unittest.TestCase):
         tracked = subprocess.check_output(
             ["git", "ls-files"], cwd=ROOT, text=True
         ).splitlines()
-        expected = {path for path in tracked if Path(path).suffix in SUFFIXES}
+        expected = {
+            path
+            for path in tracked
+            if Path(path).suffix in SUFFIXES and (ROOT / path).is_file()
+        }
         self.assertEqual(set(self.by_path), expected)
         self.assertEqual(len(self.by_path), len(self.rows))
 
@@ -159,18 +163,31 @@ class CodeLineageLedgerTests(unittest.TestCase):
         )
         self.assertEqual(case["parser_parity"]["comparisons"], 1081)
         self.assertEqual(case["raster_parity"]["exact_pixel_fraction"], 1.0)
-        bridge = self.by_path["smiles_to_peptide.py"]
-        self.assertEqual(
-            bridge["paper_role"],
-            "compatibility_bridge_for_canonical_peptide_parser",
+
+    def test_generation_candidate_callers_are_replaced_and_recoverable(self):
+        lineage = json.loads(
+            (
+                ROOT / "reproducibility" / "generation_peptide_screen_lineage.json"
+            ).read_text(encoding="utf-8")
         )
+        for legacy_path, metadata in lineage["legacy_sources"].items():
+            self.assertNotIn(legacy_path, self.by_path)
+            legacy_source = subprocess.check_output(
+                [
+                    "git",
+                    "show",
+                    f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(
+                hashlib.sha256(legacy_source).hexdigest(), metadata["sha256"]
+            )
+        self.assertEqual(lineage["formal_candidate_pool"]["rows"], 73)
+        self.assertEqual(lineage["formal_candidate_pool"]["candidate_files"], 81)
         self.assertEqual(
-            bridge["target_disposition"],
-            "remove_bridge_after_legacy_caller_migration",
-        )
-        self.assertEqual(
-            bridge["evidence_status"],
-            "verified_canonical_migration_and_historical_parity",
+            lineage["roundtrip_diagnostic"]["disposition"],
+            "snapshot_only_internal_normalization_diagnostic",
         )
 
     def test_major_copied_definition_group_is_preserved(self):

@@ -2,9 +2,67 @@
 
 from __future__ import annotations
 
+import csv
 import math
+import re
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Callable, Sequence
+
+
+_JOB_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+
+@dataclass(frozen=True)
+class PeptideScreenJob:
+    """One explicitly named candidate-pool/strain screening unit."""
+
+    job_id: str
+    strain: str
+    input_path: Path
+
+
+def load_peptide_screen_jobs(path: str | Path) -> list[PeptideScreenJob]:
+    """Load portable ``job_id,strain,input`` rows from a CSV manifest."""
+
+    manifest_path = Path(path)
+    with manifest_path.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        required = {"job_id", "strain", "input"}
+        missing = required.difference(reader.fieldnames or ())
+        if missing:
+            raise ValueError(
+                "Peptide screen manifest is missing columns: "
+                + ", ".join(sorted(missing))
+            )
+        jobs = []
+        seen_ids = set()
+        for row_number, row in enumerate(reader, start=2):
+            job_id = (row.get("job_id") or "").strip()
+            strain = (row.get("strain") or "").strip()
+            input_value = (row.get("input") or "").strip()
+            if not _JOB_ID_PATTERN.fullmatch(job_id):
+                raise ValueError(f"Invalid job_id at row {row_number}: {job_id!r}.")
+            if job_id in seen_ids:
+                raise ValueError(f"Duplicate job_id: {job_id!r}.")
+            if not strain:
+                raise ValueError(f"Missing strain at row {row_number}.")
+            if not input_value:
+                raise ValueError(f"Missing input at row {row_number}.")
+            input_path = Path(input_value)
+            if not input_path.is_absolute():
+                input_path = manifest_path.parent / input_path
+            jobs.append(
+                PeptideScreenJob(
+                    job_id=job_id,
+                    strain=strain,
+                    input_path=input_path.resolve(),
+                )
+            )
+            seen_ids.add(job_id)
+    if not jobs:
+        raise ValueError("Peptide screen manifest contains no jobs.")
+    return jobs
 
 
 @dataclass(frozen=True)

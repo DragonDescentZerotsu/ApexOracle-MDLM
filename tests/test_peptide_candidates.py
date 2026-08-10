@@ -2,11 +2,11 @@ import unittest
 
 import selfies
 from rdkit import Chem
-from smiles_to_peptide import smiles_to_pepseq
 
 from apexoracle_mdlm.chemistry import smiles_to_peptide_sequence
 from apexoracle_mdlm.figures import render_annotated_candidate
 from apexoracle_mdlm.scoring import (
+    load_peptide_screen_jobs,
     qualification_summary,
     qualify_peptide_candidates,
 )
@@ -19,7 +19,42 @@ class PeptideCandidateTests(unittest.TestCase):
         self.assertEqual(
             smiles_to_peptide_sequence(selfies.encoder(smiles)), (smiles, "ACD")
         )
-        self.assertEqual(smiles_to_pepseq(smiles), (smiles, "ACD"))
+
+    def test_job_manifest_resolves_relative_inputs(self):
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "pool.txt").write_text("[C]\n", encoding="utf-8")
+            manifest = root / "jobs.csv"
+            manifest.write_text(
+                "job_id,strain,input\nlength_256,BAA-3170,pool.txt\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                load_peptide_screen_jobs(manifest)[0].input_path,
+                (root / "pool.txt").resolve(),
+            )
+
+    def test_job_manifest_rejects_unsafe_or_duplicate_ids(self):
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            manifest = root / "jobs.csv"
+            manifest.write_text(
+                "job_id,strain,input\n../bad,A,pool.txt\n", encoding="utf-8"
+            )
+            with self.assertRaisesRegex(ValueError, "Invalid job_id"):
+                load_peptide_screen_jobs(manifest)
+            manifest.write_text(
+                "job_id,strain,input\nsame,A,a.txt\nsame,B,b.txt\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "Duplicate job_id"):
+                load_peptide_screen_jobs(manifest)
 
     def test_qualification_preserves_failed_row_alignment(self):
         def decode(value):

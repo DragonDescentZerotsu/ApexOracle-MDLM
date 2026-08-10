@@ -101,9 +101,11 @@
   head-to-tail cyclic L/D peptide；`apexoracle_mdlm.scoring.qualify_peptide_candidates` 按显式 MIC threshold、
   parser result 和 uppercase `X` policy 保留 row alignment；`apexoracle_mdlm.figures.render_annotated_candidate`
   生成可选结构图。公开入口 `scripts/reproduce/screen_peptide_candidates.py` 接收一份 SELFIES pool 和多个
-  `--strains`，输出完整 status CSV、qualified SELFIES、manifest 与可选 PNG；drawing 不再决定 qualification。
+  `--strains`，或通过 `--job-manifest` 接收 `job_id,strain,input` 多文件任务；输出完整 status CSV、逐 job
+  qualified SELFIES、manifest 与可选 PNG；drawing 不再决定 qualification。
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_peptide_candidates -v`。历史 external-project case
-  只在 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md` 和两个 reproducibility manifests 中记录，不进入 API 命名。
+  只在 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md` 和两个 reproducibility manifests 中记录，不进入 API 命名；
+  Generation 73-row pool 和 snapshot-only round-trip 诊断见 `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md`。
 - 跨仓库只读审计入口：`PYTHONPATH=src python scripts/audit/cross_repo_contracts.py
   --synergy-root <core> --generation-root <generation>`；主要参数为三个 repo roots 和可选 manifest，输出
   stdout JSON，不写文件；`--check-assets` 仅用于 trusted formal checkpoints，以 CPU `mmap` 追加 schema

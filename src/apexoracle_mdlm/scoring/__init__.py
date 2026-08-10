@@ -27,6 +27,8 @@ from .peptide_table import (
 )
 from .peptide_candidates import (
     PeptideCandidateResult,
+    PeptideScreenJob,
+    load_peptide_screen_jobs,
     qualification_summary,
     qualify_peptide_candidates,
 )
@@ -45,6 +47,7 @@ __all__ = [
     "CandidateMICRegressor",
     "ConditionEmbeddingBanks",
     "PeptideCandidateResult",
+    "PeptideScreenJob",
     "STRUCTURE_COLUMNS",
     "StrainInput",
     "StrainScreen",
@@ -58,6 +61,7 @@ __all__ = [
     "load_candidate_mic_regressor",
     "load_condition_embedding_banks",
     "load_peptide_table",
+    "load_peptide_screen_jobs",
     "load_strain_inputs",
     "last_mic_by_selfies",
     "normalize_selfies_for_tokenizer",

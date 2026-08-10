@@ -43,9 +43,11 @@ PYTHONPATH=src python -m unittest tests.test_candidate_mic_scoring \
 
 ## `screen_peptide_candidates.py`
 
-功能：对一份 one-SELFIES-per-line candidate pool 逐 molecule 去 padding scoring，并在多个显式 strain
-conditions 下按 `--mic-threshold`、canonical peptide parser 与 unknown-residue policy 筛选。输出完整
-`candidate_screen.csv`、逐 strain qualified SELFIES、`manifest.json` 和可选 annotated structure PNG。
+功能：对 one-SELFIES-per-line candidate pool 逐 molecule 去 padding scoring，并按 `--mic-threshold`、
+canonical peptide parser 与 unknown-residue policy 筛选。简单模式使用 `--input` 加多个 `--strains`；
+Generation 这种每个 target length 有独立文件的布局使用 `--job-manifest jobs.csv`，CSV 必须含
+`job_id,strain,input`，相对 input path 以 manifest 所在目录解析。两种模式均输出完整
+`candidate_screen.csv`、逐 job qualified SELFIES、`manifest.json` 和可选 annotated structure PNG。
 
 这个入口用于未来任何项目的 peptide candidate triage，不按数据来源命名。原始 peptide sequence CSV 应先
 使用上面的 `score_peptide_table_mic.py`；已经转换为 SELFIES 的 pool 直接使用本入口。focused 验证：
@@ -56,7 +58,8 @@ PYTHONPATH=src python -m unittest tests.test_peptide_candidates \
 ```
 
 历史 external-project case 只作为 provenance，见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`；迁移 parity 见
-`reproducibility/peptide_candidate_screen_parity.json`。
+`reproducibility/peptide_candidate_screen_parity.json`。Generation 的 73-row candidate pool 与已清理
+round-trip diagnostic 边界见 `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md`。
 
 ## `plot_paper_fig3a.py`
 

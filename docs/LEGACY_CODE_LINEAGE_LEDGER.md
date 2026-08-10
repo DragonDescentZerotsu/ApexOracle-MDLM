@@ -185,16 +185,29 @@ tagged/canonical scorer 在正式 checkpoint/真实 inputs 上 exact parity；ta
 因此 temp driver deletion gate 已满足并从 active tree 删除。`smiles_to_peptide.py` 仍是两个未迁移 legacy
 drivers 的 thin compatibility bridge，最终在这些 callers 迁入 package 后删除。
 
-## 10. 下一轮人工核验队列
+## 10. Generation candidate screen 与 round-trip caller 已完成清理
+
+`judge_mol_mic_with_fig.py` 独有的多文件循环现由
+`screen_peptide_candidates.py --job-manifest` 表达；共享 MIC scorer、peptide qualification 和 rendering 已在
+上一批完成正式 checkpoint/parser/raster parity。本批另冻结外部 candidate layout 为 81 files/73 rows，
+并记录当前 legacy source 的 BS profile 与论文 BAA pool 不同，所以不会伪称恢复了不存在的 producer log。
+
+`judge_smi2pep2smi_mol_mic_with_fig.py` 的 sequence round-trip 是无 threshold 的内部 normalization diagnostic；
+没有外部 caller 或正式 consumer，两份输出和 15 张图已 hash。其唯一额外依赖 `aa_seq_to_smiles.py` 在 MDLM
+中没有第二个 caller，Core 的不同副本也不依赖 MDLM 文件。因此两个 drivers、MDLM root builder 和 parser
+bridge 均满足 gate 并从 active tree 删除；恢复命令和机器可读证据见
+`docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md`。
+
+## 11. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
 1. `show.ipynb`、`show_interpretability.ipynb`、`visualize_attn*.py`：输出多、可能包含独有
    interpretability/case-study 图；
-2. `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`：可能同时承担 scorer 和 plot
+2. 剩余 `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`：可能同时承担 scorer 和 plot
    producer，不能先删 UI/plot 部分而破坏 scoring 行为；
-3. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`、`aa_seq_to_smiles.py`：逐项搜索论文图、caption、
+3. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`：逐项搜索论文图、caption、
    reviewer 文档和外部输出 hash；
 4. 没有 plotting marker 的 debug/temp 文件仍需检查独有数据转换或统计逻辑，不能因本轮队列聚焦画图而
    自动放行。
