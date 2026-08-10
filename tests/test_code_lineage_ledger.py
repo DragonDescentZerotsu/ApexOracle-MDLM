@@ -121,6 +121,58 @@ class CodeLineageLedgerTests(unittest.TestCase):
             )
             self.assertEqual(lineage["strains"][strain]["legacy_output"]["rows"], 44608)
 
+    def test_peptide_candidate_driver_is_replaced_and_recoverable(self):
+        legacy_path = "temp_judge_mol_mic_with_fig.py"
+        self.assertNotIn(legacy_path, self.by_path)
+        legacy_source = subprocess.check_output(
+            [
+                "git",
+                "show",
+                f"legacy-code-snapshot-2026-08-09:{legacy_path}",
+            ],
+            cwd=ROOT,
+        )
+        parity = json.loads(
+            (
+                ROOT / "reproducibility" / "peptide_candidate_screen_parity.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(parity["status"], "passed")
+        self.assertEqual(
+            hashlib.sha256(legacy_source).hexdigest(),
+            parity["legacy_sources"][0]["sha256"],
+        )
+        for path in parity["canonical_components"]:
+            self.assertTrue((ROOT / path).is_file(), path)
+        case = json.loads(
+            (
+                ROOT / "reproducibility" / "historical_peptide_screen_case.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(case["status"], "passed")
+        self.assertEqual(case["shared_candidate_pool"]["rows"], 41988)
+        self.assertEqual(
+            sum(
+                value["qualified_selfies"]["rows"] for value in case["strains"].values()
+            ),
+            1081,
+        )
+        self.assertEqual(case["parser_parity"]["comparisons"], 1081)
+        self.assertEqual(case["raster_parity"]["exact_pixel_fraction"], 1.0)
+        bridge = self.by_path["smiles_to_peptide.py"]
+        self.assertEqual(
+            bridge["paper_role"],
+            "compatibility_bridge_for_canonical_peptide_parser",
+        )
+        self.assertEqual(
+            bridge["target_disposition"],
+            "remove_bridge_after_legacy_caller_migration",
+        )
+        self.assertEqual(
+            bridge["evidence_status"],
+            "verified_canonical_migration_and_historical_parity",
+        )
+
     def test_major_copied_definition_group_is_preserved(self):
         with (ROOT / "reproducibility" / "definition_clone_groups.csv").open(
             encoding="utf-8", newline=""

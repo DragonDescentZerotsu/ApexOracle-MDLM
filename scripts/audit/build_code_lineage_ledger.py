@@ -456,6 +456,15 @@ def main() -> None:
                 "ApexOracle-Core 停止动态 import 此文件并通过跨仓库测试后移除薄兼容桥。"
             )
             evidence = "verified_canonical_migration_and_formal_parity"
+        elif relative == "smiles_to_peptide.py":
+            paper_role = "compatibility_bridge_for_canonical_peptide_parser"
+            disposition = "remove_bridge_after_legacy_caller_migration"
+            replacement = "apexoracle_mdlm.chemistry.smiles_to_peptide_sequence"
+            gate = (
+                "原 349 行 parser 已迁入 canonical chemistry package 并在 1,081 个历史 rows 上 parity；"
+                "judge_mol_mic_with_fig.py 与 judge_smi2pep2smi_mol_mic_with_fig.py 改用 package 后移除薄桥。"
+            )
+            evidence = "verified_canonical_migration_and_historical_parity"
 
         absolute_paths = ABSOLUTE_PATH_PATTERN.findall(text)
         rows.append(

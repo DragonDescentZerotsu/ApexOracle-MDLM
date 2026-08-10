@@ -41,6 +41,23 @@ PYTHONPATH=src python -m unittest tests.test_candidate_mic_scoring \
   tests.test_peptide_table tests.test_generated_mic_figure -v
 ```
 
+## `screen_peptide_candidates.py`
+
+功能：对一份 one-SELFIES-per-line candidate pool 逐 molecule 去 padding scoring，并在多个显式 strain
+conditions 下按 `--mic-threshold`、canonical peptide parser 与 unknown-residue policy 筛选。输出完整
+`candidate_screen.csv`、逐 strain qualified SELFIES、`manifest.json` 和可选 annotated structure PNG。
+
+这个入口用于未来任何项目的 peptide candidate triage，不按数据来源命名。原始 peptide sequence CSV 应先
+使用上面的 `score_peptide_table_mic.py`；已经转换为 SELFIES 的 pool 直接使用本入口。focused 验证：
+
+```bash
+PYTHONPATH=src python -m unittest tests.test_peptide_candidates \
+  tests.test_candidate_mic_scoring -v
+```
+
+历史 external-project case 只作为 provenance，见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`；迁移 parity 见
+`reproducibility/peptide_candidate_screen_parity.json`。
+
 ## `plot_paper_fig3a.py`
 
 功能：消费 `reproducibility/paper_fig3a_plotted_data.csv` 的 377 个 frozen exact rows，生成论文 Fig. 3a

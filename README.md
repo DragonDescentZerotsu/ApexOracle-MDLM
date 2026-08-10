@@ -101,6 +101,12 @@ The paper small-molecule MIC screen is available through
 a provenance manifest, and optional per-strain distribution figures. The former root-level temp driver
 is retained only in `legacy-code-snapshot-2026-08-09`.
 
+For recurring project-specific peptide triage, use the generic
+`scripts/reproduce/screen_peptide_candidates.py`: provide one SELFIES candidate pool, explicit strain
+conditions and a MIC threshold. It writes a complete status table, qualified SELFIES, a manifest and
+optional annotated structure images. Historical project provenance is kept separately in
+`docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`; project names are not part of the API.
+
 ## Verification and recovery
 
 ```bash

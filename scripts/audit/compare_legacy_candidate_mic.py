@@ -41,6 +41,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tokenizer", default="ibm-research/materials.selfies-ted")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--limit", type=int, default=2)
+    parser.add_argument(
+        "--legacy-forward-calls",
+        type=int,
+        default=1,
+        help="Replay accidental repeated legacy forwards when characterizing a driver.",
+    )
     parser.add_argument("--output", type=Path)
     return parser.parse_args()
 
@@ -72,6 +78,8 @@ def token_ids(tokenizer, selfies_strings, device):
 def compare(args: argparse.Namespace, legacy_source: Path, legacy_locator: str) -> dict:
     if args.limit < 1:
         raise ValueError("--limit must be positive.")
+    if args.legacy_forward_calls < 1:
+        raise ValueError("--legacy-forward-calls must be positive.")
     device = torch.device(args.device)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but is unavailable.")
@@ -114,7 +122,8 @@ def compare(args: argparse.Namespace, legacy_source: Path, legacy_locator: str) 
     for index, input_ids in enumerate(inputs):
         torch.manual_seed(20260809 + index)
         with torch.inference_mode():
-            legacy_logit = legacy_model(input_ids, args.strain)
+            for _ in range(args.legacy_forward_calls):
+                legacy_logit = legacy_model(input_ids, args.strain)
         torch.manual_seed(20260809 + index)
         with torch.inference_mode():
             canonical_logit = canonical_model(input_ids, args.strain)
@@ -139,7 +148,8 @@ def compare(args: argparse.Namespace, legacy_source: Path, legacy_locator: str) 
         batched_input_ids = torch.cat(inputs, dim=0)
         torch.manual_seed(20260819)
         with torch.inference_mode():
-            legacy_batch_logits = legacy_model(batched_input_ids, args.strain)
+            for _ in range(args.legacy_forward_calls):
+                legacy_batch_logits = legacy_model(batched_input_ids, args.strain)
         torch.manual_seed(20260819)
         with torch.inference_mode():
             canonical_batch_logits = canonical_model(batched_input_ids, args.strain)
@@ -174,6 +184,7 @@ def compare(args: argparse.Namespace, legacy_source: Path, legacy_locator: str) 
         "generation_file": str(args.generation_file),
         "strain": args.strain,
         "device": str(device),
+        "legacy_forward_calls": args.legacy_forward_calls,
         "comparisons": comparisons,
         "batch_comparison": batch_comparison,
         "peak_gpu_memory_bytes": (

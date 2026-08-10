@@ -213,3 +213,25 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   单卡峰值 allocated 9,170,041,344 bytes；两条长度不同，因此不建立不适用的 padded batch parity claim；
 - 清理结果：library/CLI/tests、frozen lineage、真实 GPU parity 与 consumer audit 已满足 deletion gate，旧
   root script 从 active tree 删除；完整源码仍可由 annotated snapshot tag 精确恢复。
+
+### M3f 通用 peptide candidate screening（2026-08-10）
+
+- legacy 来源：`temp_judge_mol_mic_with_fig.py`（445 lines，snapshot SHA-256 `dfd52f3a...d62f`）和
+  `smiles_to_peptide.py`（349 lines，`ce4dc6d3...0cbc`）；前者混合复制 scorer、hard-coded external-project
+  paths、MIC threshold、parser、SELFIES output 与 destructive image-directory cleanup，后者包含大量 dead
+  comments/demo；
+- 作者确认的产品边界：milk 只是一次外部项目输入来源，未来会有更多类似 peptide pools；公共实现必须是
+  通用 screening primitives，历史项目名只进入 provenance 文档；
+- canonical 新入口：`apexoracle_mdlm.chemistry.peptides`、
+  `apexoracle_mdlm.scoring.peptide_candidates`、`apexoracle_mdlm.figures.candidate_molecule` 与
+  `scripts/reproduce/screen_peptide_candidates.py`；一份 candidate pool 可显式复用多个 strain；
+- 有意修复：decode failure 不再导致 MIC/structure row shift；drawing failure 不再改变 qualification；不再
+  自动删除 image directory；所有 rows 都写入带 status/reason 的 CSV，并有 manifest；
+- 历史 case closure：13 份输入是同一个 41,988-row pool，5 strains 共 1,081 qualified SELFIES/PNG；1,081
+  source row、re-encoded output、tagged/canonical parser 全部一致，一张历史 PNG exact raster replay 的全部
+  channels 相同；
+- scorer parity：正式 9.17 GB clean checkpoint、两条真实 BAA-999 inputs 上 logits/MIC `torch.equal`，最大
+  差异 `0.0`；
+- 清理结果：445 行 temp driver 已删除；root `smiles_to_peptide.py` 只保留 canonical parser thin bridge，
+  供尚未迁移的两个 legacy caller 过渡，所有新代码直接 import package。完整事实与限制见
+  `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`。

@@ -163,6 +163,14 @@ checkpoint、pooling、dtype、shape 和 SHA-256。
   logits 与 MIC `torch.equal`、最大差异 `0.0`；
 - [x] 确认无外部 runtime import 后删除 488 行 `temp_judge_generated_mols_MIC.py` active-tree 副本；正式
   Synergy selection 文档继续引用 snapshot provenance，不依赖该 root script 运行；
+- [x] 将 `temp_judge_mol_mic_with_fig.py` 的 peptide structure parsing、MIC threshold qualification、qualified
+  SELFIES 和 annotated structure rendering 迁为通用 library/CLI；删除项目名与 hard-coded path；
+- [x] 将 349 行 `smiles_to_peptide.py` 清为 thin compatibility bridge，canonical parser 迁入 package；在
+  1,081 个历史 retained rows 上 parser 全等，并完成一张 1500×1500 PNG 的 exact-channel raster parity；
+- [x] 冻结历史 external-project case 的 13 个 identical inputs、5 个 outputs、1,081 images、threshold 和
+  hashes；case 只作为 provenance 文档，不形成 milk-specific public API；
+- [x] 以正式 checkpoint、两条真实 BAA-999 input 完成 tagged temp driver/canonical scorer exact GPU parity，
+  然后从 active tree 删除旧 445 行 temp driver；
 - [ ] 完成 full Generation runtime parity，并逐个切换其余 trainer/scoring 模型 caller；
 - 将 v1/v2 peptide classifier、clean/noisy MIC guidance 和 synergy experimental profiles 分开；
 - 将 `judge_*`/`temp_predict_*` 重构为无导入副作用的 scoring library + CLI；
@@ -182,6 +190,10 @@ Small-molecule screen 迁移证据见 `reproducibility/small_molecule_screen_lin
 `reproducibility/small_molecule_screen_scorer_parity.json`。没有 timestamped original producer revision，
 因此 evidence 只支持 frozen input/output closure 和 2026-08-09 tagged snapshot 的 scorer parity，不把后者
 误称为当时运行脚本的逐字节版本。
+
+Peptide candidate screen 迁移证据见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`、
+`reproducibility/historical_peptide_screen_case.json` 与
+`reproducibility/peptide_candidate_screen_parity.json`。
 
 ### M4：Legacy driver 收口
 

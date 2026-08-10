@@ -43,6 +43,7 @@ CSV。`--check-canonical-plot` 还会临时渲染 canonical PDF，并在 150 dpi
 MIC checkpoint、Core condition embeddings 和真实 Generation SELFIES，在单张显式可见 GPU 上比较逐条及
 batch logits/MIC。默认不写产物，只输出 JSON；可用 `--legacy-source` 指定其他冻结 reference，或用
 `--legacy-path-in-ref temp_judge_generated_mols_MIC.py` 核验 snapshot 中的其他复制 scorer。
+个别历史 driver 若意外重复调用 forward，可用 `--legacy-forward-calls` 原样 replay；默认仍为 1。
 
 ```bash
 CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
@@ -71,6 +72,22 @@ PYTHONPATH=src python scripts/audit/verify_small_molecule_screen_lineage.py \
 正式冻结结果见 `reproducibility/small_molecule_screen_lineage.json`。另外使用上述 legacy scorer audit 的
 `--legacy-path-in-ref temp_judge_generated_mols_MIC.py` 在两条真实 BAA-3170 molecules 上完成正式 checkpoint
 GPU parity，见 `reproducibility/small_molecule_screen_scorer_parity.json`。
+
+## `verify_historical_peptide_screen_case.py`
+
+用途：只读核验一次历史 external-project peptide screen 的重复 input copies、qualified SELFIES、image
+row/MIC filenames、tagged/canonical parser parity 和 annotated-image raster parity。项目来源不进入 canonical
+API；本脚本只保存当时数据与做法。
+
+```bash
+PYTHONPATH=src python scripts/audit/verify_historical_peptide_screen_case.py \
+  --input-directory /path/to/historical_inputs \
+  --qualified-directory /path/to/historical_qualified_selfies \
+  --image-directory /path/to/historical_images
+```
+
+冻结结果为 `reproducibility/historical_peptide_screen_case.json`；正式 checkpoint scorer parity 与清理边界为
+`reproducibility/peptide_candidate_screen_parity.json`。
 
 ## `compare_legacy_peptide_table_mic.py`
 

@@ -173,14 +173,26 @@ canonical 在两条真实 BAA-3170 molecule 上 logits/MIC 逐值相等。canoni
 parity；没有 timestamped original producer revision。因此不声称 snapshot source 与最初 44,608-entry run
 逐字节相同。该边界已清楚记录后，旧 root file 满足 deletion gate，由 tag 恢复。
 
-## 9. 下一轮人工核验队列
+## 9. 通用 peptide candidate screen 与历史 case
+
+`temp_judge_mol_mic_with_fig.py` 的有效行为已迁为 package primitives 和
+`scripts/reproduce/screen_peptide_candidates.py`。public API 不使用 milk/camel/project 名；历史数据来源、
+13 个相同输入、5 个 strain outputs、1,081 images、阈值、hash 与 evidence boundary 单独记录在
+`docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md` 和 reproducibility manifests。
+
+tagged/canonical scorer 在正式 checkpoint/真实 inputs 上 exact parity；tagged/canonical parser 在全部
+1,081 retained rows 上一致；qualified outputs 可逐行从 source row 重建，选定 PNG exact raster parity。
+因此 temp driver deletion gate 已满足并从 active tree 删除。`smiles_to_peptide.py` 仍是两个未迁移 legacy
+drivers 的 thin compatibility bridge，最终在这些 callers 迁入 package 后删除。
+
+## 10. 下一轮人工核验队列
 
 自动 ledger 已把所有包含 plotting code 或 notebook outputs 的文件标为未完成 paper-consumer audit；除
 Fig. 3a 外，尚未确认它们是否对应正式论文或 reviewer 图。优先级如下：
 
 1. `show.ipynb`、`show_interpretability.ipynb`、`visualize_attn*.py`：输出多、可能包含独有
    interpretability/case-study 图；
-2. `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`、剩余 `temp_judge_mol_mic_with_fig.py`：可能同时承担 scorer 和 plot
+2. `judge_*_with_fig.py`、`judge_generated_mols_synergy.py`：可能同时承担 scorer 和 plot
    producer，不能先删 UI/plot 部分而破坏 scoring 行为；
 3. `debug_temp_SMs_MIC_analysis*.py`、`p_value_reference.py`、`aa_seq_to_smiles.py`：逐项搜索论文图、caption、
    reviewer 文档和外部输出 hash；

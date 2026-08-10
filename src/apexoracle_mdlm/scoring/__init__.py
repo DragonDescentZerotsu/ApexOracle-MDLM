@@ -25,6 +25,11 @@ from .peptide_table import (
     convert_peptides_to_structures,
     load_peptide_table,
 )
+from .peptide_candidates import (
+    PeptideCandidateResult,
+    qualification_summary,
+    qualify_peptide_candidates,
+)
 from .small_molecule_screen import (
     StrainInput,
     StrainScreen,
@@ -39,6 +44,7 @@ __all__ = [
     "GeneratedMoleculeFile",
     "CandidateMICRegressor",
     "ConditionEmbeddingBanks",
+    "PeptideCandidateResult",
     "STRUCTURE_COLUMNS",
     "StrainInput",
     "StrainScreen",
@@ -58,6 +64,8 @@ __all__ = [
     "parse_generated_molecule_filename",
     "parse_strain_input",
     "read_selfies_file",
+    "qualification_summary",
+    "qualify_peptide_candidates",
     "regression_logit_to_mic",
     "score_selfies_across_strains",
     "score_selfies_strings",

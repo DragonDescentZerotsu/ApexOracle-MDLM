@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-08-10",
+  "status": "passed",
+  "legacy_sources": [
+    {
+      "git_ref": "legacy-code-snapshot-2026-08-09",
+      "relative_path": "temp_judge_mol_mic_with_fig.py",
+      "sha256": "dfd52f3a0b4f89d4efa388daa1c12d4a5c1637e335417707f4a5120fcabed62f"
+    },
+    {
+      "git_ref": "legacy-code-snapshot-2026-08-09",
+      "relative_path": "smiles_to_peptide.py",
+      "sha256": "ce4dc6d36d59a71e71ba75c7f63b1b77d81ee5473f2ce515040ad72ad2c10cbc"
+    }
+  ],
+  "canonical_components": [
+    "src/apexoracle_mdlm/chemistry/peptides.py",
+    "src/apexoracle_mdlm/scoring/peptide_candidates.py",
+    "src/apexoracle_mdlm/figures/candidate_molecule.py",
+    "scripts/reproduce/screen_peptide_candidates.py"
+  ],
+  "formal_checkpoint": {
+    "owner": "ApexOracle-Core",
+    "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802"
+  },
+  "historical_candidate_input": {
+    "owner": "ApexOracle-MDLM ignored case-study asset",
+    "sha256": "2122be72c134b8c32dab77a66e133c09e888947a6219c981fdb7a29272a6c215",
+    "rows": 41988
+  },
+  "scoring_parity": {
+    "strain": "BAA-999",
+    "sample_count": 2,
+    "legacy_forward_calls_per_sample": 2,
+    "tokens_per_sample": [
+      114,
+      105
+    ],
+    "per_sample_logits_torch_equal": true,
+    "per_sample_logits_max_abs_difference": 0.0,
+    "per_sample_mic_torch_equal": true,
+    "per_sample_mic_max_abs_difference": 0.0,
+    "peak_gpu_allocated_bytes": 9170041344
+  },
+  "qualification_and_drawing_parity": {
+    "historical_qualified_rows": 1081,
+    "legacy_canonical_parser_equal_rows": 1081,
+    "qualified_selfies_reconstruction_equal": true,
+    "raster_shape": [
+      1500,
+      1500,
+      3
+    ],
+    "raster_exact_channel_fraction": 1.0,
+    "raster_max_channel_difference": 0
+  },
+  "public_cli_smoke": {
+    "input_rows": 2,
+    "strain": "BAA-999",
+    "mic_threshold_umol": 1000000000.0,
+    "candidate_screen_rows": 2,
+    "qualified_selfies_rows": 2,
+    "annotated_png_files": 2,
+    "predicted_mic_umol": [
+      102.0,
+      38.0
+    ],
+    "candidate_screen_sha256": "ad1616f78c28f95c14afad3c7e75005540d2e956964c714811d575d200ac2690",
+    "qualified_selfies_sha256": "3bbe694a10c956762966a58a7faabca9b1768f00606ddb1c5645f357f03fe0d6",
+    "status": "passed"
+  },
+  "intentional_fixes": [
+    "One candidate input is reused across explicit strain conditions instead of copying identical files per strain.",
+    "SELFIES decode failures retain source row alignment instead of shifting MIC-to-structure pairs.",
+    "Drawing failures no longer change scientific qualification or the qualified SELFIES output.",
+    "Outputs include a complete row-level status table and provenance manifest."
+  ],
+  "evidence_boundary": {
+    "verified": "Tagged scorer parity, all 1,081 historical retained rows, parser parity, output reconstruction, and one exact raster replay.",
+    "not_verified": "No timestamped producer revision or complete historical MIC table permits exact replay of every excluded row."
+  }
+}

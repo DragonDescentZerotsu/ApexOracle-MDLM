@@ -16,6 +16,7 @@ figure = ["matplotlib", "numpy", "scipy"]
 scoring = ["hydra-core", "transformers"]
 peptide-table = ["matplotlib", "numpy", "pandas", "rdkit", "selfies"]
 small-molecule-screen = ["hydra-core", "matplotlib", "numpy", "selfies", "transformers"]
+peptide-screen = ["hydra-core", "pillow", "rdkit", "selfies", "transformers"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
