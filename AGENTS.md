@@ -61,7 +61,15 @@
   strict-head/partner checks 通过。此前仅本地存在的 annotated tag `legacy-code-snapshot-2026-08-09` 已推送
   `custom`，远端 peeled commit 为 `79eed10cac8d5feb446be886eee0c5b356b23b06`，并在 shallow clone 单独 fetch
   后通过全部 snapshot-dependent tests。Fresh clone 不内含权重是预期 release boundary；未来由 super-repo
-  asset resolver 提供。Full Generation sampler parity 与 Core compatibility bridge 切换属于下一跨模块阶段。
+  asset resolver 提供。
+- **2026-08-10 跨模块收口：** Generation commit `03c1ee0` 已改用 canonical MDLM heads/loaders，固定输入
+  forward/gradient exact，论文参数 256-step sampler 完成；legacy sampler 自身同 seed 不 bitwise deterministic，
+  因此 full-run 验收采用完成性、shape/range、resolved config 与固定资产 hash，而不伪称跨进程 token exact。
+  Core PR #32 已以 merge commit `0025c8b` 合入 `main`，直接使用 `apexoracle_mdlm.scoring`；两条实际
+  Generation outputs × 两个 strains 的四个 clean-MIC logits 均 `torch.equal`、最大差异 `0.0`。唯一受控
+  runtime caller 迁移后，根目录 `judge_generated_mols_MIC.py` compatibility bridge 已删除；完整旧实现由
+  `legacy-code-snapshot-2026-08-09` 恢复。跨仓库验证入口仍为
+  `PYTHONPATH=src python scripts/audit/cross_repo_contracts.py --synergy-root <core> --generation-root <generation>`。
 - 新增可调用功能时，应在作用域最近的 `AGENTS.md` 登记 canonical 入口、主要参数、输出和验证命令。
   如果没有更近的 `AGENTS.md`，登记在本文件。
 
@@ -166,8 +174,8 @@
 - `apexoracle_mdlm.scoring` 另提供 `parse_generated_molecule_filename`、
   `format_generated_molecule_filename` 与 `find_generated_molecule_file`；canonical 输入 schema 为
   `strain_{strain}_MIC_{target_mic}_length_{target_length}_{guidance}.txt`，输出 parsed dataclass、filename
-  或匹配文件名。旧 `judge_generated_mols_MIC.py` 主体已删除；同名文件仅为 Core 动态 import 保留 thin
-  compatibility bridge，所有新 caller 必须使用 package。
+  或匹配文件名。旧 `judge_generated_mols_MIC.py` 主体和临时 bridge 均已删除；Core 与所有新 caller 使用
+  package，旧源码只能从 recovery tag 读取。
   Focused 验证：`PYTHONPATH=src python -m unittest tests.test_generated_files -v`。
 - `apexoracle_mdlm.scoring` 的 peptide-table contract：`load_peptide_table`、
   `convert_peptides_to_structures`、`score_selfies_across_strains` 与 `add_mic_predictions`；输入为显式列名、

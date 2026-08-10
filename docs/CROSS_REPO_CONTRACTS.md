@@ -53,11 +53,12 @@ Canonical generation MIC 文件必须包含 strain、target MIC、target length 
 MIC parser 误认。`apexoracle_mdlm.scoring` 已冻结 canonical parser、condition loader、clean DLM adapter
 和 candidate MIC scorer。
 
-Core 的 `scripts/reproduce/evaluate_remasking_schedule_reviewer.py` 会通过文件路径动态 import
-`judge_generated_mols_MIC.py`，设置 `current_directory` 与 `tokenizer` 后构造
-`MIC_regressor(config, checkpoint, device)`。因此旧 642 行实现虽已删除，同名 root 文件暂时保留为仅委托
-canonical scorer 的兼容桥。这个 bridge 是真实 caller contract，不是第二份 legacy implementation；Core
-改用 `apexoracle_mdlm.scoring` 并通过 caller test 后应删除。
+Core 的 `scripts/reproduce/evaluate_remasking_schedule_reviewer.py` 已在 PR #32（source commit `2caad68`，
+`main` merge commit `0025c8b`）从动态 import 根目录 `judge_generated_mols_MIC.py` 改为直接调用
+`apexoracle_mdlm.scoring`。它从 MDLM root 解析 `src/`、`configs/` 与 upstream runtime，从 Core root 解析
+condition embeddings。两条实际 Generation outputs 分别在 BAA-3170/BAA-3197 下得到四个
+`torch.equal` clean-MIC logits，最大差异 `0.0`。这是旧 bridge 的唯一受控 runtime consumer；跨仓库 source
+contract 通过后，bridge 已从 MDLM active tree 删除并继续由 recovery tag 保存。
 
 Genome embedding 在 load 时乘 `1e14`；ATCC/text embedding 使用各自 filename-to-key 规则。移动目录不会
 改变数值，但改变文件名、scale 或 normalized strain key 都会改变 condition lookup，因此必须作为独立
@@ -95,12 +96,12 @@ bfloat16 GPU parity 已与 checkpoint producer 的 tensor-returning implementati
 当前禁止：
 
 - 移动或改名 `Checkpoints_fangping`、v1 classifier checkpoint、Core embedding 目录；
-- 虽然 formal head-level 与 clean candidate scorer GPU parity 已通过，但在 DLM/full sampler parity 前让
-  Generation 直接改 import 新 package；
+- 在没有固定 MDLM commit/source-path、resolved config 和 sampler completion contract 的情况下，让
+  Generation 隐式寻找或下载 MDLM package；
 - 将 noisy generation MIC checkpoint 与 clean candidate-scoring checkpoint 合并为一个 profile；
 - 将 experimental all-data synergy candidate probability 标成 MIC，或冒充 Core 论文 CV synergy prediction；
 - 自动转换 mixed-type partner embedding keys，或默认选择某一个 partner；
-- 把 Generation 的 dirty checkout 当作 MDLM 重构的一部分修改或提交。
+- 把 Generation 的上游 remote 当作 ApexOracle 自有发布 remote 推送。
 
 ## 5. Super-repo 的最终连接方式
 
@@ -128,11 +129,10 @@ PYTHONPATH=src python scripts/audit/cross_repo_contracts.py \
 ```
 
 该审计只读源码，检查 MIC/synergy output writer、动态 imports、checkpoint key usage、embedding config、MDLM
-consumer、Core/MDLM saved-window coordinates，并分别验证 MDLM canonical `RegressionHead` 与 Generation
-cross-attention 所需 state modules。旧 trainer 已由 snapshot/migration manifest 保存，不再要求 active root
-copy 与 Generation 做 AST equality；实际参数/数值兼容由 strict load 和下述正式 GPU parity 负责。
-当前 source contract 为 14 项，新增项直接检查 canonical synergy-guidance producer 的两个 named profiles 与
-symmetric-pair implementation。
+consumer、Core/MDLM saved-window coordinates、Core 直接 candidate-scorer caller，以及 Generation 对 canonical
+MDLM heads 的 import/实例化。旧 trainer 和 Generation 复制 heads 已由 snapshot/migration manifest 保存，不再
+要求 active root copy 做 AST equality；实际参数/数值兼容由 strict load、正式 GPU parity 与 sampler manifest
+负责。当前 source contract 为 14 项。
 
 在作者机器上核验 trusted formal checkpoints 时追加 `--check-assets`。该模式以 CPU `mmap` 读取 manifest
 中的 DLM、classifier、MIC、synergy checkpoint 与 synergy partner dictionary，执行 schema、partner-key
@@ -141,9 +141,9 @@ contract 与 canonical head `strict=True` load；它不运行 GPU forward，也�
 选项。
 
 有一张空闲 GPU 时，可再追加 `--check-gpu-head-parity`（应先用 `CUDA_VISIBLE_DEVICES` 只暴露一张卡）。
-它加载正式 noisy MIC guidance 权重，以固定 seed、2-sample synthetic condition batch 和 generation
-实际使用的 bfloat16 autocast，对比 Generation legacy copy 与 canonical genome/text attention 和 regression
-output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
+它从 Generation recovery tag 只读载入已删除的 legacy heads，加载正式 noisy MIC guidance 权重，以固定
+seed、2-sample synthetic condition batch 和 generation 实际使用的 bfloat16 autocast，对比 tagged copy 与
+canonical genome/text attention 和 regression output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
 
 当前 formal bfloat16 GPU head parity 已通过：genome/text attention 与 regression output 均
 `torch.equal`，最大差异 `0.0`。clean candidate scorer 也已用正式 checkpoint、真实 BAA-3170 inputs 完成
@@ -151,6 +151,8 @@ output；只向 stdout 写 JSON，不写实验产物或启动 sampler。
 candidate scorer 已用正式 Generation checkpoint、真实 input 和 partner 完成单 candidate、双 pair-order parity，
 logits/probabilities 同样 `torch.equal`、最大差异 `0.0`。synergy producer 也已用两个正式 backbone 对
 snapshot/canonical 的 first-clean/second-noisy 与 both-clean encoder outputs 完成四项 `torch.equal`、最大差异
-`0.0`。仍待完成 full sampler、Core
-compatibility-bridge caller 迁移、Generation clean branch/自有 remote、顶层 asset resolver 与 fresh-clone
-smoke。因此可以分别声明 head 与 candidate-scoring parity，不能声明三仓库整体 release 已端到端验收。
+`0.0`。Generation commit `03c1ee0` 已使用 canonical heads/loaders，并完成固定输入 forward/gradient exact 与
+论文参数 256-step sampler；legacy sampler 自身同 seed 不 bitwise deterministic，完整边界见 Generation
+`reproducibility/full_sampler_mdlm_parity.json`。Core PR #32 也已迁移 direct caller 并删除 MDLM bridge。
+仍待完成的是 Generation 自有 remote、顶层 asset resolver 与 super-repo fresh-clone smoke，因此不能把当前
+三个独立 checkout 写成已经完成的统一 release。

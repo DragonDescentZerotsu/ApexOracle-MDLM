@@ -86,8 +86,9 @@ Generation input → Core assets → scorer → cache → plotted data → manus
 - ApexOracle-DLM-Pretraining：合作者维护的 DLM+MTR 预训练 producer；
 - ApexOracle-MDLM（本仓库）：downstream DLM inference adapters、guidance components 和 candidate scoring。
 
-根目录 `judge_generated_mols_MIC.py` 目前只是一个很薄的兼容桥，用于一个已审计的 ApexOracle-Core 动态
-import。所有新代码必须使用 `apexoracle_mdlm.scoring`；Core caller 迁移并通过跨仓库测试后会删除此桥。
+原根目录 `judge_generated_mols_MIC.py` 的混合实现和临时兼容桥均已从 active tree 删除。ApexOracle-Core
+现已直接 import `apexoracle_mdlm.scoring`；完整历史源码仍可由
+`legacy-code-snapshot-2026-08-09` 恢复。
 
 ## 验证与恢复
 
