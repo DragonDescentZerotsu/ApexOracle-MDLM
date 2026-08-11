@@ -267,6 +267,15 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 - 新发现并冻结的边界：旧 DLM 不消费 attention mask，因此改变 batch composition/size 会改变 padding，
   可能改变 prediction；历史 camel-milk protocol 必须用 batch size 32，并由每次 manifest 记录。修复
   attention mask 属于未来 versioned scientific protocol，不能在清理中静默改变；
+- 2026-08-11 maintenance：实际新菌株库存 screen 验证 tokenizer repository 的声明上限 512 不是 downstream
+  DLM 的 position contract；canonical scorer 现固定 audited revision，并从 resolved config 读取 1024 上限。
+  同批修复空 CSV cell 被 coercion 为 `NAN` 假肽和 embedding JSON sidecar 被 `torch.load` 的 I/O 缺陷；
+  这些修改不改变历史有效 rows 的 conversion 或 batch-size-32 raw prediction protocol；focused 19 tests、
+  全仓 127 tests 与 code-ledger stale check 通过；
+- 同日 workflow 收口：原 Core worktree 的两个 Providencia-specific inventory prepare/summarize scripts 已
+  提取为 supplier/target-neutral package API 与一个双 subcommand CLI；正式 DLF prepare CSV 与旧 adapter
+  byte-identical，四层 target results 的 row IDs、predictions 和 counts 一致。Prepared inventory 由 target
+  output 移到 source canonical path 后跨 strain 复用；该迁移不触碰 raw GPU predictions 或 checkpoint；
 - 清理结果：canonical replacement、正式 parity、historical lineage 和 consumer audit 均完成，旧 root
   script 已从 active tree 删除；完整源码由 snapshot tag 恢复，不保留第二份 legacy copy。
 

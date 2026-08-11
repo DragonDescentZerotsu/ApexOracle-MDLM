@@ -140,7 +140,16 @@ PYTHONPATH=src python -m unittest tests.test_candidate_synergy_scoring \
 功能：读取 peptide/protein 两列，执行 `RDKit MolFromSequence → canonical SMILES → SELFIES`，保留并标记
 invalid rows；随后以一个 DLM encoding batch 复用多个 strain conditions，输出 structure CSV、prediction
 CSV、`manifest.json` 和可选 per-strain violin PDFs。所有输入/资产/输出路径均为 CLI 参数；
-`--runtime-root` 默认解析到当前 MDLM checkout 根目录并写入 manifest。
+`--runtime-root` 默认解析到当前 MDLM checkout 根目录并写入 manifest。`--tokenizer-revision` 默认固定到
+已审计 revision `55e83392264cb998f7aa5014847df29868aefeb8`；入口以 resolved `config.model.length`
+而不是 tokenizer 自带的 512 metadata 做运行前上限检查。manifest 还记录 resolved-config hash、有效输入
+token-length summary 和本次实际使用的 genome/text tensor path/hash/shape/dtype。
+`--genome-scale` 默认并显式记录为 `1e14`，只在内存加载 genome tensor 时应用；磁盘 `.pt` 保持原始
+Evo-2 数值。它与 MIC cutoff 或 generation guidance gamma 无关。
+
+CSV 空 peptide 保持为空并在 conversion 中标记 `empty_peptide`，不会再经 pandas 转成可被 RDKit 接受的
+`NAN` sequence。Condition embedding directory 只读取 `.pt`，允许 canonical producer 把 JSON provenance
+sidecar 放在 tensor 相邻位置。
 
 默认 `--batch-size 32` 是历史 camel-milk protocol。由于 upstream DLM 当前忽略 tokenizer attention mask，
 改变 batch size/composition 可能改变 padding 和预测；不得把它只当作性能参数。正式 parity 见
@@ -149,6 +158,25 @@ CSV、`manifest.json` 和可选 per-strain violin PDFs。所有输入/资产/输
 ```bash
 PYTHONPATH=src python -m unittest tests.test_candidate_mic_scoring \
   tests.test_peptide_table tests.test_generated_mic_figure -v
+```
+
+## `peptide_inventory_screen.py`
+
+功能：用一个通用入口取代 per-target inventory adapters。`prepare` 接收 CSV/TSV/XLSX 与显式
+sequence/identifier/residue-count/N-/C-terminus/cyclic/modification columns，原样保留全部 source rows、顺序与
+duplicates，输出 `screen_input.csv`、`inventory_rows.csv` 和 `preparation_manifest.json`。Prepared inventory
+与 strain 无关，应该在 source canonical path 只生成一次。
+
+`summarize` 消费 canonical `score_peptide_table_mic.py` prediction/manifest，显式接收 strain、target label、
+stock column/unit、MIC cutoff 和必要时的 legacy model length，输出完整 joined table、all hits、
+exact-unmodified hits、exact-unmodified in-stock hits 与 hash summary。Cutoff 不硬编码，输出 filename 由数值
+deterministically 生成。没有 chemistry metadata 时不会把 plain sequence 自动标成 exact-unmodified。
+
+Focused 验证：
+
+```bash
+PYTHONPATH=src python -m unittest tests.test_peptide_inventory \
+  tests.test_peptide_table -v
 ```
 
 ## `screen_peptide_candidates.py`

@@ -23,9 +23,7 @@ from apexoracle_mdlm.models import (
 class Tokenizer(Protocol):
     pad_token_id: int
 
-    def __call__(
-        self, text: Sequence[str], **kwargs: Any
-    ) -> Mapping[str, torch.Tensor]: ...
+    def __call__(self, text: Sequence[str], **kwargs: Any) -> Mapping[str, Any]: ...
 
 
 @dataclass(frozen=True)
@@ -312,6 +310,28 @@ def normalize_selfies_for_tokenizer(selfies: str) -> str:
     """Insert the spaces expected by the frozen SELFIES-TED tokenizer."""
 
     return selfies.replace("][", "] [")
+
+
+def selfies_token_lengths(
+    tokenizer: Tokenizer,
+    selfies_strings: Sequence[str],
+) -> list[int]:
+    """Return exact unpadded lengths under the frozen SELFIES normalization."""
+
+    if not selfies_strings:
+        return []
+    encoded = tokenizer(
+        [normalize_selfies_for_tokenizer(item) for item in selfies_strings],
+        padding=False,
+        truncation=False,
+        add_special_tokens=True,
+    )
+    input_ids = encoded["input_ids"]
+    if isinstance(input_ids, torch.Tensor):
+        if input_ids.ndim == 1:
+            return [int(input_ids.numel())]
+        return [int(row.numel()) for row in input_ids]
+    return [len(row) for row in input_ids]
 
 
 def regression_logit_to_mic(logits: torch.Tensor) -> torch.Tensor:

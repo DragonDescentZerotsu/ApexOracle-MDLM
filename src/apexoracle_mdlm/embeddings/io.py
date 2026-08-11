@@ -56,17 +56,25 @@ def load_embedding_directory(
     device: str | torch.device = "cpu",
     strict_unique: bool = True,
 ) -> dict[str, torch.Tensor]:
-    """Load and scale every tensor file in a directory using a stable key contract."""
+    """Load and scale ``.pt`` tensors in a directory using a stable key contract.
+
+    Producers may place JSON provenance manifests beside tensors.  Those sidecars
+    are deliberately ignored rather than being passed to :func:`torch.load`.
+    """
 
     root = Path(directory)
     if not root.is_dir():
         raise NotADirectoryError(f"Embedding directory does not exist: {root}")
 
     embeddings: dict[str, torch.Tensor] = {}
-    for path in sorted(item for item in root.iterdir() if item.is_file()):
+    for path in sorted(
+        item for item in root.iterdir() if item.is_file() and item.suffix == ".pt"
+    ):
         key = key_parser(path.name)
         if strict_unique and key in embeddings:
-            raise ValueError(f"Multiple embedding files resolve to key {key!r} in {root}.")
+            raise ValueError(
+                f"Multiple embedding files resolve to key {key!r} in {root}."
+            )
 
         payload = load_torch_file(path, map_location=device, weights_only=False)
         if not isinstance(payload, torch.Tensor):

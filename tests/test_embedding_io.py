@@ -38,6 +38,9 @@ class EmbeddingIOTests(unittest.TestCase):
             root = Path(temp_dir)
             source = torch.arange(6, dtype=torch.bfloat16).reshape(2, 3)
             torch.save(source, root / "Escherichia_coli_ATCC_25922.pt")
+            (root / "Escherichia_coli_ATCC_25922.manifest.json").write_text(
+                '{"schema_version": 1}\n', encoding="utf-8"
+            )
             (root / "ignored_directory").mkdir()
 
             embeddings = load_atcc_embeddings(root, scale=2.0)
@@ -46,6 +49,17 @@ class EmbeddingIOTests(unittest.TestCase):
         self.assertEqual(embeddings["25922"].shape, (2, 3))
         self.assertEqual(embeddings["25922"].dtype, torch.bfloat16)
         self.assertTrue(torch.equal(embeddings["25922"], source * 2.0))
+
+    def test_loader_ignores_non_pt_sidecars(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            torch.save(torch.tensor([1.0]), root / "A_ATCC_1.pt")
+            (root / "A_ATCC_1.json").write_text("not a torch file", encoding="utf-8")
+            (root / "README.txt").write_text("metadata", encoding="utf-8")
+
+            embeddings = load_atcc_embeddings(root)
+
+        self.assertEqual(list(embeddings), ["1"])
 
     def test_load_text_embeddings_preserves_legacy_name_mapping(self):
         with tempfile.TemporaryDirectory() as temp_dir:

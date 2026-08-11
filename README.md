@@ -82,6 +82,7 @@ PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
   --config-dir configs \
   --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --genome-embeddings /path/to/Genome_embs \
+  --genome-scale 1e14 \
   --atcc-text-embeddings /path/to/ATCC/embeddings \
   --text-only-embeddings /path/to/wo_ATCC/embeddings \
   --generation-file /path/to/generated_selfies.txt \
@@ -110,14 +111,42 @@ PYTHONPATH=src python scripts/reproduce/score_peptide_table_mic.py \
   --genome-embeddings /path/to/Genome_embs \
   --atcc-text-embeddings /path/to/ATCC/embeddings \
   --text-only-embeddings /path/to/wo_ATCC/embeddings \
+  --tokenizer-revision 55e83392264cb998f7aa5014847df29868aefeb8 \
   --device cuda --batch-size 32 \
   --output-directory results/peptide_screen --plot
 ```
 
 Batch size is part of this historical protocol because the attributed DLM path receives padding but
 does not consume the tokenizer attention mask. Use `32` to reproduce the frozen camel-milk screen;
-every canonical run records it in `manifest.json`. Migration and historical-output hashes are in
+every canonical run records it in `manifest.json`. Empty peptide cells remain invalid instead of
+becoming the literal sequence `nan`; embedding directories only consume `.pt` tensors. The scorer
+rejects inputs beyond the resolved DLM `model.length` and records the pinned tokenizer revision,
+resolved-config hash, token-length summary, and exact condition tensor hashes. Migration and
+historical-output hashes are in
 `reproducibility/peptide_table_migration_parity.json`.
+
+Prepare a reusable inventory once, then summarize any strain's canonical table predictions without
+adding target-specific code:
+
+```bash
+PYTHONPATH=src python scripts/reproduce/peptide_inventory_screen.py prepare \
+  --input /path/to/inventory.xlsx --sheet Peptides \
+  --sequence-column Sequence --identifier-column ID \
+  --n-terminus-column N-terminus --c-terminus-column C-terminus \
+  --cyclic-column Cyclic --output-directory /path/to/prepared_inventory
+
+PYTHONPATH=src python scripts/reproduce/peptide_inventory_screen.py summarize \
+  --inventory /path/to/prepared_inventory/inventory_rows.csv \
+  --predictions /path/to/strain_predictions.csv \
+  --model-manifest /path/to/strain_predictions/manifest.json \
+  --strain NEW_STRAIN --stock-column Remaining --mic-cutoff 15 \
+  --output-directory /path/to/strain_results
+```
+
+Prepared inventories retain every row and duplicate and are independent of strain. Missing chemistry
+metadata never implies an exact unmodified structure; declared modifications remain sequence-only
+approximations. New strains reuse the same prepared input and only supply matching condition assets
+and a new strain key.
 
 ## Structure-table conversion and catalogue matching
 

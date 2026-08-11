@@ -17,6 +17,26 @@
   `reproducibility/fixed_epsilon_mic_scorer_asset_rename.json` 已由 canonical builder 纳入 code asset ledger；
   tracked asset count 为 176，118 tests 与 builder stale check 均通过。该修复只补机器可读资产血缘，不改变
   profile、checkpoint bytes、scoring code 或 Generation contract。
+- **2026-08-11 peptide-table screening 维护：** *Providencia stuartii* ATCC 29914 私有库存 screen 暴露出
+  三个通用 I/O/provenance 问题，现已修复：embedding directory loader 只读取 `.pt` 并忽略相邻 JSON
+  sidecar；peptide CSV 空单元格保留为空，禁止经 pandas `NaN -> "nan"` 后被 RDKit 误判为 Asn-Ala-Asn；
+  `score_peptide_table_mic.py` 固定 tokenizer revision
+  `55e83392264cb998f7aa5014847df29868aefeb8`，以 resolved `config.model.length` 而不是 tokenizer metadata
+  作为运行前 token 上限，并在 manifest 记录 resolved-config hash、token lengths 与实际使用的 condition
+  tensor path/hash/shape/dtype。历史 batch-size-32/padding prediction protocol、checkpoint 和 raw model scores
+  未改变。Focused 19 tests 与全仓 127 tests 通过；focused 命令为
+  `PYTHONPATH=src python -m unittest tests.test_peptide_inventory tests.test_embedding_io
+  tests.test_peptide_table -v`，code ledger stale
+  check 同步通过。
+- **2026-08-11 通用 peptide inventory workflow：** Reviewer-specific inventory prepare/reporting 已收敛为
+  `apexoracle_mdlm.scoring.peptide_inventory` 与
+  `scripts/reproduce/peptide_inventory_screen.py {prepare,summarize}`。`prepare` 接受 CSV/TSV/XLSX、显式
+  sequence/identifier/terminus/cyclic/modification columns，保留全行、顺序和 duplicates；prepared input 与
+  strain 解耦，可跨任意 condition 复用。`summarize` 接受 canonical prediction/manifest、strain、stock column、
+  cutoff 与 model length，输出完整 joined table 和 all/exact/in-stock tiers。CLI/package 不含 Reviewer、菌株、
+  workbook 或 15 µM 硬编码；output filename 根据 cutoff 确定。Excel reader 所需 `openpyxl>=3.1` 已登记在
+  `peptide-table` optional dependency，本机 `mdlm` 环境为 `openpyxl==3.1.5`。Focused 验证为上述 19-test
+  命令；其中包含默认 genome scale `1e14`、sidecar allowlist 和 inventory tiers 回归测试。
 - **2026-08-09 作者确认的最终清理原则：** 对重要或暂时不能确定是否可删除的作者 legacy 代码，默认
   先提取独有行为并重构为简洁 canonical implementation，补 characterization/parity test 后删除原始混乱
   副本；对确认没有独有 runtime/论文/跨仓库角色的文件，由 ledger/provenance 和 snapshot tag 保存后从
@@ -126,7 +146,8 @@
   `PYTHONPATH=src python -m unittest tests.test_checkpoint_schemas -v`。
 - `apexoracle_mdlm.embeddings`：ATCC/text filename key normalization 与
   `load_atcc_embeddings`/`load_text_embeddings`；主要参数为 directory、scale、device 和
-  `strict_unique`，输出 `dict[str, torch.Tensor]`。Focused 验证：
+  `strict_unique`，只加载 `.pt` tensor、忽略 producer 相邻 provenance sidecars，输出
+  `dict[str, torch.Tensor]`。Focused 验证：
   `PYTHONPATH=src python -m unittest tests.test_embedding_io -v`。
 - 这些 M1 contracts 已被 canonical candidate scorer 使用；其他 legacy GPU caller 仍未整体切换。
 - `apexoracle_mdlm.models.RegressionHead` 与 `FirstTokenCrossAttention`：保持历史 parameter names 和
@@ -192,10 +213,21 @@
   `convert_peptides_to_structures`、`score_selfies_across_strains` 与 `add_mic_predictions`；输入为显式列名、
   peptide table、strain list、batch size 和 device，输出保留 invalid rows 的 structure/prediction frames。
   `CandidateMICRegressor.encode_molecules`/`predict_from_cls_embedding` 允许一个 padded DLM batch 复用多个
-  strain。公开入口为 `scripts/reproduce/score_peptide_table_mic.py`，输出两个 CSV、manifest 和可选 figures。
+  strain。空 CSV peptide 必须保持 invalid，不得转成字面 `nan` sequence。公开入口为
+  `scripts/reproduce/score_peptide_table_mic.py`，新增主要参数 `--tokenizer-revision`；入口以 resolved
+  `config.model.length` 拒绝超长 molecule，输出两个 CSV、manifest 和可选 figures，manifest 同时冻结
+  tokenizer revision、config hash、token-length summary、实际 condition tensor hashes 与显式
+  `--genome-scale`（默认 `1e14`）。
   历史 protocol 的 batch size 固定为 32，因为 DLM 不消费 attention mask；改变 batch size 必须作为新
   protocol 并重新验证。Focused 验证：`PYTHONPATH=src python -m unittest tests.test_peptide_table -v`；正式
   parity 见 `reproducibility/peptide_table_migration_parity.json`。
+- `apexoracle_mdlm.scoring.peptide_inventory`：`prepare_peptide_inventory` 将任意显式列 schema 变为稳定
+  `screen_input.csv`/row-aligned inventory，`summarize_peptide_inventory` 对 canonical MIC predictions 生成
+  all/exact-unmodified/in-stock tiers；没有 chemistry metadata 时明确禁止声称 exact-unmodified。公开入口为
+  `scripts/reproduce/peptide_inventory_screen.py prepare|summarize`，支持 CSV/TSV/XLSX 和可选 stock metadata，
+  输出 preparation/result manifests 与 SHA-256。Prepared inventory 与 strain 无关，应在 source canonical
+  path 只生成一次；新 strain 只改变 scorer/reporting 的 key 和 condition assets。Focused 验证：
+  `PYTHONPATH=src python -m unittest tests.test_peptide_inventory tests.test_peptide_table -v`。
 - `apexoracle_mdlm.scoring.small_molecule_screen`：`parse_strain_input`、
   `score_small_molecule_inputs` 与 `decoded_wide_rows`；公开入口为
   `scripts/reproduce/score_small_molecule_screen.py`，重复传入 `--input STRAIN=PATH`，输出

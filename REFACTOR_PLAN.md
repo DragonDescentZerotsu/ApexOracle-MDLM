@@ -10,6 +10,21 @@
 canonical builder 已重建四份 lineage outputs，tracked asset count 从 175 更新为 176。118 tests 与 stale check
 通过；这是 provenance-only maintenance，不改变模型或运行接口。
 
+2026-08-11 *Providencia stuartii* ATCC 29914 inventory screen 触发一次 post-release maintenance：embedding
+loader 由“所有普通文件”收紧为 `.pt` allowlist，避免把 Evo-2 相邻 JSON manifest 交给 `torch.load`；peptide
+CSV 关闭 pandas 默认 NA coercion，避免空值变成可被 RDKit 接受的 `NAN` 假序列；table scorer 固定已审计
+tokenizer revision，并以 resolved DLM `model.length` 做运行前 guard，同时补齐 resolved-config 与实际 condition
+tensor provenance。历史 checkpoint、batch-size-32 padded protocol 和已产生的 raw predictions 均未改变；
+focused 19 tests、全仓 127 tests 与 code-ledger stale check 通过。
+
+同日按作者要求进一步避免 per-strain code growth：两个 Providencia-specific inventory scripts 已由通用
+`apexoracle_mdlm.scoring.peptide_inventory` 与 `peptide_inventory_screen.py {prepare,summarize}` 取代。
+Prepared inventory 与 strain 解耦，CSV/TSV/XLSX columns、chemistry/stock metadata、target label、strain、cutoff
+和 model length 都是显式参数；普通新 strain/molecule workflow 只新增资产和 CLI 参数，不新增 Python。
+正式 4,842-row DLF preparation 与旧 adapter byte-identical，四层 Providencia results source-row/prediction/count
+parity 通过。Excel runtime dependency 已收敛到 `peptide-table` extra 的 `openpyxl>=3.1`，没有新增第二个
+workbook adapter。
+
 ## 1. 目标与不变量
 
 本仓库最终作为 `ApexOracle-MDLM` submodule，负责 downstream molecule representation 与 generation

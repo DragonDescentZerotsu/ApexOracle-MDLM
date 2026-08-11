@@ -37,7 +37,10 @@ def load_peptide_table(
         raise FileNotFoundError(source)
     if limit is not None and limit < 0:
         raise ValueError("limit must be non-negative.")
-    frame = pd.read_csv(source)
+    # Preserve empty cells as empty strings.  With pandas' default NA parsing,
+    # ``astype(str)`` turns a blank peptide into the literal sequence ``"nan"``;
+    # RDKit then accepts it as Asn-Ala-Asn instead of retaining an invalid row.
+    frame = pd.read_csv(source, keep_default_na=False)
     missing = [
         column
         for column in (peptide_column, protein_column)

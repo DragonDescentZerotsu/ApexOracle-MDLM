@@ -6,13 +6,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import torch
 from hydra import compose, initialize_config_dir
+from omegaconf import OmegaConf
 from transformers import AutoTokenizer
 
+from apexoracle_mdlm.embeddings import (
+    embedding_key_from_atcc_filename,
+    embedding_key_from_text_filename,
+)
 from apexoracle_mdlm.figures import plot_mic_distribution
 from apexoracle_mdlm.scoring import (
     add_mic_predictions,
@@ -21,7 +27,12 @@ from apexoracle_mdlm.scoring import (
     load_candidate_mic_regressor,
     load_condition_embedding_banks,
     load_peptide_table,
+    selfies_token_lengths,
 )
+
+
+DEFAULT_TOKENIZER_REVISION = "55e83392264cb998f7aa5014847df29868aefeb8"
+DEFAULT_GENOME_SCALE = 1e14
 
 
 def sha256(path: Path) -> str:
@@ -44,9 +55,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config-name", default="config")
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--genome-embeddings", type=Path, required=True)
+    parser.add_argument("--genome-scale", type=float, default=DEFAULT_GENOME_SCALE)
     parser.add_argument("--atcc-text-embeddings", type=Path, required=True)
     parser.add_argument("--text-only-embeddings", type=Path, required=True)
     parser.add_argument("--tokenizer", default="ibm-research/materials.selfies-ted")
+    parser.add_argument("--tokenizer-revision", default=DEFAULT_TOKENIZER_REVISION)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--limit", type=int)
@@ -58,10 +71,71 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _tensor_file_index(directory: Path, key_parser) -> dict[str, Path]:
+    index: dict[str, Path] = {}
+    for path in sorted(directory.resolve().glob("*.pt")):
+        key = key_parser(path.name)
+        if key in index:
+            raise ValueError(
+                f"Multiple embedding files resolve to key {key!r} in {directory}."
+            )
+        index[key] = path
+    return index
+
+
+def condition_embedding_provenance(
+    *,
+    strains: list[str],
+    banks,
+    genome_directory: Path,
+    atcc_text_directory: Path,
+    text_only_directory: Path,
+) -> dict[str, dict[str, object]]:
+    genome_files = _tensor_file_index(
+        genome_directory, embedding_key_from_atcc_filename
+    )
+    atcc_text_files = _tensor_file_index(
+        atcc_text_directory, embedding_key_from_atcc_filename
+    )
+    text_only_files = _tensor_file_index(
+        text_only_directory, embedding_key_from_text_filename
+    )
+    provenance: dict[str, dict[str, object]] = {}
+    for strain in strains:
+        if strain in banks.genomes:
+            if strain not in genome_files or strain not in atcc_text_files:
+                raise KeyError(f"Cannot resolve condition files for strain {strain!r}.")
+            files = {
+                "genome": (genome_files[strain], banks.genomes[strain]),
+                "text": (atcc_text_files[strain], banks.atcc_text[strain]),
+            }
+            mode = "genome_and_atcc_text"
+        else:
+            if strain not in text_only_files:
+                raise KeyError(f"Cannot resolve text-only file for strain {strain!r}.")
+            files = {"text": (text_only_files[strain], banks.text_only[strain])}
+            mode = "text_only_with_learnable_genome"
+        provenance[strain] = {
+            "mode": mode,
+            "files": {
+                name: {
+                    "path": str(path),
+                    "sha256": sha256(path),
+                    "shape": list(tensor.shape),
+                    "dtype": str(tensor.dtype),
+                }
+                for name, (path, tensor) in files.items()
+            },
+        }
+    return provenance
+
+
 def main() -> None:
     args = parse_args()
     if args.batch_size < 1:
         raise ValueError("--batch-size must be positive.")
+    if not math.isfinite(args.genome_scale) or args.genome_scale <= 0:
+        raise ValueError("--genome-scale must be finite and positive.")
     if len(set(args.strains)) != len(args.strains):
         raise ValueError("--strains must not contain duplicates.")
     device = torch.device(args.device)
@@ -76,13 +150,44 @@ def main() -> None:
         limit=args.limit,
     )
     structure_frame = convert_peptides_to_structures(peptide_frame)
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     with initialize_config_dir(
         config_dir=str(args.config_dir.resolve()),
         version_base=None,
     ):
         config = compose(config_name=args.config_name)
+    model_max_length = int(config.model.length)
+    if model_max_length < 1:
+        raise ValueError("Resolved config.model.length must be positive.")
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer,
+        revision=args.tokenizer_revision,
+    )
+    tokenizer_declared_max_length = int(tokenizer.model_max_length)
+    # The tokenizer repository declares 512, but this scorer's DLM owns the
+    # position contract and was configured/trained at 1024.  Align warnings and
+    # validation with the resolved downstream model rather than silently using
+    # the tokenizer metadata as a model limit.
+    tokenizer.model_max_length = model_max_length
+    valid_selfies = structure_frame.loc[
+        structure_frame["conversion_status"].eq("valid"), "SELFIES"
+    ].tolist()
+    token_lengths = selfies_token_lengths(tokenizer, valid_selfies)
+    over_limit = [length for length in token_lengths if length > model_max_length]
+    if over_limit:
+        raise ValueError(
+            f"{len(over_limit)} valid molecules exceed resolved model length "
+            f"{model_max_length}; observed maximum {max(over_limit)}."
+        )
+    resolved_config_yaml = OmegaConf.to_yaml(config, resolve=True, sort_keys=True)
     banks = load_condition_embedding_banks(
+        genome_directory=args.genome_embeddings,
+        atcc_text_directory=args.atcc_text_embeddings,
+        text_only_directory=args.text_only_embeddings,
+        genome_scale=args.genome_scale,
+    )
+    condition_provenance = condition_embedding_provenance(
+        strains=args.strains,
+        banks=banks,
         genome_directory=args.genome_embeddings,
         atcc_text_directory=args.atcc_text_embeddings,
         text_only_directory=args.text_only_embeddings,
@@ -141,6 +246,29 @@ def main() -> None:
         "batch_size": args.batch_size,
         "runtime_root": str(args.runtime_root.resolve()),
         "tokenizer": args.tokenizer,
+        "tokenizer_revision": args.tokenizer_revision,
+        "tokenization": {
+            "tokenizer_declared_model_max_length": tokenizer_declared_max_length,
+            "resolved_model_max_length": model_max_length,
+            "valid_rows": len(token_lengths),
+            "minimum_length": min(token_lengths) if token_lengths else None,
+            "maximum_length": max(token_lengths) if token_lengths else None,
+            "over_model_limit_rows": len(over_limit),
+        },
+        "config": {
+            "directory": str(args.config_dir.resolve()),
+            "name": args.config_name,
+            "model_name": str(config.model.name),
+            "resolved_yaml_sha256": hashlib.sha256(
+                resolved_config_yaml.encode("utf-8")
+            ).hexdigest(),
+        },
+        "condition_embeddings": condition_provenance,
+        "condition_embedding_scales": {
+            "genome": args.genome_scale,
+            "atcc_text": 1.0,
+            "text_only": 1.0,
+        },
         "checkpoint": {
             "path": str(args.checkpoint),
             "bytes": args.checkpoint.stat().st_size,
