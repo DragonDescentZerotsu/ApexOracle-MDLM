@@ -6,6 +6,10 @@
 > 切换和 legacy active-tree cleanup 均已关闭；初始 clean implementation candidate 为 `c9d17c7`，并已由
 > ApexOracle `v0.2.0` source release 固定。后续变更只按维护版本处理。
 
+2026-08-11 全仓文件系统复核发现 fixed-epsilon scorer 改名 manifest 已发布但未进入 generated code ledger；
+canonical builder 已重建四份 lineage outputs，tracked asset count 从 175 更新为 176。118 tests 与 stale check
+通过；这是 provenance-only maintenance，不改变模型或运行接口。
+
 ## 1. 目标与不变量
 
 本仓库最终作为 `ApexOracle-MDLM` submodule，负责 downstream molecule representation 与 generation

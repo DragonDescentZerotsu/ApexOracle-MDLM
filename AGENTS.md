@@ -13,6 +13,10 @@
   `docs/CODE_AUDIT.md`；legacy 恢复方法记录在 `docs/LEGACY_SNAPSHOT.md`。执行过程中必须同步更新。
 - `legacy-code-snapshot-2026-08-09` 是重构前 source-only 恢复点。删除或迁移 legacy 文件前，必须先
   有等价的 canonical 入口、行为保持测试和 source mapping；不得 reset、clean 或改写该 tag。
+- **2026-08-11 lineage ledger 完整性修复：** 后加入的
+  `reproducibility/fixed_epsilon_mic_scorer_asset_rename.json` 已由 canonical builder 纳入 code asset ledger；
+  tracked asset count 为 176，118 tests 与 builder stale check 均通过。该修复只补机器可读资产血缘，不改变
+  profile、checkpoint bytes、scoring code 或 Generation contract。
 - **2026-08-09 作者确认的最终清理原则：** 对重要或暂时不能确定是否可删除的作者 legacy 代码，默认
   先提取独有行为并重构为简洁 canonical implementation，补 characterization/parity test 后删除原始混乱
   副本；对确认没有独有 runtime/论文/跨仓库角色的文件，由 ledger/provenance 和 snapshot tag 保存后从
