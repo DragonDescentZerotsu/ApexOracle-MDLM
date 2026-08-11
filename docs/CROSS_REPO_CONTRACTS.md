@@ -21,13 +21,13 @@
 - DLM checkpoint 顶层为 Lightning `state_dict`，Generation 去除一层 `backbone.`；
 - v1 peptide classifier 使用 `state_dict`，encoder 前缀为 `backbone.backbone.`，head 为六个
   `ClsHead.*` tensors；
-- noisy MIC guidance 与 clean MIC scorer 都包含 `mdlm_model_state_dict`、`re_head_state_dict`、
+- noisy MIC guidance 与 fixed-`t=1e-3` MIC scorer 都包含 `mdlm_model_state_dict`、`re_head_state_dict`、
   `co_cross_attn_genome`、`co_cross_attn_text` 和 `(1, 8192)` learnable genome embedding；
 - 两个 MIC checkpoint 的 regression head 与 genome/text attention keys、shapes 完全一致；作用和训练
   protocol 不同，不能因此互换。
 - formal synergy guidance 和 `synergy_judger` checkpoint 是两个不同文件；二者都使用 24,576-input
   classification head、两组带 LoRA 的 condition attention，并对 `(partner, candidate)` 两个顺序的 logits
-  取均值。它们不能与 12,288-input clean MIC checkpoint 互换；canonical candidate scorer 只接受显式传入的
+  取均值。它们不能与 12,288-input fixed-`t=1e-3` MIC checkpoint 互换；canonical candidate scorer 只接受显式传入的
   checkpoint，不将这些 profiles 静默合并。
 - partner embedding dictionary 的 844 个 key 同时包含 603 个 integer key 与 241 个 string key；CLI 必须
   显式给出 key type，禁止把 `447` 和 `"447"` 自动视为同一个 partner。
@@ -64,12 +64,12 @@ Genome embedding 在 load 时乘 `1e14`；ATCC/text embedding 使用各自 filen
 改变数值，但改变文件名、scale 或 normalized strain key 都会改变 condition lookup，因此必须作为独立
 breaking change 处理。
 
-Peptide-table screening 仍消费 Core 的同一个 clean MIC checkpoint 和 condition embeddings，但没有被 Core
+Peptide-table screening 仍消费 Core 的同一个 fixed-`t=1e-3` MIC checkpoint 和 condition embeddings，但没有被 Core
 或 Generation import。它的历史 padded batch 没有向 DLM 传递 attention mask，因此 batch size/composition
 会影响预测；复现 2026-03-27 camel-milk output 时 batch size 固定为 32。该边界已记录在
 `reproducibility/peptide_table_migration_parity.json`，不能在跨仓库路径整理时顺手改变。
 
-历史 synergy candidate drivers 还存在三个不能继续继承的错误边界：它们 hard-code clean MIC checkpoint，
+历史 synergy candidate drivers 还存在三个不能继续继承的错误边界：它们 hard-code fixed-`t=1e-3` MIC checkpoint，
 却构造 synergy head；导入 tuple-returning attention 后又直接调用 `.reshape()`；并把 sigmoid probability
 误标为 MIC，随后应用不可达的 `>15` 阈值。Canonical `score_generated_molecule_synergy.py` 已改为显式
 checkpoint/partner/condition contract，输出列名固定为 `synergy_probability`，并保留 partner key type。

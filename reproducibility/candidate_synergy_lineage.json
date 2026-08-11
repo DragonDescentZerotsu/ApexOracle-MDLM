@@ -50,7 +50,7 @@
     }
   },
   "active_judge_failures": {
-    "hard_coded_checkpoint": "clean MIC checkpoint with incompatible 12288-input non-LoRA head",
+    "hard_coded_checkpoint": "fixed-t=1e-3 MIC checkpoint with incompatible 12288-input non-LoRA head",
     "direct_correct_checkpoint_replay": "AttributeError: tuple has no attribute reshape",
     "cause": "tuple-returning MIC attention imported where producer tensor-returning attention is required",
     "mislabel": "sigmoid synergy probability is named and plotted as MIC",

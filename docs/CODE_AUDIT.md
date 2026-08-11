@@ -144,7 +144,7 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 ### MIC guidance producer cleanup（2026-08-10）
 
 - 六个 115--117 KB root trainers 的差异已提取为五个 profile；两份 noisy non-pad source byte-identical，
-  `clean_non_pad` 实际固定 `t=1e-3`，不是文件名暗示的精确 `t=0`。
+  canonical `fixed_epsilon_non_pad` 实际固定 `t=1e-3`；legacy 源码中的 `clean` 不是精确 `t=0`。
 - Canonical package 保留 checkpoint names/state keys、padding/non-pad encoder 行为、MIC transform、condition
   padding 和 genome-missing learnable embedding；CLI 只接受 prepared canonical table 和显式资产路径。
 - 六份 source 的 head/attention fixed-input parity 全部 exact；五个正式约 9.17 GB checkpoints 完成 schema 与
@@ -338,7 +338,7 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
   embedding lookup 和 sigmoid probability，形成 `apexoracle_mdlm.scoring.synergy` 与参数化 CLI；
 - 冻结 Generation guidance 与 synergy-judger 两个 4.11 GB checkpoints 的不同 hashes/schema，以及 partner
   mapping 的 844 mixed-type keys；public manifest 必须记录 partner key type；
-- active judges 误用 clean MIC checkpoint，且导入 tuple-returning MIC attention 后当 tensor `.reshape()`；
+- active judges 误用 fixed-`t=1e-3` MIC checkpoint，且导入 tuple-returning MIC attention 后当 tensor `.reshape()`；
   正确 checkpoint direct replay 仍失败。另有 probability-as-MIC label、无效 `>15` threshold 和 destructive
   image cleanup，故不能作为 executable reference；
 - exact parity reference 改用 snapshot checkpoint producer 的 tensor-returning attention/head，加上 judge 的
@@ -349,7 +349,7 @@ consumer/provenance 核验后直接由 snapshot tag 恢复。最终不建立第�
 
 ### M3i MIC attention interpretability（2026-08-10）
 
-- 论文 ApexOracle-18/BAA-3170/11775 case 的 producer 已从 output-heavy notebook 追溯到正式 clean MIC
+- 论文 ApexOracle-18/BAA-3170/11775 case 的 producer 已从 output-heavy notebook 追溯到正式 fixed-`t=1e-3` MIC
   checkpoint、candidate SMILES、condition tensors、FASTA/GenBank 与 saved Evo-2 tensor；
 - canonical scorer 增加无状态 `forward_with_attention`，保持原 prediction API；interpretability package
   冻结 Core-compatible global-fragment-index window contract、sequence/order/tensor checks、完整 attention tables

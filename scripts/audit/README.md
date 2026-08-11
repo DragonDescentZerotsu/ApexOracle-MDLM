@@ -111,7 +111,7 @@ batch logits/MIC。默认不写产物，只输出 JSON；可用 `--legacy-source
 CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
   scripts/audit/compare_legacy_candidate_mic.py \
   --core-root /path/to/ApexOracle-Core \
-  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --generation-file /path/to/generated_selfies.txt \
   --strain BAA-3170 --limit 2
 ```
@@ -160,7 +160,7 @@ parity 仍见 `reproducibility/candidate_synergy_migration_parity.json`。
 
 ## `compare_legacy_mic_attention.py`
 
-用途：从 snapshot 提取 `visualize_attn.py`，加载正式 clean MIC checkpoint 与 candidate，一次比较多个 strain
+用途：从 snapshot 提取 `visualize_attn.py`，加载正式 fixed-`t=1e-3` MIC checkpoint 与 candidate，一次比较多个 strain
 的 legacy/canonical logit、MIC、genome attention 和 text attention。该入口验证模型 forward，不承担
 FASTA/GenBank annotation；后者由公开 reproduce CLI 的显式资产检查负责。
 
@@ -168,7 +168,7 @@ FASTA/GenBank annotation；后者由公开 reproduce CLI 的显式资产检查�
 CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src python \
   scripts/audit/compare_legacy_mic_attention.py \
   --core-root /path/to/ApexOracle-Core \
-  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --molecule-file /path/to/ApexOracle_18.txt --molecule-format smiles \
   --strain BAA-3170 --strain 11775
 ```
@@ -236,7 +236,7 @@ row 534；`--batch-size 32` 是复现协议，不可在 parity audit 中任意�
 CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src python \
   scripts/audit/compare_legacy_peptide_table_mic.py \
   --core-root /path/to/ApexOracle-Core \
-  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --input /path/to/Camel_All_Peptide_Protein_unique.csv \
   --historical-predictions /path/to/camel_milk_mic_predictions.csv \
   --strains '#002' 15697 --batch-size 32

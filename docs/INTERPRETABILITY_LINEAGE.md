@@ -18,7 +18,7 @@ window contract，再输出完整 genome/text attention CSV、selected-window CD
   `6365ab61...f66af`；两个 notebooks 和 scripts 均与 `legacy-code-snapshot-2026-08-09` 逐字节一致。
 - `show.ipynb` 的前 6 个 code-cell sources 是 `show_interpretability.ipynb` 的重复子集；后者另含
   ApexOracle-3/12/18 的 9 个 strain cases。两个 notebook 分别保存 43/95 outputs，且均含失败 cell。
-- 使用正式 clean MIC checkpoint、505-byte ApexOracle-18 SMILES、snapshot `visualize_attn.py` 和 canonical
+- 使用正式 fixed-`t=1e-3` MIC checkpoint、505-byte ApexOracle-18 SMILES、snapshot `visualize_attn.py` 和 canonical
   scorer，在单张 H100 上对 BAA-3170/11775 比较 logit、MIC、genome attention 和 text attention：全部
   `torch.equal`，最大差异 `0.0`；峰值显存 9,170,041,344 bytes。完整记录为
   `reproducibility/mic_attention_migration_parity.json`。

@@ -10,11 +10,15 @@ Generation checkout。六份 root trainer 已归并为五个明确 profile：
 | `noisy_standard` | `guaidance_regressor_all_data.py` | `DIT`、random time、不保护 padding、100 epochs |
 | `noisy_padding_preserved` | `guaidance_regressor_all_data_pad_no_mask.py` | `DIT`、random time、token 3 padding 保持、100 epochs |
 | `noisy_non_pad` | `guaidance_regressor_all_data_non_pad.py`、`..._non_pad_cls.py` | `DIT_non_pad`、random time、200 epochs；两份 source byte-identical |
-| `clean_non_pad` | `..._non_pad_cls_clean.py` | `DIT_non_pad`、固定 `t=1e-3`、13 epochs |
+| `fixed_epsilon_non_pad` | `..._non_pad_cls_clean.py` | `DIT_non_pad`、固定 `t=1e-3`、13 epochs |
 | `noisy_non_pad_eval` | `..._non_pad_cls_noise.py` | `DIT_non_pad`、random time、encoder eval、200 epochs |
 
-`clean_non_pad` 的旧命名容易误解：源码先把随机数乘零，再执行
+历史源码和资产中的 `clean` 命名容易误解：源码先把随机数乘零，再执行
 `t=(1-1e-3)*0+1e-3`，所以实际是固定 `t=1e-3`，不是精确 `t=0`。Canonical profile 保留真实行为。
+本地正式资产也已改名为
+`guidance_regressor_non_pad_t1e-3/mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth`；旧文件名仅在
+provenance 的 `historical_*` 字段保留。改名前后 SHA-256 相同，完整映射见
+`reproducibility/fixed_epsilon_mic_scorer_asset_rename.json`。
 
 ## Canonical 入口
 
@@ -60,7 +64,8 @@ git show legacy-code-snapshot-2026-08-09:guaidance_regressor_all_data_pad_no_mas
   > /tmp/guaidance_regressor_all_data_pad_no_mask.py
 ```
 
-Snapshot tag 不移动、不改写；本地 ignored checkpoints、data、embeddings 和 outputs 均未删除或移动。
+Snapshot tag 不移动、不改写；除上述作者明确要求的单个 scorer checkpoint 原子改名外，本地 ignored
+checkpoints、data、embeddings 和 outputs 均未删除或移动。
 
 ## 验证命令
 

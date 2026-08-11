@@ -112,7 +112,7 @@ PYTHONPATH=src python -m unittest tests.test_dlm_encoder tests.test_candidate_mi
 CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
   scripts/audit/compare_legacy_candidate_mic.py \
   --core-root /path/to/ApexOracle-Core \
-  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --generation-file /path/to/generated_selfies.txt \
   --strain BAA-3170 --limit 2
 ```

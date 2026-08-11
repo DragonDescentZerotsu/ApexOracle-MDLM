@@ -287,6 +287,12 @@ MIC guidance producer 的 source hashes、五 profiles、正式 checkpoint schem
 parity、inactive cls 数值边界和恢复命令见 `docs/MIC_GUIDANCE_MIGRATION.md` 与
 `reproducibility/mic_guidance_migration.json`。
 
+2026-08-10 对其中历史误称为 `clean_non_pad` 的 profile 完成命名收口：canonical 名为
+`fixed_epsilon_non_pad`，准确表达训练输入固定 `t=1e-3`。对应本地 reporting/candidate-scoring checkpoint
+已在同一文件系统原子改名，bytes 与 SHA-256 不变；所有 active consumer 和发布文档改用 canonical 路径，
+旧名只作为历史 provenance 保存。可逆映射与验收见
+`reproducibility/fixed_epsilon_mic_scorer_asset_rename.json`。
+
 Legacy small-molecule postprocessing 与 paper Fig. 5b display 迁移证据见
 `docs/LEGACY_ANALYSIS_MIGRATION.md`、`reproducibility/small_molecule_postprocessing_lineage.json` 与
 `reproducibility/in_vivo_cfu_lineage.json`。CFU clean plotting code 已迁移，但 raw CSV/test definition 未补齐前，

@@ -36,7 +36,7 @@ embedding dictionary 中混合 key type 造成静默错配。
 `judge_generated_mols_synergy.py`（465 lines，SHA-256 `e97aa014...a7bd`）和
 `judge_mol_synergy_with_fig.py`（430 lines，`e792e390...8fc`）不能作为 executable reference：
 
-1. 两者 hard-code 的是 9.17 GB clean MIC checkpoint；其 12,288-input non-LoRA head 与 synergy 所需的
+1. 两者 hard-code 的是 9.17 GB fixed-`t=1e-3` MIC checkpoint；其 12,288-input non-LoRA head 与 synergy 所需的
    24,576-input LoRA schema 不兼容。
 2. 两者从 `guaidance_regressor_all_data.py` 导入 tuple-returning attention，却把返回值直接当 tensor
    `.reshape()`；改成正确 synergy checkpoint 后真实 replay 仍以 `AttributeError` 失败。

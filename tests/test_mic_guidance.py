@@ -39,7 +39,7 @@ class MICGuidanceProfileTests(unittest.TestCase):
         self.assertEqual(len(sources), 6)
         self.assertEqual(len(set(sources)), 6)
         self.assertEqual(
-            get_mic_guidance_profile("clean_non_pad").sampling,
+            get_mic_guidance_profile("fixed_epsilon_non_pad").sampling,
             "fixed_epsilon",
         )
 

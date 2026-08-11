@@ -32,6 +32,13 @@
   output `torch.equal`、最大差异 `0.0`。原 sources 由 snapshot tag 和
   `docs/MIC_GUIDANCE_MIGRATION.md` 恢复后从 active tree 删除，Core audit 改读 migration manifest；不得再让
   外部 caller 依赖 root trainer path。
+- **2026-08-10 fixed-epsilon scorer 资产改名：** legacy `clean_non_pad` 实际固定 `t=1e-3`，不是严格
+  `t=0`。Canonical profile 已改为 `fixed_epsilon_non_pad`；本地 9.17 GB reporting/candidate-scoring
+  checkpoint 已原子移动到
+  `guidance_regressor_non_pad_t1e-3/mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth`，内容 SHA-256
+  保持 `c0d7c2be...013686802`。所有 active code/文档/manifest 使用新名；旧 profile、目录和文件名仅保留在
+  `historical_*` provenance 字段。完整可逆映射见
+  `reproducibility/fixed_epsilon_mic_scorer_asset_rename.json`。
 - **2026-08-10 hierarchical MIC handoff：** 11 个 root `DP_inhouse_*` drivers 是历史
   strain/species/phylum variants，canonical owner 为 Core；逐文件 source/profile、Core replacement hashes、
   live consumer scan 和 722,786,228,244-byte local output inventory 已冻结在

@@ -28,7 +28,7 @@ condition-embedding 目录。checkpoint、embedding、generated molecules、cach
 PYTHONPATH=src python scripts/reproduce/score_generated_molecule_mic.py \
   --runtime-root . \
   --config-dir configs \
-  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --genome-embeddings /path/to/Genome_embs \
   --atcc-text-embeddings /path/to/ATCC/embeddings \
   --text-only-embeddings /path/to/wo_ATCC/embeddings \
@@ -54,7 +54,7 @@ PYTHONPATH=src python scripts/reproduce/score_peptide_table_mic.py \
   --input /path/to/peptides.csv \
   --strains '#002' 15697 \
   --config-dir configs \
-  --checkpoint /path/to/clean_mic_checkpoint.pth \
+  --checkpoint /path/to/fixed_epsilon_mic_scorer.pth \
   --genome-embeddings /path/to/Genome_embs \
   --atcc-text-embeddings /path/to/ATCC/embeddings \
   --text-only-embeddings /path/to/wo_ATCC/embeddings \

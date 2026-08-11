@@ -4,7 +4,8 @@
   "molecule_format": "smiles",
   "tokenizer": "ibm-research/materials.selfies-ted",
   "checkpoint": {
-    "path": "/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "path": "/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_t1e-3/mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth",
+    "historical_path": "/data2/tianang/projects/Synergy/Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
     "bytes": 9168011488,
     "sha256": null
   },

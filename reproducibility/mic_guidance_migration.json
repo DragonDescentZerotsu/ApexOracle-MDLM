@@ -45,8 +45,9 @@
       "backbone_checkpoint_label": "1-255000-fine-tune.ckpt",
       "historical_output_label": "guidance_regressor_non_pad"
     },
-    "clean_non_pad": {
-      "name": "clean_non_pad",
+    "fixed_epsilon_non_pad": {
+      "name": "fixed_epsilon_non_pad",
+      "historical_profile_name": "clean_non_pad",
       "legacy_sources": [
         "guaidance_regressor_all_data_non_pad_cls_clean.py"
       ],
@@ -149,7 +150,7 @@
         "legacy_attention_returns_weights": false
       }
     ],
-    "clean_non_pad": [
+    "fixed_epsilon_non_pad": [
       {
         "head_state_dict_keys_equal": true,
         "head_forward_torch_equal": true,
@@ -195,8 +196,9 @@
       "classification_head_strict_load": true,
       "r2": 0.6349100448945466
     },
-    "clean_non_pad": {
-      "relative_path": "guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "fixed_epsilon_non_pad": {
+      "relative_path": "guidance_regressor_non_pad_t1e-3/mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth",
+      "historical_relative_path": "guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
       "bytes": 9168011488,
       "schema_valid": true,
       "classification_head_strict_load": true,

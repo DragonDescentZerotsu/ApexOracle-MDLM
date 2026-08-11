@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-08-10",
+  "status": "completed",
+  "asset_role": "post-generation MIC reporting and candidate scoring",
+  "protocol": {
+    "canonical_profile": "fixed_epsilon_non_pad",
+    "sampling": "fixed_epsilon",
+    "t": 0.001,
+    "exact_clean_t0": false,
+    "preserve_padding": false,
+    "epochs": 13
+  },
+  "owner": "ApexOracle-Core",
+  "historical": {
+    "profile": "clean_non_pad",
+    "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth"
+  },
+  "canonical": {
+    "profile": "fixed_epsilon_non_pad",
+    "relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_t1e-3/mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth"
+  },
+  "bytes": 9168011488,
+  "sha256_before": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
+  "sha256_after": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
+  "co_located_assets": [
+    {
+      "historical_filename": "noise_guidance_all_peptide_epoch_10_of_13.pth",
+      "canonical_filename": "mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch10.pth",
+      "bytes": 9168010862,
+      "sha256": "26e4255fcda5605a6c9902209cefaeccd466a294797ca72fdcf5c739dd3edfde"
+    },
+    {
+      "historical_filename": "log_guidance_regressor.log",
+      "canonical_filename": "training_fixed_epsilon_non_pad.log",
+      "bytes": 6530,
+      "sha256": "635c1b9ffd675a7380380071a5521459ea20cc1178bcdd5a42b150a98c892419"
+    }
+  ],
+  "move_semantics": "same-filesystem atomic rename",
+  "rollback": "Move the canonical path back to the historical relative path; no binary content conversion was performed.",
+  "consumer_boundary": {
+    "generation_sampler_checkpoint_changed": false,
+    "generation_sampler_profile": "noisy_padding_preserved",
+    "active_tracked_references_use_canonical_name": true,
+    "historical_names_retained_only_as_provenance": true
+  }
+}

@@ -67,8 +67,8 @@ MIC_GUIDANCE_PROFILES: Mapping[str, MICGuidanceProfile] = {
         backbone_checkpoint_label="1-255000-fine-tune.ckpt",
         historical_output_label="guidance_regressor_non_pad",
     ),
-    "clean_non_pad": MICGuidanceProfile(
-        name="clean_non_pad",
+    "fixed_epsilon_non_pad": MICGuidanceProfile(
+        name="fixed_epsilon_non_pad",
         legacy_sources=("guaidance_regressor_all_data_non_pad_cls_clean.py",),
         backbone_variant="dit_non_pad",
         # The legacy code multiplied the random draw by zero before adding

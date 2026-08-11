@@ -41,13 +41,24 @@ FORMAL_CHECKPOINTS = {
     "noisy_non_pad": (
         "guidance_regressor_non_pad/" "noise_guidance_best_R2_all_peptide_epoch_200.pth"
     ),
-    "clean_non_pad": (
-        "guidance_regressor_non_pad_clean/"
-        "noise_guidance_best_R2_all_peptide_epoch_13.pth"
+    "fixed_epsilon_non_pad": (
+        "guidance_regressor_non_pad_t1e-3/"
+        "mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth"
     ),
     "noisy_non_pad_eval": (
         "guidance_regressor_non_pad_noise/"
         "noise_guidance_best_R2_all_peptide_epoch_200.pth"
+    ),
+}
+
+HISTORICAL_PROFILE_NAMES = {
+    "fixed_epsilon_non_pad": "clean_non_pad",
+}
+
+HISTORICAL_CHECKPOINTS = {
+    "fixed_epsilon_non_pad": (
+        "guidance_regressor_non_pad_clean/"
+        "noise_guidance_best_R2_all_peptide_epoch_13.pth"
     ),
 }
 
@@ -149,6 +160,10 @@ def _checkpoint_audit(checkpoint_root: Path) -> dict[str, Any]:
             "classification_head_strict_load": True,
             "r2": float(payload["R2"]),
         }
+        if profile in HISTORICAL_CHECKPOINTS:
+            results[profile]["historical_relative_path"] = HISTORICAL_CHECKPOINTS[
+                profile
+            ]
         del cls_head, cls_state, payload
         gc.collect()
     return results
@@ -386,7 +401,15 @@ def main() -> None:
         "schema_version": 1,
         "snapshot_ref": args.ref,
         "profiles": {
-            name: profile.__dict__ for name, profile in MIC_GUIDANCE_PROFILES.items()
+            name: {
+                **profile.__dict__,
+                **(
+                    {"historical_profile_name": HISTORICAL_PROFILE_NAMES[name]}
+                    if name in HISTORICAL_PROFILE_NAMES
+                    else {}
+                ),
+            }
+            for name, profile in MIC_GUIDANCE_PROFILES.items()
         },
         "sources": source_records,
         "source_component_parity": component_parity,

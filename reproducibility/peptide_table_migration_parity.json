@@ -46,7 +46,8 @@
   },
   "formal_parity": {
     "checkpoint_owner": "ApexOracle-Core",
-    "checkpoint_relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
+    "checkpoint_relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_t1e-3/mic_candidate_scorer_all_peptide_non_pad_t1e-3_epoch13.pth",
+    "historical_checkpoint_relative_path": "Checkpoints/genome_text_learnable_emb/guidance_regressor_non_pad_clean/noise_guidance_best_R2_all_peptide_epoch_13.pth",
     "checkpoint_sha256": "c0d7c2be49ef179a25a19dcd9c54c592c282b6961e51aff60e95fabc13786802",
     "selected_row_ids": "0-31 plus invalid row 534",
     "valid_samples": 32,

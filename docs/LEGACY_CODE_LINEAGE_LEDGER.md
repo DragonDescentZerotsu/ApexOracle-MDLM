@@ -107,7 +107,7 @@ Fig. 3a 的本机完整小资产核验与 CSV stale check：
 ```mermaid
 flowchart LR
   G["ApexOracle-Generation\n4 generated-output files"] --> S["apexoracle_mdlm.scoring\ncanonical scorer"]
-  C["ApexOracle-Core\nclean MIC checkpoint"] --> S
+  C["ApexOracle-Core\nfixed-t=1e-3 MIC checkpoint"] --> S
   E["ApexOracle-Core\ngenome/text embeddings"] --> S
   S --> K["4 historical frozen MIC caches"]
   K --> D["377 exact plotted rows"]
