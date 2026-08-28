@@ -146,6 +146,8 @@ CSV、`manifest.json` 和可选 per-strain violin PDFs。所有输入/资产/输
 token-length summary 和本次实际使用的 genome/text tensor path/hash/shape/dtype。
 `--genome-scale` 默认并显式记录为 `1e14`，只在内存加载 genome tensor 时应用；磁盘 `.pt` 保持原始
 Evo-2 数值。它与 MIC cutoff 或 generation guidance gamma 无关。
+入口会幂等注册 upstream config 使用的 `cwd/device_count/eval/div_up` Hydra resolvers，因此可以直接作为
+独立 CLI 解析完整 resolved config 并生成 provenance，不需要先 import training `main.py`。
 
 CSV 空 peptide 保持为空并在 conversion 中标记 `empty_peptide`，不会再经 pandas 转成可被 RDKit 接受的
 `NAN` sequence。Condition embedding directory 只读取 `.pt`，允许 canonical producer 把 JSON provenance

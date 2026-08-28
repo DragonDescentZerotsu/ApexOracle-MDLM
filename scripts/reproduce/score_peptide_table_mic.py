@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -33,6 +34,27 @@ from apexoracle_mdlm.scoring import (
 
 DEFAULT_TOKENIZER_REVISION = "55e83392264cb998f7aa5014847df29868aefeb8"
 DEFAULT_GENOME_SCALE = 1e14
+
+
+def register_upstream_config_resolvers() -> None:
+    """Register the resolvers used by the attributed upstream Hydra config."""
+
+    resolvers = {
+        "cwd": os.getcwd,
+        "device_count": torch.cuda.device_count,
+        "eval": eval,
+        "div_up": lambda x, y: (x + y - 1) // y,
+    }
+    for name, resolver in resolvers.items():
+        if not OmegaConf.has_resolver(name):
+            OmegaConf.register_new_resolver(name, resolver)
+
+
+def resolved_config_yaml(config) -> str:
+    """Resolve the full config for provenance without importing training main."""
+
+    register_upstream_config_resolvers()
+    return OmegaConf.to_yaml(config, resolve=True, sort_keys=True)
 
 
 def sha256(path: Path) -> str:
@@ -178,7 +200,7 @@ def main() -> None:
             f"{len(over_limit)} valid molecules exceed resolved model length "
             f"{model_max_length}; observed maximum {max(over_limit)}."
         )
-    resolved_config_yaml = OmegaConf.to_yaml(config, resolve=True, sort_keys=True)
+    resolved_config = resolved_config_yaml(config)
     banks = load_condition_embedding_banks(
         genome_directory=args.genome_embeddings,
         atcc_text_directory=args.atcc_text_embeddings,
@@ -260,7 +282,7 @@ def main() -> None:
             "name": args.config_name,
             "model_name": str(config.model.name),
             "resolved_yaml_sha256": hashlib.sha256(
-                resolved_config_yaml.encode("utf-8")
+                resolved_config.encode("utf-8")
             ).hexdigest(),
         },
         "condition_embeddings": condition_provenance,

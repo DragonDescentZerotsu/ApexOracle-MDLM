@@ -6,6 +6,13 @@
 > 切换和 legacy active-tree cleanup 均已关闭；初始 clean implementation candidate 为 `c9d17c7`，并已由
 > ApexOracle `v0.2.0` source release 固定。后续变更只按维护版本处理。
 
+2026-08-28 ATCC 29914 ApexOracle 1--24 structure screen 的接口复核发现：独立调用
+`score_peptide_table_mic.py` 时，resolved-config provenance 会因没有 import upstream `main.py` 而缺失
+`cwd/device_count/eval/div_up` Hydra resolvers。维护修复在 CLI 内幂等注册同语义 resolvers，并以真实
+`configs/config.yaml` compose/resolve regression test 覆盖原失败点；模型、checkpoint、tokenizer、
+batch-size-32 padding protocol 和预测公式均未改变。修复后同一条 24-row ATCC 29914 CLI 已端到端完成，
+focused 16 tests、全仓 128 tests、Black、`git diff --check` 和 code-ledger stale check 通过。
+
 2026-08-11 全仓文件系统复核发现 fixed-epsilon scorer 改名 manifest 已发布但未进入 generated code ledger；
 canonical builder 已重建四份 lineage outputs，tracked asset count 从 175 更新为 176。118 tests 与 stale check
 通过；这是 provenance-only maintenance，不改变模型或运行接口。

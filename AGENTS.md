@@ -28,6 +28,14 @@
   `PYTHONPATH=src python -m unittest tests.test_peptide_inventory tests.test_embedding_io
   tests.test_peptide_table -v`，code ledger stale
   check 同步通过。
+- **2026-08-28 peptide-table CLI resolver 修复：** ATCC 29914 ApexOracle 1--24 接口复核确认
+  `score_peptide_table_mic.py` 独立运行时会在 resolved-config provenance 阶段因未注册 upstream Hydra
+  resolvers 而于推理前失败。入口现幂等注册 `cwd/device_count/eval/div_up`，无需 import training
+  `main.py`；真实 `configs/config.yaml` compose/resolve regression test 覆盖原失败点。该维护不改变模型、
+  checkpoint、tokenizer、batch-size-32 padding protocol 或预测公式。Focused 验证仍以
+  `PYTHONPATH=src python -m unittest tests.test_candidate_mic_scoring tests.test_peptide_table -v` 为入口；
+  当前 focused 16 tests、全仓 128 tests、真实 24-row CLI、Black、`git diff --check` 和 code-ledger stale
+  check 均通过。
 - **2026-08-11 通用 peptide inventory workflow：** Reviewer-specific inventory prepare/reporting 已收敛为
   `apexoracle_mdlm.scoring.peptide_inventory` 与
   `scripts/reproduce/peptide_inventory_screen.py {prepare,summarize}`。`prepare` 接受 CSV/TSV/XLSX、显式

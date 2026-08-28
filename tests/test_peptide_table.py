@@ -220,6 +220,40 @@ class PeptideTableTests(unittest.TestCase):
 
         self.assertEqual(args.genome_scale, 1e14)
 
+    def test_cli_resolves_real_upstream_config_without_importing_main(self):
+        script_path = (
+            Path(__file__).resolve().parents[1]
+            / "scripts"
+            / "reproduce"
+            / "score_peptide_table_mic.py"
+        )
+        spec = importlib.util.spec_from_file_location(
+            "score_peptide_table_mic_resolvers", script_path
+        )
+        module = importlib.util.module_from_spec(spec)
+        self.assertIsNotNone(spec.loader)
+        spec.loader.exec_module(module)
+        resolver_names = ("cwd", "device_count", "eval", "div_up")
+        for name in resolver_names:
+            module.OmegaConf.clear_resolver(name)
+        try:
+            with mock.patch.object(module.torch.cuda, "device_count", return_value=2):
+                config_directory = Path(__file__).resolve().parents[1] / "configs"
+                with module.initialize_config_dir(
+                    config_dir=str(config_directory), version_base=None
+                ):
+                    config = module.compose(config_name="config")
+                resolved = module.resolved_config_yaml(config)
+
+            self.assertIn("devices: 2", resolved)
+            self.assertIn("batch_size: 256", resolved)
+            self.assertNotIn("${device_count:", resolved)
+            self.assertNotIn("${div_up:", resolved)
+        finally:
+            for name in resolver_names:
+                module.OmegaConf.clear_resolver(name)
+            module.register_upstream_config_resolvers()
+
     def test_missing_columns_and_negative_limit_are_rejected(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "peptides.csv"
