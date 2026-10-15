@@ -19,7 +19,7 @@ regressor/classifier、synergy guidance、candidate scoring、Hugging Face expor
 - 当前 Git 已跟踪的源码、Hydra 配置、README、Hugging Face wrapper 和 notebook；
 - 重构开始前已有的 `judge_generated_mols_MIC.py` 工作区修改；
 - 重构开始前未跟踪的 `p_value_reference.py` 与 `temp_predict_mic_from_peptide_csv.py`；
-- 本文件、根 `AGENTS.md` 和用于防止本地缓存误入 Git 的 `.gitignore` 更新。
+- 源码恢复说明与用于防止本地缓存误入 Git 的 `.gitignore` 更新。
 
 notebook 在 snapshot 中保留原样，包含历史输出；重构分支若清空输出，不影响 tag 中的原始版本。
 
@@ -52,9 +52,6 @@ git worktree add ../mdlm-legacy-recovery legacy-code-snapshot-2026-08-09
 ```bash
 git restore --source legacy-code-snapshot-2026-08-09 -- path/to/file.py
 ```
-
-不得移动、覆盖或重新指向该 tag。重构后的每个删除/迁移批次应在 `docs/CODE_AUDIT.md` 中记录旧路径、
-新入口、验证命令和恢复位置。
 
 2026-08-09 首批 migration 已移除 active tree 中 `judge_generated_mols_MIC.py` 原有的 642 行 mixed
 implementation。2026-08-10 Core PR #32 直接调用 canonical package 并通过跨仓库 parity/source gate 后，

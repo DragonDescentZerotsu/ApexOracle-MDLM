@@ -35,7 +35,7 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src python \
   --output reproducibility/peptide_classifier_migration.json
 ```
 
-冻结结果与 exact-producer 不确定性见 `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`。
+冻结结果与 exact-producer 不确定性见 `reproducibility/peptide_classifier_migration.json`。
 
 ## `compare_legacy_mic_guidance.py`
 
@@ -52,7 +52,7 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> PYTHONPATH=src conda run --no-capture-output -n 
   --output reproducibility/mic_guidance_migration.json
 ```
 
-完整边界与恢复命令见 `docs/MIC_GUIDANCE_MIGRATION.md`。
+完整边界与恢复命令见 `reproducibility/mic_guidance_migration.json`。
 
 ## `verify_hierarchical_mic_legacy_lineage.py`
 
@@ -66,7 +66,7 @@ PYTHONPATH=src python scripts/audit/verify_hierarchical_mic_legacy_lineage.py \
   --output reproducibility/hierarchical_mic_legacy_lineage.json
 ```
 
-冻结结果与 Core focused tests 见 `docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md`。
+冻结结果与 Core focused tests 见 `reproducibility/hierarchical_mic_legacy_lineage.json`。
 
 ## `verify_legacy_chemistry.py`
 
@@ -81,7 +81,7 @@ PYTHONPATH=src python scripts/audit/verify_legacy_chemistry.py \
   --output reproducibility/chemistry_legacy_migration.json
 ```
 
-完整边界见 `docs/CHEMISTRY_LEGACY_MIGRATION.md`。
+完整边界见 `reproducibility/chemistry_legacy_migration.json`。
 
 ## `verify_paper_figure_lineage.py`
 
@@ -90,7 +90,7 @@ condition-embedding directory counts、source/assembled PDFs、manuscript consum
 two-sided Mann–Whitney p-values；同时检查 377-row exact plotted-data CSV 未漂移。
 
 ```bash
-/home/tianang/anaconda3/bin/conda run --no-capture-output -n mdlm \
+conda run --no-capture-output -n mdlm \
   python scripts/audit/verify_paper_figure_lineage.py
 ```
 

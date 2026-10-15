@@ -77,7 +77,7 @@ MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
 ```
 
 Generation input → Core assets → scorer → cache → plotted data → manuscript 的完整血缘见
-`reproducibility/paper_figure_lineage.json` 和 `docs/LEGACY_CODE_LINEAGE_LEDGER.md`。
+`reproducibility/paper_figure_lineage.json`。
 
 ## 模块边界
 
@@ -98,8 +98,7 @@ PYTHONPATH=src python scripts/audit/build_code_lineage_ledger.py --check
 PYTHONPATH=src python scripts/audit/verify_paper_figure_lineage.py --check-canonical-plot
 ```
 
-当前迁移状态和恢复命令见 `REFACTOR_PLAN.md`、`docs/CODE_AUDIT.md`、
-`docs/CROSS_REPO_CONTRACTS.md` 与 `docs/LEGACY_SNAPSHOT.md`。
+跨模块接口与源码恢复命令见 `docs/CROSS_REPO_CONTRACTS.md` 与 `docs/LEGACY_SNAPSHOT.md`。
 
 ## License 与 upstream attribution
 

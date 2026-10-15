@@ -38,7 +38,7 @@ PYTHONPATH=src python scripts/reproduce/train_peptide_classifier.py \
 
 This command does not pretrain the DLM backbone. The deployed v1 head strictly loads through
 `apexoracle_mdlm.models.load_peptide_classifier_head`; exact source/profile boundaries and GPU parity
-are recorded in `docs/PEPTIDE_CLASSIFIER_MIGRATION.md`.
+are recorded in `reproducibility/peptide_classifier_migration.json`.
 
 ## MIC-guidance training
 
@@ -58,7 +58,7 @@ PYTHONPATH=src python scripts/reproduce/train_mic_guidance.py \
 
 This also does not pretrain DLM. The output checkpoint fields remain compatible with
 ApexOracle-Generation. Source hashes, all five formal checkpoint schemas, and exact Generation MIC
-regression parity are recorded in `docs/MIC_GUIDANCE_MIGRATION.md`.
+regression parity are recorded in `reproducibility/mic_guidance_migration.json`.
 
 ## Experimental synergy-guidance training
 
@@ -69,7 +69,7 @@ Prepare the pair table and train with explicit assets through
 `scripts/reproduce/train_synergy_guidance.py`. The trainer requires
 `--confirm-experimental-all-data` because this workflow is not the paper's Core synergy
 cross-validation benchmark. Formal checkpoint, source, and GPU parity are recorded in
-`docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md`.
+`reproducibility/synergy_guidance_migration.json`.
 
 ## Candidate MIC scoring
 
@@ -168,7 +168,7 @@ PYTHONPATH=src python scripts/reproduce/match_screen_to_catalogue.py \
 
 Both query and catalogue structures are normalized with RDKit canonical isomeric SMILES. The formal
 DBAASP conversion and full 5,887,458-row MolPort historical parity are recorded in
-`docs/CHEMISTRY_LEGACY_MIGRATION.md`; supplier names remain provenance, not API names.
+`reproducibility/chemistry_legacy_migration.json`; supplier names remain provenance, not API names.
 
 ## Reproduce the source panel for paper Fig. 3a
 
@@ -182,7 +182,7 @@ MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
 ```
 
 The complete Generation input → Core asset → scorer → cache → plotted-data → manuscript lineage is
-in `reproducibility/paper_figure_lineage.json` and `docs/LEGACY_CODE_LINEAGE_LEDGER.md`.
+in `reproducibility/paper_figure_lineage.json`.
 
 ## Module boundaries
 
@@ -207,7 +207,7 @@ For recurring project-specific peptide triage, use the generic
 `scripts/reproduce/screen_peptide_candidates.py`: provide one SELFIES candidate pool, explicit strain
 conditions and a MIC threshold. It writes a complete status table, qualified SELFIES, a manifest and
 optional annotated structure images. Historical project provenance is kept separately in
-`docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`; project names are not part of the API.
+`reproducibility/historical_peptide_screen_case.json`; project names are not part of the API.
 
 ## Verification and recovery
 
@@ -217,8 +217,8 @@ PYTHONPATH=src python scripts/audit/build_code_lineage_ledger.py --check
 PYTHONPATH=src python scripts/audit/verify_paper_figure_lineage.py --check-canonical-plot
 ```
 
-See `REFACTOR_PLAN.md`, `docs/CODE_AUDIT.md`, `docs/CROSS_REPO_CONTRACTS.md`, and
-`docs/LEGACY_SNAPSHOT.md` for current migration status and exact recovery commands.
+See `docs/CROSS_REPO_CONTRACTS.md` for module interfaces and
+`docs/LEGACY_SNAPSHOT.md` for source recovery commands.
 
 ## License and upstream attribution
 

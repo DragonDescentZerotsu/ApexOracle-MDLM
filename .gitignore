@@ -69,3 +69,28 @@ Thumbs.db
 *.safetensors
 # Local, generated Hugging Face release capsules (may contain model weights).
 .hf-release.*
+
+# Local agent instructions, internal plans, and manuscript working records.
+AGENTS.md
+CLAUDE.md
+REFACTOR_PLAN.md
+PUBLICATION_HANDOFF.md
+*[Rr][Ee][Vv][Ii][Ee][Ww][Ee][Rr]*[Rr][Ee][Ss][Pp][Oo][Nn][Ss][Ee]*.md
+*[Dd][Rr][Aa][Ff][Tt]*.md
+*MANUSCRIPT*PLAN*.md
+.local/
+/docs/CHEMISTRY_LEGACY_MIGRATION.md
+/docs/CODE_AUDIT.md
+/docs/DEBUG_FILE_CLEANUP.md
+/docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md
+/docs/HIERARCHICAL_MIC_LEGACY_HANDOFF.md
+/docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md
+/docs/HUGGINGFACE_RELEASE_AUDIT.md
+/docs/INTERPRETABILITY_LINEAGE.md
+/docs/LEGACY_ANALYSIS_MIGRATION.md
+/docs/LEGACY_CODE_LINEAGE_LEDGER.md
+/docs/MIC_GUIDANCE_MIGRATION.md
+/docs/MOLECULE_EMBEDDING_MIGRATION.md
+/docs/PEPTIDE_CLASSIFIER_MIGRATION.md
+/docs/SYNERGY_CANDIDATE_SCORING_LINEAGE.md
+/docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md

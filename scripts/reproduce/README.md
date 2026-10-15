@@ -22,7 +22,7 @@ CUDA_VISIBLE_DEVICES=0 PYTHONPATH=src python scripts/reproduce/export_molecule_e
 ```
 
 Frozen cache parity、synergy checkpoint drift 和 legacy 恢复信息见
-`docs/MOLECULE_EMBEDDING_MIGRATION.md`。Focused 验证：
+`reproducibility/molecule_embedding_migration.json`。Focused 验证：
 `PYTHONPATH=src python -m unittest tests.test_molecule_embeddings tests.test_dlm_encoder -v`。
 
 ## `train_peptide_classifier.py`
@@ -41,7 +41,7 @@ PYTHONPATH=src python scripts/reproduce/train_peptide_classifier.py \
 ```
 
 三 profile 的 source/head/noisy-encoder GPU parity 与正式 v1 checkpoint strict load 见
-`docs/PEPTIDE_CLASSIFIER_MIGRATION.md`。Focused 验证：
+`reproducibility/peptide_classifier_migration.json`。Focused 验证：
 `PYTHONPATH=src python -m unittest tests.test_model_heads -v`。
 
 ## `train_mic_guidance.py`
@@ -63,7 +63,7 @@ PYTHONPATH=src python scripts/reproduce/train_mic_guidance.py \
 ```
 
 五个正式 checkpoint schema、tagged source component parity 和 Generation profile GPU regression exact parity
-见 `docs/MIC_GUIDANCE_MIGRATION.md`。Focused 验证：
+见 `reproducibility/mic_guidance_migration.json`。Focused 验证：
 `PYTHONPATH=src python -m pytest -q tests/test_mic_guidance.py`。
 
 ## `prepare_synergy_guidance_table.py` / `train_synergy_guidance.py`
@@ -92,7 +92,7 @@ PYTHONPATH=src python scripts/reproduce/train_synergy_guidance.py \
 
 Focused 验证：`PYTHONPATH=src python -m pytest -q tests/test_synergy_guidance.py
 tests/test_dlm_encoder.py tests/test_candidate_synergy_scoring.py`。两 profile producer GPU parity 与 Generation
-正式 candidate inference parity 见 `docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md`。
+正式 candidate inference parity 见 `reproducibility/synergy_guidance_migration.json`。
 
 ## `score_generated_molecule_mic.py`
 
@@ -133,7 +133,7 @@ PYTHONPATH=src python -m unittest tests.test_candidate_synergy_scoring \
 ```
 
 真实 checkpoint/input GPU parity 和 legacy failure 边界见
-`docs/SYNERGY_CANDIDATE_SCORING_LINEAGE.md`。
+`reproducibility/candidate_synergy_lineage.json`。
 
 ## `score_peptide_table_mic.py`
 
@@ -197,9 +197,9 @@ PYTHONPATH=src python -m unittest tests.test_peptide_candidates \
   tests.test_candidate_mic_scoring -v
 ```
 
-历史 external-project case 只作为 provenance，见 `docs/HISTORICAL_PEPTIDE_SCREEN_CASE.md`；迁移 parity 见
+历史 external-project case 只作为 provenance，见 `reproducibility/historical_peptide_screen_case.json`；迁移 parity 见
 `reproducibility/peptide_candidate_screen_parity.json`。Generation 的 73-row candidate pool 与已清理
-round-trip diagnostic 边界见 `docs/GENERATION_PEPTIDE_SCREEN_LINEAGE.md`。
+round-trip diagnostic 边界见 `reproducibility/generation_peptide_screen_lineage.json`。
 
 ## `analyze_mic_attention.py`
 
@@ -211,7 +211,7 @@ averaged attention；在写 annotation 前强制验证 FASTA/GenBank sequence/or
 主要参数：candidate MIC scorer 的 config/checkpoint/condition banks，加 `--molecule-file`、
 `--molecule-format`、`--strain`、对应 `--genome-fasta/--genome-genbank/--genome-embedding`、`--threshold`
 和 `--output-dir`。Attention 是 PyTorch 默认的跨 heads 平均值，只能作 descriptive/hypothesis-generating
-解释。正式 ApexOracle-18 lineage 与两套 exact outputs 见 `docs/INTERPRETABILITY_LINEAGE.md`。
+解释。正式 ApexOracle-18 lineage 与两套 exact outputs 见 `reproducibility/interpretability_lineage.json`。
 
 ## `analyze_small_molecule_screen.py`
 
@@ -251,7 +251,7 @@ violin、median 和四个论文已报告的 p-value labels，输出 PDF/PNG/mani
 该入口只重建 display，不执行 statistical test。目前 raw CSV 和 test definition 均未找到，因此不得声称正式
 Fig. 5b statistical parity 已完成。验证：
 `MPLBACKEND=Agg PYTHONPATH=src python -m unittest tests.test_in_vivo_cfu_figure -v`；见
-`docs/LEGACY_ANALYSIS_MIGRATION.md`。
+`reproducibility/in_vivo_cfu_lineage.json`。
 
 ## `plot_paper_fig3a.py`
 
