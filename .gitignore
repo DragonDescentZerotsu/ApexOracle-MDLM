@@ -94,3 +94,7 @@ PUBLICATION_HANDOFF.md
 /docs/PEPTIDE_CLASSIFIER_MIGRATION.md
 /docs/SYNERGY_CANDIDATE_SCORING_LINEAGE.md
 /docs/SYNERGY_GUIDANCE_PRODUCER_MIGRATION.md
+
+# Local internal records; keep originals outside version control.
+/docs/LEGACY_SNAPSHOT.md
+/docs/CROSS_REPO_CONTRACTS.md

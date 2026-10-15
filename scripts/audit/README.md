@@ -248,4 +248,4 @@ CUDA_VISIBLE_DEVICES=<idle-gpu> TOKENIZERS_PARALLELISM=false PYTHONPATH=src pyth
 
 用途：核验 Core/MDLM/Generation 的 source、filename、checkpoint 和 guidance-head contracts，包括 Core
 直接调用 canonical candidate scorer、Generation 使用 canonical MDLM heads，以及从 Generation recovery tag
-读取旧 heads 的可选 GPU parity。参数和完整边界见 `docs/CROSS_REPO_CONTRACTS.md`。
+读取旧 heads 的可选 GPU parity。接口清单见 `reproducibility/cross_repo_contracts.json`，命令参数见各入口的 `--help`。
