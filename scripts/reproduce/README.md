@@ -1,6 +1,6 @@
 # Canonical reproduction entries
 
-本目录只放参数化、无作者机器绝对路径的公开复现入口。大型数据、checkpoint、embedding 和输出不进入 Git。
+本目录提供参数化的训练、embedding、guidance 和 candidate scoring 入口。
 
 ## `export_molecule_embeddings.py`
 
