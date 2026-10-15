@@ -217,8 +217,8 @@ PYTHONPATH=src python scripts/audit/build_code_lineage_ledger.py --check
 PYTHONPATH=src python scripts/audit/verify_paper_figure_lineage.py --check-canonical-plot
 ```
 
-See `docs/CROSS_REPO_CONTRACTS.md` for module interfaces and
-`docs/LEGACY_SNAPSHOT.md` for source recovery commands.
+Module interface schemas are recorded in `reproducibility/cross_repo_contracts.json`.
+Historical source is available through the `legacy-code-snapshot-2026-08-09` tag.
 
 ## License and upstream attribution
 

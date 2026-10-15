@@ -98,7 +98,8 @@ PYTHONPATH=src python scripts/audit/build_code_lineage_ledger.py --check
 PYTHONPATH=src python scripts/audit/verify_paper_figure_lineage.py --check-canonical-plot
 ```
 
-跨模块接口与源码恢复命令见 `docs/CROSS_REPO_CONTRACTS.md` 与 `docs/LEGACY_SNAPSHOT.md`。
+跨模块接口清单见 `reproducibility/cross_repo_contracts.json`；历史源码由
+`legacy-code-snapshot-2026-08-09` tag 保留。
 
 ## License 与 upstream attribution
 
