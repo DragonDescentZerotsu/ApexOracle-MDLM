@@ -1,8 +1,8 @@
 # ApexOracle-MDLM
 
 本仓库是 ApexOracle 的 downstream MDLM 模块，负责 DLM 推理、molecule encoding、guidance heads 和
-candidate scoring。它不是合作者维护的 DLM+MTR 预训练仓库，也不会复制 ApexOracle-Core 或
-ApexOracle-Generation 的源码。
+candidate scoring。DLM+MTR 预训练由 ApexOracle-DLM-Pretraining 提供；跨模块接口连接 ApexOracle-Core 与
+ApexOracle-Generation。
 
 公开 API 位于 `src/apexoracle_mdlm/`。重构前的历史实验代码可从 annotated tag
 `legacy-code-snapshot-2026-08-09` 完整恢复；active branch 只逐步保留经过测试的 library、参数化 CLI 和
@@ -17,7 +17,7 @@ python -m pip install -e '.[scoring,figure,peptide-table]'
 ```
 
 正式 candidate scoring 还需要与 upstream MDLM 兼容的运行环境，以及 ApexOracle-Core 提供的三个
-condition-embedding 目录。checkpoint、embedding、generated molecules、cache 和其他大型资产均不进入 Git。
+condition-embedding 目录。
 
 ## Candidate MIC scoring
 
@@ -68,7 +68,7 @@ attention mask。复现历史 camel-milk screen 必须使用 `32`；canonical CL
 
 ## 复现论文 Fig. 3a source panel
 
-377 个 exact plotted rows 已进入版本控制，因此发布图不依赖大型 scoring cache：
+可从 377 个 exact plotted rows 重建图表：
 
 ```bash
 MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
@@ -76,12 +76,12 @@ MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
   --summary results/paper_fig3a.summary.json
 ```
 
-Generation input → Core assets → scorer → cache → plotted data → manuscript 的完整血缘见
+Generation input → Core assets → scorer → cache → plotted data 的完整血缘见
 `reproducibility/paper_figure_lineage.json`。
 
 ## 模块边界
 
-- ApexOracle-Core：genome/text embeddings、clean/noisy MIC checkpoints、prediction 和 reviewer capsules；
+- ApexOracle-Core：genome/text embeddings、clean/noisy MIC checkpoints、prediction 和 复现流程；
 - ApexOracle-Generation：guided diffusion/ReMDM sampling 和 generated SELFIES；
 - ApexOracle-DLM-Pretraining：合作者维护的 DLM+MTR 预训练 producer；
 - ApexOracle-MDLM（本仓库）：downstream DLM inference adapters、guidance components 和 candidate scoring。

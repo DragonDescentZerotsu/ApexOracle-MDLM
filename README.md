@@ -1,8 +1,8 @@
 # ApexOracle-MDLM
 
 Downstream DLM runtime, molecule encoding, guidance heads, and candidate scoring for ApexOracle.
-This repository is one module of the ApexOracle super-repository; it is not the collaborator-owned
-DLM+MTR pretraining codebase and it does not vendor ApexOracle-Core or ApexOracle-Generation.
+This module integrates with ApexOracle-Core and ApexOracle-Generation. DLM+MTR pretraining
+is provided by ApexOracle-DLM-Pretraining.
 
 The active public API lives under `src/apexoracle_mdlm/`. Historical experiments remain recoverable
 from the annotated Git tag `legacy-code-snapshot-2026-08-09`; the clean migration is complete and the
@@ -19,7 +19,7 @@ python -m pip install -e '.[scoring,figure,peptide-table,chemistry]'
 
 Formal candidate scoring additionally needs the upstream-compatible MDLM runtime dependencies from
 the supplied environment and three ApexOracle-Core condition-embedding directories. Checkpoints,
-embeddings, generated molecules, caches, and other large assets are intentionally not stored in Git.
+embeddings and generated molecules are resolved through the explicit asset paths described below.
 
 ## Peptide-classifier guidance training
 
@@ -181,13 +181,13 @@ MPLBACKEND=Agg PYTHONPATH=src python scripts/reproduce/plot_paper_fig3a.py \
   --summary results/paper_fig3a.summary.json
 ```
 
-The complete Generation input → Core asset → scorer → cache → plotted-data → manuscript lineage is
+The complete Generation input → Core asset → scorer → cache → plotted-data lineage is
 in `reproducibility/paper_figure_lineage.json`.
 
 ## Module boundaries
 
 - ApexOracle-Core owns genome/text embeddings, clean and noisy MIC checkpoints, prediction, and
-  reviewer reproduction capsules.
+  reproducibility workflows.
 - ApexOracle-Generation owns guided diffusion/ReMDM sampling and generated SELFIES files.
 - ApexOracle-DLM-Pretraining owns the collaborator-produced DLM+MTR training pipeline.
 - ApexOracle-MDLM (this repository) owns downstream DLM inference adapters, guidance components, and
